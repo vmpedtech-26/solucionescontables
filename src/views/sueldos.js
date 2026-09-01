@@ -268,6 +268,9 @@ export function initSueldos(mainApp) {
       if (simDeducOs) simDeducOs.innerText = `$0,00`;
       if (simSecRow) simSecRow.style.display = 'none';
       if (simPatrTotal) simPatrTotal.innerText = `+$0,00`;
+      if (simPatrJub) simPatrJub.innerText = `$0,00`;
+      if (simPatrOs) simPatrOs.innerText = `$0,00`;
+      if (simPatrOtros) simPatrOtros.innerText = `$0,00`;
       return;
     }
 

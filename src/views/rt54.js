@@ -580,7 +580,7 @@ export function renderRT54() {
 
       <!-- Side-by-Side Balance Sheet comparison -->
       <h4 style="font-size: 13px; font-weight: 800; color: var(--color-primary); margin-bottom: 12px; display:flex; align-items:center; gap:4px;">
-        <i data-lucide="balance" style="color: var(--color-accent);"></i> Cruce de Situación Patrimonial: Histórico vs. Homogéneo
+        <i data-lucide="scale" style="color: var(--color-accent);"></i> Cruce de Situación Patrimonial: Histórico vs. Homogéneo
       </h4>
       
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">

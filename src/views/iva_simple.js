@@ -543,7 +543,7 @@ export function renderIVASimple() {
             <span class="text-secondary">Saldo a Favor / Ret. (−)</span>
             <span class="font-mono" style="font-weight:700;color:#fbbf24;">$ ${fmt(retPercSaldo + saldoFavor)}</span>
           </div>
-          <div style="display:flex;justify-content:space-between;font-size:14.5px;font-weight:800;padding-top:4px;">
+          <div data-saldo-neto="${saldoNeto}" style="display:flex;justify-content:space-between;font-size:14.5px;font-weight:800;padding-top:4px;">
             <span style="color:var(--color-primary);">${saldoNeto >= 0 ? 'Saldo a Pagar ARCA' : 'Saldo Técnico Favor Contribuyente'}</span>
             <span class="font-mono" style="color:${saldoNeto >= 0 ? '#ef4444' : '#10b981'};">$ ${fmt(Math.abs(saldoNeto))}</span>
           </div>
@@ -699,6 +699,9 @@ export function initIVASimple(mainApp) {
   // Presentar F.2051 con simulación de ARCA Live, fallos de red y reintentos
   btnPresentar?.addEventListener('click', (e) => {
     e.stopPropagation();
+
+    // Leer el saldo neto ya calculado y mostrado en el panel "Liquidación Estimada"
+    const saldoNeto = parseFloat(document.querySelector('[data-saldo-neto]')?.dataset.saldoNeto || '0');
 
     // Crear el overlay del modal
     const modal = document.createElement('div');
