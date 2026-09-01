@@ -402,7 +402,7 @@ export function renderIVASimple() {
       </div>
 
       <!-- Consistencia -->
-      <div class="card" style="border-color:${consistenciaOk ? 'rgba(16,185,129,0.3)' : consistOkCalc ? 'rgba(99,102,241,0.2)' : 'rgba(239,68,68,0.3)'}; margin-bottom:0;">
+      <div class="card" data-consist-ok-calc="${consistOkCalc}" style="border-color:${consistenciaOk ? 'rgba(16,185,129,0.3)' : consistOkCalc ? 'rgba(99,102,241,0.2)' : 'rgba(239,68,68,0.3)'}; margin-bottom:0;">
         <div class="card-header" style="background:${consistenciaOk ? 'rgba(16,185,129,0.02)' : consistOkCalc ? 'rgba(99,102,241,0.01)' : 'rgba(239,68,68,0.02)'};">
           <h3>
             <i data-lucide="${consistenciaOk ? 'check-circle-2' : 'bar-chart-2'}" style="color:${consistenciaOk ? 'var(--color-accent)' : '#818cf8'};"></i>
@@ -665,6 +665,7 @@ export function initIVASimple(mainApp) {
   // Validar consistencia
   btnValidar?.addEventListener('click', (e) => {
     e.stopPropagation();
+    const consistOkCalc = document.querySelector('[data-consist-ok-calc]')?.dataset.consistOkCalc === 'true';
     if (!consistOkCalc) {
       mainApp.showToast('No se puede validar. La diferencia entre el débito del libro y el calculado por actividad excede $ 1,00.', 'error');
       return;
