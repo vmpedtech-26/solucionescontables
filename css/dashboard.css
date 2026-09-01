@@ -828,6 +828,24 @@
   }
 }
 
+@media (max-width: 900px) {
+  .grid-resp-3, .grid-resp-4 {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .grid-resp-3, .grid-resp-4 {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .portal-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
 /* -------------------------------------------------------------
    PREMIUM FEATURE LOCK LAYER (SALES TEASER)
    ------------------------------------------------------------- */

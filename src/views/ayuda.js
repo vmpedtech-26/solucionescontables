@@ -189,8 +189,8 @@ const TabContents = {
 
       <div>
         <h4 style="font-size: 13.5px; font-weight: 700; margin-bottom: 12px; color: var(--color-primary);">El Circuito de Trabajo en 4 Pasos:</h4>
-        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;">
-          
+        <div class="grid-resp-4" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;">
+
           <div style="border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 12px; text-align: center;">
             <div style="background: rgba(99, 102, 241, 0.06); color: #6366f1; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px;">1</div>
             <h5 style="font-size: 12px; font-weight: 700; margin-bottom: 4px;">Enlazar ARCA</h5>

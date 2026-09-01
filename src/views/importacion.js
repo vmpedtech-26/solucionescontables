@@ -156,7 +156,7 @@ export function renderImportacion() {
         </div>
 
         <!-- Reconciliation status dashboard metrics cards -->
-        <div id="reconcile-metrics-dashboard" style="display: none; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 20px;">
+        <div id="reconcile-metrics-dashboard" class="grid-resp-3" style="display: none; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 20px;">
           <div style="background: rgba(16, 185, 129, 0.04); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: var(--radius-sm); padding: 14px;">
             <div style="font-size: 11px; font-weight: 800; color: #10b981; text-transform: uppercase;">Coincidentes</div>
             <div class="font-mono" id="rec-val-coincident" style="font-size: 24px; font-weight: 800; margin-top: 4px; color: var(--color-primary);">0</div>
@@ -311,7 +311,7 @@ export function renderImportacion() {
         <!-- Bank Reconciliation results layout -->
         <div id="bank-results-container" style="display: none; flex-direction: column; gap: 20px; border-top: 1px solid var(--border-color); padding-top: 20px;">
           
-          <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 8px;">
+          <div class="grid-resp-4" style="display:grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 8px;">
             <div style="background: rgba(16, 185, 129, 0.03); border: 1px solid rgba(16, 185, 129, 0.15); border-radius: var(--radius-sm); padding: 10px;">
               <div style="font-size: 10px; font-weight: 800; color: #10b981; text-transform: uppercase;">Movimientos</div>
               <div class="font-mono" style="font-size: 20px; font-weight: 800; margin-top: 2px;">5</div>

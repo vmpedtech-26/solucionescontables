@@ -108,7 +108,7 @@ export function renderPortalCliente() {
     </div>
   </div>
 
-  <div class="portal-grid" style="display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 24px; align-items: start;">
+  <div class="portal-grid" style="display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 24px; align-items: start; min-width: 0;">
     
     <!-- Left Column: Operations (Upload OR Bill) -->
     <div style="display: flex; flex-direction: column; gap: 20px;">

@@ -191,7 +191,7 @@ export function renderDashboardHome() {
     </div>
 
     <!-- Mini KPI status grid -->
-    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; border-top: 1px solid rgba(13, 148, 136, 0.1); padding-top: 16px;">
+    <div class="grid-resp-4" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; border-top: 1px solid rgba(13, 148, 136, 0.1); padding-top: 16px;">
       
       <div style="background: rgba(255,255,255,0.01); border: 1px solid var(--border-color); padding: 10px 14px; border-radius: 6px;">
         <span style="font-size: 10px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; display: block; margin-bottom: 4px;">WSAA Autenticación</span>
@@ -263,7 +263,7 @@ export function renderDashboardHome() {
       <div style="display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: ${consumptionPercent >= 85 ? '#fef2f2' : '#fffbeb'}; border: 1px solid ${consumptionPercent >= 85 ? '#fee2e2' : '#fef3c7'}; border-radius: 4px; font-size: 12px; color: ${consumptionPercent >= 85 ? '#991b1b' : '#92400e'};">
         <i data-lucide="alert-triangle" style="width: 16px; height: 16px; flex-shrink: 0; display: inline-block; vertical-align: middle;"></i>
         <span>
-          <strong>Riesgo Contable de Exclusióm:</strong> El cliente ha facturado acumulado <strong>$ ${accumMonotributoSales.toLocaleString('es-AR')}</strong> en los últimos 12 meses. Se sugiere fuertemente iniciar la planificación preventiva del pase al Régimen General (IVA/Ganancias) para evitar reclamos retroactivos.
+          <strong>Riesgo Contable de Exclusión:</strong> El cliente ha facturado acumulado <strong>$ ${accumMonotributoSales.toLocaleString('es-AR')}</strong> en los últimos 12 meses. Se sugiere fuertemente iniciar la planificación preventiva del pase al Régimen General (IVA/Ganancias) para evitar reclamos retroactivos.
         </span>
       </div>
     </div>

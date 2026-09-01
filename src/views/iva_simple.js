@@ -105,7 +105,7 @@ export function renderIVASimple() {
     </div>
 
     <!-- Metrics row -->
-    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px;">
+    <div class="grid-resp-3" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px;">
       <div class="card" style="margin-bottom:0;">
         <div class="card-body" style="padding: 16px;">
           <div style="font-size: 10px; font-weight:800; color: var(--text-muted); text-transform: uppercase;">Facturado 12 Meses Móviles</div>

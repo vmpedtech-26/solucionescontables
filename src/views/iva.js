@@ -244,13 +244,13 @@ export function renderIVA() {
                   ` : ''}
                 </td>
                 <td class="font-mono text-right text-sm">$ ${item.neto.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</td>
-                <td class="font-mono text-right text-sm text-emerald">${item.df > 0 ? '$ ' + item.df.toLocaleString('es-AR', { minimumFractionDigits: 2 }) : '—'}</td>
+                <td class="font-mono text-right text-sm text-emerald">${item.df > 0 ? '$ ' + item.df.toLocaleString('es-AR', { minimumFractionDigits: 2 }) : `<span title="Esta operación es una compra: no genera Débito Fiscal para tu empresa, solo Crédito Fiscal." style="cursor:help; text-decoration:underline dashed; text-decoration-color: var(--text-muted);">—</span>`}</td>
                 <td class="font-mono text-right text-sm text-red">
-                  ${item.cf > 0 
-                    ? '$ ' + item.cf.toLocaleString('es-AR', { minimumFractionDigits: 2 }) 
-                    : item.isCuitInactive 
-                      ? `<span style="text-decoration:line-through;color:var(--text-muted);" title="Originalmente $ ${item.iva.toLocaleString('es-AR', { minimumFractionDigits: 2 })}. Excluido por CUIT Inactiva.">$ ${item.iva.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</span> <span style="font-size:9.5px;color:#f59e0b;display:block;">$ 0,00</span>` 
-                      : '—'}
+                  ${item.cf > 0
+                    ? '$ ' + item.cf.toLocaleString('es-AR', { minimumFractionDigits: 2 })
+                    : item.isCuitInactive
+                      ? `<span style="text-decoration:line-through;color:var(--text-muted);" title="Originalmente $ ${item.iva.toLocaleString('es-AR', { minimumFractionDigits: 2 })}. Excluido por CUIT Inactiva.">$ ${item.iva.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</span> <span style="font-size:9.5px;color:#f59e0b;display:block;">$ 0,00</span>`
+                      : `<span title="Esta operación es una venta: no genera Crédito Fiscal para tu empresa, solo Débito Fiscal." style="cursor:help; text-decoration:underline dashed; text-decoration-color: var(--text-muted);">—</span>`}
                 </td>
                 <td class="font-mono text-right text-sm" style="font-weight: 700;">$ ${item.total.toLocaleString('es-AR')}</td>
               </tr>
