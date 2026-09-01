@@ -334,6 +334,7 @@ export function renderConfiguracion() {
 export function initConfiguracion(mainApp) {
   if (window.lucide) window.lucide.createIcons();
 
+  const activeCompany = getActiveCompany();
   const delegationBody = document.getElementById('delegation-list-body');
 
   // Handle Model Radio Toggle

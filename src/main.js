@@ -326,12 +326,11 @@ class Application {
       toast.classList.add('toast-show');
     });
 
-    // Auto removal
+    // Auto removal (con fallback por si transitionend no dispara, ej. pestaña en segundo plano)
     setTimeout(() => {
       toast.classList.remove('toast-show');
-      toast.addEventListener('transitionend', () => {
-        toast.remove();
-      });
+      toast.addEventListener('transitionend', () => toast.remove(), { once: true });
+      setTimeout(() => toast.remove(), 500);
     }, 3500);
   }
 }
