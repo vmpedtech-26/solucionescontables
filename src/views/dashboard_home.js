@@ -107,7 +107,7 @@ export function renderDashboardHome() {
           <i data-lucide="alert-triangle" style="width:16px; height:16px; flex-shrink:0;"></i>
           <span><strong>Diferencia SIRCREB (Bancos):</strong> Detectamos 2 percepciones bancarias en el extracto no conciliadas con el Libro Diario.</span>
         </div>
-        <a href="#/studio/retenciones" class="btn btn-outline btn-sm" style="font-size:10.5px; padding: 3px 10px; border-color: rgba(245,158,11,0.3); color: #d97706; background:#fff; text-decoration:none;">Conciliar</a>
+        <a href="#/studio/retenciones?filter=sircreb" class="btn btn-outline btn-sm" style="font-size:10.5px; padding: 3px 10px; border-color: rgba(245,158,11,0.3); color: #d97706; background:#fff; text-decoration:none;">Conciliar</a>
       </div>
     `;
   } else if (activeCompany.id === 'co-2') {
