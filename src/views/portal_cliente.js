@@ -159,7 +159,7 @@ export function renderPortalCliente() {
           <h3><i data-lucide="camera"></i> Enviar Comprobante al Contador</h3>
         </div>
         <div class="card-body">
-          \${proactiveQuotaAlert}
+          ${proactiveQuotaAlert}
           <p class="text-secondary" style="font-size: 13.5px; margin-bottom: 20px;">
             Subí una foto del ticket impreso, arrastrá un PDF de gastos o usá la cámara de tu celular. El bot contable extraerá los montos y CUITs de forma automática.
           </p>
@@ -506,7 +506,7 @@ export function renderPortalCliente() {
                     </td>
                     <td class="text-center">
                       ${t.tipo !== 'Venta' ? `
-                        <button class="btn btn-outline btn-xs btn-reconstruct-ticket" data-id="\${t.id}" title="Reconstruir comprobante térmico: Genera una réplica digital exacta del ticket en base a la información extraída por la IA, lista para descargar o imprimir." style="display:inline-flex; align-items:center; gap:2px; font-size:9.5px; padding: 2px 6px; border-color: rgba(99, 102, 241, 0.3); color:#818cf8;">
+                        <button class="btn btn-outline btn-xs btn-reconstruct-ticket" data-id="${t.id}" title="Reconstruir comprobante térmico: Genera una réplica digital exacta del ticket en base a la información extraída por la IA, lista para descargar o imprimir." style="display:inline-flex; align-items:center; gap:2px; font-size:9.5px; padding: 2px 6px; border-color: rgba(99, 102, 241, 0.3); color:#818cf8;">
                           <i data-lucide="sparkles" style="width:10px; height:10px; color:#818cf8;"></i> Reconstruir
                         </button>
                       ` : `
@@ -1534,7 +1534,7 @@ export function initPortalCliente(mainApp) {
       <html lang="es">
       <head>
         <meta charset="UTF-8">
-        <title>Factura Electrónica ARCA - \${activeCompany.razon_social}</title>
+        <title>Factura Electrónica ARCA - ${activeCompany.razon_social}</title>
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
         <style>
           body {
@@ -1547,7 +1547,7 @@ export function initPortalCliente(mainApp) {
           }
           .afip-invoice-wrapper {
             background: #fff;
-            border: 2px solid \${colors.border} !important;
+            border: 2px solid ${colors.border} !important;
             border-radius: 6px;
             padding: 24px;
             color: #000;
@@ -1555,18 +1555,18 @@ export function initPortalCliente(mainApp) {
             box-sizing: border-box;
           }
           .receipt-theme-bg {
-            background-color: \${colors.bg} !important;
-            border-color: \${colors.border} !important;
-            color: \${colors.text} !important;
+            background-color: ${colors.bg} !important;
+            border-color: ${colors.border} !important;
+            color: ${colors.text} !important;
           }
           .invoice-title-color {
-            color: \${colors.title} !important;
+            color: ${colors.title} !important;
           }
           .table-border-custom {
-            border-bottom: 2px solid \${colors.border} !important;
+            border-bottom: 2px solid ${colors.border} !important;
           }
           .accent-text-theme {
-            color: \${colors.border} !important;
+            color: ${colors.border} !important;
           }
           table {
             width: 100%;
@@ -1587,7 +1587,7 @@ export function initPortalCliente(mainApp) {
       </head>
       <body>
         <div class="afip-invoice-wrapper">
-          \${replicaEl.innerHTML}
+          ${replicaEl.innerHTML}
         </div>
         <script>
           window.onload = function() {
