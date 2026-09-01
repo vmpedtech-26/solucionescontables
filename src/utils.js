@@ -34,6 +34,30 @@ export function cuitLastDigit(cuit) {
 }
 
 /**
+ * Valida un CUIT/CUIL argentino mediante algoritmo Módulo 11.
+ * @param {string} cuit
+ * @returns {boolean}
+ */
+export function validarCUIT(cuit) {
+  const clean = cuit.replace(/[^0-9]/g, '');
+  if (clean.length !== 11) return false;
+  
+  const factors = [5, 4, 3, 2, 7, 6, 5, 4, 3, 2];
+  let sum = 0;
+  for (let i = 0; i < 10; i++) {
+    sum += parseInt(clean[i], 10) * factors[i];
+  }
+  
+  let calculated = 11 - (sum % 11);
+  if (calculated === 11) calculated = 0;
+  if (calculated === 10) calculated = 9;
+  
+  const digit = parseInt(clean[10], 10);
+  return calculated === digit;
+}
+
+
+/**
  * Calendario de vencimientos ARCA según terminación de CUIT.
  * Devuelve los días de vencimiento del mes siguiente para cada obligación.
  * @param {string} cuit

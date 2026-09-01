@@ -148,6 +148,38 @@ export function renderConfiguracion() {
         </div>
       </div>
 
+      <!-- Supabase Sync configuration card -->
+      <div class="card" style="border-color: rgba(16, 185, 129, 0.3); background: rgba(16, 185, 129, 0.01);">
+        <div class="card-header" style="border-bottom-color: rgba(16, 185, 129, 0.1);">
+          <h3><i data-lucide="database" style="color: var(--color-accent);"></i> Base de Datos Cloud (Supabase Sync)</h3>
+          <span class="badge" style="margin: 0; font-size: 10px; background: rgba(16, 185, 129, 0.08); color: var(--color-accent); border-color: rgba(16, 185, 129, 0.2);">SaaS Cloud</span>
+        </div>
+        <div class="card-body">
+          <p class="text-secondary" style="font-size: 13px; line-height: 1.5; margin-bottom: 16px;">
+            Conectá la aplicación a tu base de datos de producción en Supabase para sincronizar todas las transacciones, empresas y auditorías de forma real y segura en la nube.
+          </p>
+          <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px;">
+            <div>
+              <label style="font-size: 11.5px; font-weight: 600; display: block; margin-bottom: 6px;">Supabase URL</label>
+              <input type="text" id="supabase-url-input" class="form-input" style="width: 100%; padding: 8px 12px; font-size: 12.5px; background: #fff;" placeholder="https://xxxxxxxxxxxxxxxxxxxx.supabase.co" value="${localStorage.getItem('vmp_supabase_url') || ''}">
+            </div>
+            <div>
+              <label style="font-size: 11.5px; font-weight: 600; display: block; margin-bottom: 6px;">Supabase Anon Key (API Key)</label>
+              <input type="password" id="supabase-anon-key-input" class="form-input" style="width: 100%; padding: 8px 12px; font-size: 12.5px; background: #fff;" placeholder="Pega tu Anon Key..." value="${localStorage.getItem('vmp_supabase_anon_key') || ''}">
+            </div>
+          </div>
+          <div style="display: flex; gap: 12px; align-items: center;">
+            <button id="btn-save-supabase" class="btn btn-primary" style="background: var(--color-accent); border-color: var(--color-accent); flex: 1; font-weight: 700; height: 38px;">
+              Guardar y Conectar
+            </button>
+          </div>
+          <div style="margin-top: 12px; display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-secondary);">
+            <i data-lucide="info" style="width: 13px; height: 13px; color: var(--color-accent);"></i>
+            <span>Para configurar las tablas y políticas en tu base de datos, ejecutá el script <a href="file:///Users/matias/Desktop/SISTEMAS%20&%20APPS/SolucionesContables/vmp-studio/supabase_schema.sql" target="_blank" style="color: var(--color-accent); text-decoration: underline; font-weight: 600;">supabase_schema.sql</a> en la consola SQL de Supabase.</span>
+          </div>
+        </div>
+      </div>
+
     </div>
 
     <!-- Right Column: Delegated CUITs status & instructions -->
@@ -456,5 +488,31 @@ export function initConfiguracion(mainApp) {
         }
       }, line.t);
     });
+  });
+
+  // Save Supabase Credentials
+  const btnSaveSupabase = document.getElementById('btn-save-supabase');
+  const supabaseUrlInput = document.getElementById('supabase-url-input');
+  const supabaseAnonKeyInput = document.getElementById('supabase-anon-key-input');
+  
+  btnSaveSupabase?.addEventListener('click', () => {
+    const url = supabaseUrlInput?.value.trim() || '';
+    const anonKey = supabaseAnonKeyInput?.value.trim() || '';
+    
+    if (url && anonKey) {
+      localStorage.setItem('vmp_supabase_url', url);
+      localStorage.setItem('vmp_supabase_anon_key', anonKey);
+      mainApp.showToast("¡Base de Datos Supabase vinculada con éxito! Conectando...", "success");
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    } else {
+      localStorage.removeItem('vmp_supabase_url');
+      localStorage.removeItem('vmp_supabase_anon_key');
+      mainApp.showToast("Conexión Supabase removida. Volviendo a almacenamiento local (localStorage).", "info");
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    }
   });
 }

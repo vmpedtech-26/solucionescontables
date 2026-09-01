@@ -136,6 +136,11 @@ export function renderDashboardLayout(childHTML, activeRoute) {
           <i data-lucide="calculator"></i>
           <span>Ajuste por Inflación (RT 54)</span>
         </a>
+        <a href="#/studio/sueldos" class="db-nav-item ${activeRoute === 'sueldos' ? 'active' : ''}" data-route="sueldos">
+          <i data-lucide="user-check"></i>
+          <span>Sueldos y ARCA</span>
+          ${!isAdminUnlocked ? '<i data-lucide="lock" style="width: 12px; height: 12px; margin-left: auto; color: #818cf8;" title="Módulo Premium"></i>' : ''}
+        </a>
 
         <div class="db-nav-label">Soporte</div>
         <a href="#/studio/ayuda" class="db-nav-item ${activeRoute === 'ayuda' ? 'active' : ''}" data-route="ayuda">
@@ -349,6 +354,7 @@ export function initDashboardLayout(mainApp) {
 
   // Logout studio
   document.getElementById('logout-studio-btn')?.addEventListener('click', () => {
+    localStorage.removeItem('vmp_premium_unlocked');
     window.location.hash = '#/';
   });
 

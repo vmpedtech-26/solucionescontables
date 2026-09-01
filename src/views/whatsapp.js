@@ -11,11 +11,17 @@ let extractedData = null;
 export function renderWhatsApp() {
   const activeCompany = getActiveCompany();
 
+  const unreadCounts = JSON.parse(localStorage.getItem('vmp_wa_unread_counts') || '{"co-1": 1, "co-2": 0, "co-3": 0}');
+  if (unreadCounts[activeChatId] > 0) {
+    unreadCounts[activeChatId] = 0;
+    localStorage.setItem('vmp_wa_unread_counts', JSON.stringify(unreadCounts));
+  }
+
   // Mock chats list
   const chats = [
-    { id: 'co-1', name: 'Transportes Patagónicos S.A.', lastMsg: 'Te paso el ticket del camión...', time: '11:42', avatar: '#0d9488', count: 1 },
-    { id: 'co-2', name: 'TecnoDesarrollos Sur', lastMsg: 'Matias, ¿viste la recategorización?', time: 'Ayer', avatar: '#6366f1', count: 0 },
-    { id: 'co-3', name: 'Alimentos del Valle S.R.L.', lastMsg: 'Factura de luz cargada.', time: 'Ayer', avatar: '#10b981', count: 0 }
+    { id: 'co-1', name: 'Transportes Patagónicos S.A.', lastMsg: 'Te paso el ticket del camión...', time: '11:42', avatar: '#0d9488', count: unreadCounts['co-1'] },
+    { id: 'co-2', name: 'TecnoDesarrollos Sur', lastMsg: 'Matias, ¿viste la recategorización?', time: 'Ayer', avatar: '#6366f1', count: unreadCounts['co-2'] },
+    { id: 'co-3', name: 'Alimentos del Valle S.R.L.', lastMsg: 'Factura de luz cargada.', time: 'Ayer', avatar: '#10b981', count: unreadCounts['co-3'] }
   ];
 
   const activeChat = chats.find(c => c.id === activeChatId) || chats[0];
@@ -352,12 +358,11 @@ export function initWhatsApp(mainApp) {
   // Confirm OCR and register in ledger
   document.getElementById('btn-confirm-ocr')?.addEventListener('click', () => {
     if (extractedData) {
-      // Add transaction reactively into the DB for the active company
-      const activeCo = getActiveCompany();
-      addTransaction(activeCo.id, 'compras', extractedData);
+      // Add transaction reactively into the DB for the sender client's company (activeChatId)
+      addTransaction(activeChatId, 'compras', extractedData);
       
       scanState = 'registered';
-      mainApp.showToast('¡Comprobante OCR registrado de forma reactiva!', 'success');
+      mainApp.showToast('¡Comprobante OCR registrado en la empresa del cliente remitente!', 'success');
       
       // Auto refresh the screen
       mainApp.router();

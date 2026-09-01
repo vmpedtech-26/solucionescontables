@@ -1,0 +1,82 @@
+{
+  "cuit": "20-35849201-4",
+  "periodo": "2026-05",
+  "sincronizado_en": "2026-06-23T22:31:23.522Z",
+  "ventas": [
+    {
+      "fecha": "2026-05-05",
+      "cliente": "Librerías del Sur",
+      "cuit": "30-66442211-5",
+      "tipo_comprobante": "Factura A",
+      "numero": "0001-00002934",
+      "neto": 120000,
+      "iva": 25200,
+      "total": 145200
+    },
+    {
+      "fecha": "2026-05-12",
+      "cliente": "Supermercados La Anónima",
+      "cuit": "30-50001091-2",
+      "tipo_comprobante": "Factura A",
+      "numero": "0001-00002935",
+      "neto": 450000,
+      "iva": 94500,
+      "total": 544500
+    },
+    {
+      "fecha": "2026-05-18",
+      "cliente": "Consumidor Final",
+      "cuit": "00-00000000-0",
+      "tipo_comprobante": "Factura B",
+      "numero": "0001-00000845",
+      "neto": 78000,
+      "iva": 16380,
+      "total": 94380
+    },
+    {
+      "fecha": "2026-05-25",
+      "cliente": "Desarrollos Neuquén",
+      "cuit": "30-71829384-9",
+      "tipo_comprobante": "Factura A",
+      "numero": "0001-00002936",
+      "neto": 600000,
+      "iva": 126000,
+      "total": 726000
+    }
+  ],
+  "compras": [
+    {
+      "fecha": "2026-05-03",
+      "proveedor": "Telecom Argentina",
+      "cuit": "30-63948172-3",
+      "tipo_comprobante": "Factura A",
+      "numero": "0921-93821049",
+      "neto": 45000,
+      "iva": 12150,
+      "total": 57150,
+      "categoria": "Servicios"
+    },
+    {
+      "fecha": "2026-05-10",
+      "proveedor": "Estación de Servicio Shell",
+      "cuit": "30-58472910-1",
+      "tipo_comprobante": "Factura A",
+      "numero": "0012-00029482",
+      "neto": 95000,
+      "iva": 19950,
+      "total": 114950,
+      "categoria": "Combustibles"
+    },
+    {
+      "fecha": "2026-05-22",
+      "proveedor": "Papelera Comahue",
+      "cuit": "30-61928374-2",
+      "tipo_comprobante": "Factura A",
+      "numero": "0003-00004928",
+      "neto": 32000,
+      "iva": 6720,
+      "total": 38720,
+      "categoria": "Papelería"
+    }
+  ]
+}

@@ -19,6 +19,7 @@ import { renderRT54, initRT54 } from './views/rt54.js';
 import { renderAyuda, initAyuda } from './views/ayuda.js';
 import { renderWhatsApp, initWhatsApp } from './views/whatsapp.js';
 import { renderMigrador, initMigrador } from './views/migrador.js';
+import { renderSueldos, initSueldos } from './views/sueldos.js';
 
 class Application {
   constructor() {
@@ -60,11 +61,13 @@ class Application {
 
     // Landing Page Route
     if (hash === '#/' || hash === '#' || hash === '') {
-      rootEl.innerHTML = renderLanding();
+      if (!rootEl.querySelector('.lp-wrapper')) {
+        rootEl.innerHTML = renderLanding();
+      }
       initLanding(this);
       
       // Update breadcrumb or titles if applicable
-      document.title = "Soluciones Contables — El SaaS para Estudios Contables Modernos";
+      document.title = "Soluciones Contables — El integrante virtual que elimina la carga manual de tu estudio.";
     } 
     // Studio Professional Routes
     else if (hash.startsWith('#/studio')) {
@@ -117,6 +120,9 @@ class Application {
         }
         else if (subRoute === '/rt54') {
           this.safeRoute(renderRT54, initRT54, 'rt54', "RT 54 · Panel Contable");
+        }
+        else if (subRoute === '/sueldos') {
+          this.safeRoute(renderSueldos, initSueldos, 'sueldos', "Libro de Sueldos Digital");
         }
         else if (subRoute === '/whatsapp') {
           this.safeRoute(renderWhatsApp, initWhatsApp, 'whatsapp', "Omnicanal · WhatsApp Inbox");

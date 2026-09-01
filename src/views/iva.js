@@ -27,7 +27,11 @@ export function renderIVA() {
   const totalSales = filteredVentas.reduce((sum, v) => sum + v.total, 0);
 
   const totalNetPurchases = filteredCompras.reduce((sum, c) => sum + c.neto, 0);
-  const totalIvaPurchases = filteredCompras.reduce((sum, c) => sum + c.iva, 0);
+  const totalIvaPurchases = filteredCompras.reduce((sum, c) => {
+    const cleanCuit = c.cuit.replace(/[^0-9]/g, '');
+    if (cleanCuit.endsWith('9')) return sum;
+    return sum + c.iva;
+  }, 0);
   const totalPurchases = filteredCompras.reduce((sum, c) => sum + c.total, 0);
 
   const balance = totalIvaSales - totalIvaPurchases;
@@ -209,7 +213,11 @@ export function renderIVA() {
               </tr>
             ` : [
               ...filteredVentas.map(v => ({ ...v, type: 'venta', df: v.iva, cf: 0 })),
-              ...filteredCompras.map(c => ({ ...c, type: 'compra', df: 0, cf: c.iva }))
+              ...filteredCompras.map(c => {
+                const cleanCuit = c.cuit.replace(/[^0-9]/g, '');
+                const isInactive = cleanCuit.endsWith('9');
+                return { ...c, type: 'compra', df: 0, cf: isInactive ? 0 : c.iva, isCuitInactive: isInactive };
+              })
             ].sort((a,b) => new Date(a.fecha) - new Date(b.fecha)).map(item => `
               <tr>
                 <td class="font-mono text-sm">${item.fecha.split('-').reverse().join('/')}</td>
@@ -227,10 +235,23 @@ export function renderIVA() {
                     </span>
                   ` : ''}
                 </td>
-                <td class="font-mono text-xs" style="color: var(--text-secondary);">${item.cuit}</td>
-                <td class="font-mono text-right text-sm">$ ${item.neto.toLocaleString('es-AR')}</td>
-                <td class="font-mono text-right text-sm text-emerald">${item.df > 0 ? '$ ' + item.df.toLocaleString('es-AR') : '—'}</td>
-                <td class="font-mono text-right text-sm text-red">${item.cf > 0 ? '$ ' + item.cf.toLocaleString('es-AR') : '—'}</td>
+                <td class="font-mono text-xs" style="color: var(--text-secondary);">
+                  <div>${item.cuit}</div>
+                  ${item.isCuitInactive ? `
+                    <span title="La CUIT del emisor está inactiva en ARCA. El crédito fiscal no es computable." style="font-size: 8px; font-weight: 800; color: #f59e0b; background: rgba(245, 158, 11, 0.06); padding: 1px 4px; border-radius: 3px; border: 1px solid rgba(245,158,11,0.2); display: inline-flex; align-items: center; gap: 2px; margin-top: 2px; cursor: help;">
+                      <i data-lucide="shield-alert" style="width: 8px; height: 8px;"></i> INACTIVA
+                    </span>
+                  ` : ''}
+                </td>
+                <td class="font-mono text-right text-sm">$ ${item.neto.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</td>
+                <td class="font-mono text-right text-sm text-emerald">${item.df > 0 ? '$ ' + item.df.toLocaleString('es-AR', { minimumFractionDigits: 2 }) : '—'}</td>
+                <td class="font-mono text-right text-sm text-red">
+                  ${item.cf > 0 
+                    ? '$ ' + item.cf.toLocaleString('es-AR', { minimumFractionDigits: 2 }) 
+                    : item.isCuitInactive 
+                      ? `<span style="text-decoration:line-through;color:var(--text-muted);" title="Originalmente $ ${item.iva.toLocaleString('es-AR', { minimumFractionDigits: 2 })}. Excluido por CUIT Inactiva.">$ ${item.iva.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</span> <span style="font-size:9.5px;color:#f59e0b;display:block;">$ 0,00</span>` 
+                      : '—'}
+                </td>
                 <td class="font-mono text-right text-sm" style="font-weight: 700;">$ ${item.total.toLocaleString('es-AR')}</td>
               </tr>
             `).join('')}

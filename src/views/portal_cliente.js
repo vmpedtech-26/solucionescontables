@@ -68,6 +68,30 @@ export function renderPortalCliente() {
   const ocrLimit = parseInt(localStorage.getItem('vmp_ocr_scans_limit'), 10);
   const quotaPercent = Math.min(100, (ocrScans / ocrLimit) * 100);
 
+  let proactiveQuotaAlert = '';
+  if (ocrScans >= ocrLimit) {
+    proactiveQuotaAlert = `
+      <div style="background: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.2); border-left: 4px solid #ef4444; border-radius: 8px; padding: 12px 16px; margin-bottom: 20px; font-size: 13px; color: #b91c1c; display: flex; align-items: center; gap: 10px;">
+        <i data-lucide="lock" style="width: 18px; height: 18px; flex-shrink: 0; color: #ef4444;"></i>
+        <div>
+          <strong>Cupo Gemini OCR Agotado:</strong> Has procesado ${ocrScans}/${ocrLimit} comprobantes. El escaneo automático está bloqueado. Por favor, <strong>cargá tus comprobantes manualmente</strong> usando el botón "Carga Manual" o solicita una extensión.
+        </div>
+      </div>
+    `;
+  } else if (ocrScans >= (ocrLimit * 0.8)) {
+    proactiveQuotaAlert = `
+      <div style="background: rgba(245, 158, 11, 0.05); border: 1px solid rgba(245, 158, 11, 0.2); border-left: 4px solid #f59e0b; border-radius: 8px; padding: 12px 16px; margin-bottom: 20px; font-size: 13px; color: #92400e; display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; box-sizing: border-box;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <i data-lucide="alert-triangle" style="width: 18px; height: 18px; flex-shrink: 0; color: #f59e0b;"></i>
+          <div>
+            <strong>Advertencia de Cupo OCR:</strong> Has consumido el ${quotaPercent.toFixed(1)}% (${ocrScans}/${ocrLimit}) del cupo mensual de digitalizaciones con IA.
+          </div>
+        </div>
+        <button id="btn-upgrade-quota-alert" class="btn btn-outline btn-sm" style="font-size: 11px; padding: 4px 10px; border-color: rgba(245,158,11,0.3); color: #d97706; background:#fff; cursor:pointer;">Aumentar Cupo</button>
+      </div>
+    `;
+  }
+
   const isMonotributo = activeCompany.condicion_iva.includes('Monotributo');
   const allowedComprobante = isMonotributo 
     ? '<option value="Factura C" selected>Factura C (Monotributo)</option><option value="Factura E">Factura E (Exportación de Servicios)</option>' 
@@ -135,6 +159,7 @@ export function renderPortalCliente() {
           <h3><i data-lucide="camera"></i> Enviar Comprobante al Contador</h3>
         </div>
         <div class="card-body">
+          \${proactiveQuotaAlert}
           <p class="text-secondary" style="font-size: 13.5px; margin-bottom: 20px;">
             Subí una foto del ticket impreso, arrastrá un PDF de gastos o usá la cámara de tu celular. El bot contable extraerá los montos y CUITs de forma automática.
           </p>
@@ -176,9 +201,14 @@ export function renderPortalCliente() {
                 <span id="ocr-quota-warning" style="font-size: 10px; color: ${ocrScans >= ocrLimit ? '#ef4444' : '#f59e0b'}; font-weight: 700;">
                   ${ocrScans >= ocrLimit ? '⚠️ Cupo mensual agotado.' : ocrScans >= (ocrLimit * 0.8) ? '⚠️ Cupo próximo al límite.' : '✓ Cupo disponible.'}
                 </span>
-                <button type="button" id="btn-increase-ocr-quota" class="btn btn-outline btn-xs" style="font-size: 9.5px; padding: 2px 8px; height: auto; border-color: rgba(99, 102, 241, 0.3); color: #818cf8; font-weight: 700;">
-                  Aumentar Límite
-                </button>
+                <div style="display:flex; gap:6px;">
+                  <button type="button" id="btn-portal-manual-entry" class="btn btn-outline btn-xs" style="font-size: 9.5px; padding: 2px 8px; height: auto; border-color: rgba(245, 158, 11, 0.3); color: #fbbf24; font-weight: 700;">
+                    Carga Manual
+                  </button>
+                  <button type="button" id="btn-increase-ocr-quota" class="btn btn-outline btn-xs" style="font-size: 9.5px; padding: 2px 8px; height: auto; border-color: rgba(99, 102, 241, 0.3); color: #818cf8; font-weight: 700;">
+                    Aumentar Límite
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -476,7 +506,7 @@ export function renderPortalCliente() {
                     </td>
                     <td class="text-center">
                       ${t.tipo !== 'Venta' ? `
-                        <button class="btn btn-outline btn-xs btn-reconstruct-ticket" data-id="${t.id}" style="display:inline-flex; align-items:center; gap:2px; font-size:9.5px; padding: 2px 6px; border-color: rgba(99, 102, 241, 0.3); color:#818cf8;">
+                        <button class="btn btn-outline btn-xs btn-reconstruct-ticket" data-id="\${t.id}" title="Reconstruir comprobante térmico: Genera una réplica digital exacta del ticket en base a la información extraída por la IA, lista para descargar o imprimir." style="display:inline-flex; align-items:center; gap:2px; font-size:9.5px; padding: 2px 6px; border-color: rgba(99, 102, 241, 0.3); color:#818cf8;">
                           <i data-lucide="sparkles" style="width:10px; height:10px; color:#818cf8;"></i> Reconstruir
                         </button>
                       ` : `
@@ -594,6 +624,9 @@ export function renderPortalCliente() {
         <div style="display:flex; flex-direction:column; gap:8px; margin-top: 8px;">
           <button class="btn btn-primary w-full" id="btn-upgrade-quota-modal" style="background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); border: none; font-size: 13px; font-weight: 800; height: 40px; display: flex; align-items: center; justify-content: center; gap: 6px;">
             <i data-lucide="sparkles"></i> Aumentar Cupo a 400 Escaneos
+          </button>
+          <button class="btn btn-outline w-full" id="btn-manual-entry-fallback" style="font-size:12.5px; height:40px; border-color:#fbbf24; color:#f59e0b; display:flex; align-items:center; justify-content:center; gap:6px;">
+            <i data-lucide="keyboard"></i> Carga Manual (Alternativa)
           </button>
           <button class="btn btn-outline w-full" id="btn-cancel-quota-modal" style="font-size:12px; height:36px;">
             Cerrar
@@ -2142,6 +2175,9 @@ Sabor digital, VMP Studio.
   const btnCancelQuotaModal = document.getElementById('btn-cancel-quota-modal');
   const btnUpgradeQuotaModal = document.getElementById('btn-upgrade-quota-modal');
   const btnIncreaseQuota = document.getElementById('btn-increase-ocr-quota');
+  const btnUpgradeQuotaAlert = document.getElementById('btn-upgrade-quota-alert');
+  const btnPortalManualEntry = document.getElementById('btn-portal-manual-entry');
+  const btnManualEntryFallback = document.getElementById('btn-manual-entry-fallback');
 
   const increaseOcrQuota = () => {
     localStorage.setItem('vmp_ocr_scans_limit', '400');
@@ -2151,7 +2187,154 @@ Sabor digital, VMP Studio.
     mainApp.router();
   };
 
+  const openManualEntryModal = () => {
+    if (quotaModal) quotaModal.style.display = 'none'; // Cerrar modal de cuota si está abierto
+
+    const modal = document.createElement('div');
+    modal.style.position = 'fixed';
+    modal.style.top = '0';
+    modal.style.left = '0';
+    modal.style.width = '100%';
+    modal.style.height = '100%';
+    modal.style.background = 'rgba(15, 23, 42, 0.7)';
+    modal.style.backdropFilter = 'blur(12px)';
+    modal.style.webkitBackdropFilter = 'blur(12px)';
+    modal.style.zIndex = '9999';
+    modal.style.display = 'flex';
+    modal.style.alignItems = 'center';
+    modal.style.justifyContent = 'center';
+    modal.style.opacity = '0';
+    modal.style.transition = 'opacity 0.25s ease';
+
+    modal.innerHTML = `
+      <div style="background:#ffffff; border:1px solid rgba(15,23,42,0.1); border-radius:16px; padding:28px; max-width:420px; width:90%; box-shadow:0 25px 50px -12px rgba(15,23,42,0.25); transform:scale(0.9); transition:transform 0.25s ease;" class="manual-entry-card">
+        <h3 style="font-family:var(--font-heading); font-size:18px; font-weight:800; color:#0f172a; margin-top:0; margin-bottom:18px; display:flex; align-items:center; gap:8px;">
+          <i data-lucide="keyboard" style="color:#f59e0b;"></i> Carga Manual de Gasto
+        </h3>
+        <form id="portal-manual-form" style="display:flex; flex-direction:column; gap:14px;">
+          <div>
+            <label style="display:block; font-size:11px; font-weight:700; color:#475569; margin-bottom:6px; text-transform:uppercase;">Proveedor / Emisor *</label>
+            <input type="text" id="m-vendor" placeholder="Ej: Distribuidora Comahue" required style="width:100%; border:1px solid var(--border-color); border-radius:6px; padding:10px 12px; font-size:13px; background:#fff; color:#0f172a;">
+          </div>
+          <div>
+            <label style="display:block; font-size:11px; font-weight:700; color:#475569; margin-bottom:6px; text-transform:uppercase;">CUIT Emisor *</label>
+            <input type="text" id="m-cuit" placeholder="30-12345678-9" required style="width:100%; border:1px solid var(--border-color); border-radius:6px; padding:10px 12px; font-size:13px; background:#fff; color:#0f172a;">
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+            <div>
+              <label style="display:block; font-size:11px; font-weight:700; color:#475569; margin-bottom:6px; text-transform:uppercase;">Monto Total ($) *</label>
+              <input type="number" id="m-total" placeholder="0.00" step="0.01" required style="width:100%; border:1px solid var(--border-color); border-radius:6px; padding:10px 12px; font-size:13px; background:#fff; color:#0f172a;">
+            </div>
+            <div>
+              <label style="display:block; font-size:11px; font-weight:700; color:#475569; margin-bottom:6px; text-transform:uppercase;">Categoría</label>
+              <select id="m-category" style="width:100%; border:1px solid var(--border-color); border-radius:6px; padding:10px 12px; font-size:13px; background:#fff; color:#0f172a;">
+                <option value="Combustibles">Combustibles</option>
+                <option value="Servicios">Servicios</option>
+                <option value="Mantenimiento">Mantenimiento</option>
+                <option value="Tecnología">Tecnología</option>
+                <option value="Librería">Librería</option>
+                <option value="Otros">Otros</option>
+              </select>
+            </div>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px; margin-top:4px;">
+            <input type="checkbox" id="m-is-active" style="width:16px; height:16px; cursor:pointer;">
+            <label for="m-is-active" style="font-size:12px; color:#475569; cursor:pointer; font-weight:600;">Es Bien de Uso (Activo Fijo)</label>
+          </div>
+          <div style="display:flex; gap:12px; margin-top:10px;">
+            <button type="button" id="btn-cancel-manual" style="flex:1; padding:10px 16px; border:1px solid var(--border-color); border-radius:8px; background:#fff; color:#475569; font-weight:600; cursor:pointer; font-size:13px;">Cancelar</button>
+            <button type="submit" style="flex:1; padding:10px 16px; border:none; border-radius:8px; background:linear-gradient(135deg, #f59e0b, #d97706); color:#fff; font-weight:600; cursor:pointer; font-size:13px; box-shadow:0 4px 12px rgba(245,158,11,0.25);">Guardar Gasto</button>
+          </div>
+        </form>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+    if (window.lucide) window.lucide.createIcons({ root: modal });
+
+    // Animación de entrada
+    setTimeout(() => {
+      modal.style.opacity = '1';
+      modal.querySelector('.manual-entry-card').style.transform = 'scale(1)';
+    }, 20);
+
+    const closeModal = () => {
+      modal.style.opacity = '0';
+      modal.querySelector('.manual-entry-card').style.transform = 'scale(0.9)';
+      setTimeout(() => {
+        if (modal.parentNode) document.body.removeChild(modal);
+      }, 250);
+    };
+
+    modal.querySelector('#btn-cancel-manual').addEventListener('click', closeModal);
+
+    modal.querySelector('#portal-manual-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const vendor = modal.querySelector('#m-vendor').value;
+      const cuit = modal.querySelector('#m-cuit').value;
+      const total = parseFloat(modal.querySelector('#m-total').value) || 0;
+      const category = modal.querySelector('#m-category').value;
+      const esActivo = modal.querySelector('#m-is-active').checked;
+
+      // Calcular Neto e IVA del Gasto (21% estándar)
+      const neto = total / 1.21;
+      const iva = total - neto;
+
+      // Validar CUIT
+      const isCuitValid = validarCUIT(cuit);
+      if (!isCuitValid) {
+        mainApp.showToast('Advertencia: CUIT no válido bajo algoritmo Módulo 11. Se guarda igual con advertencia.', 'warning');
+      }
+
+      // Agregar transacción de compra
+      const newPurchase = {
+        id: "c-" + Date.now(),
+        fecha: new Date().toISOString().split('T')[0],
+        proveedor: vendor,
+        cuit: cuit,
+        tipo_comprobante: "Factura A",
+        numero: "0009-" + Math.floor(10000000 + Math.random() * 90000000).toString().slice(0, 8),
+        neto: neto,
+        iva: iva,
+        total: total,
+        es_activo: esActivo,
+        categoria: category
+      };
+
+      // Importar base de datos y guardar
+      import('../db/mockdb.js').then(db => {
+        db.addTransaction(activeCompany.id, 'compras', newPurchase);
+        
+        // Agregar a la lista de documentos digitalizados
+        const newTicket = {
+          id: "t-" + Date.now(),
+          fecha: new Date().toISOString().split('T')[0],
+          detalle: `Factura A - ${vendor}`,
+          archivo: `manual_gasto_${Date.now().toString().slice(-4)}.pdf`,
+          tipo: "Compra",
+          monto: total,
+          estado: "Aprobado",
+          es_activo: esActivo,
+          categoria: category
+        };
+
+        const tickets = JSON.parse(localStorage.getItem(`vmp_tickets_${activeCompany.id}`)) || [];
+        tickets.unshift(newTicket);
+        localStorage.setItem(`vmp_tickets_${activeCompany.id}`, JSON.stringify(tickets));
+
+        mainApp.showToast(`¡Comprobante de "${vendor}" cargado manualmente!`, "success");
+        closeModal();
+        mainApp.router();
+      });
+    });
+  };
+
   btnIncreaseQuota?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    increaseOcrQuota();
+  });
+
+  btnUpgradeQuotaAlert?.addEventListener('click', (e) => {
     e.stopPropagation();
     increaseOcrQuota();
   });
@@ -2159,6 +2342,16 @@ Sabor digital, VMP Studio.
   btnUpgradeQuotaModal?.addEventListener('click', (e) => {
     e.stopPropagation();
     increaseOcrQuota();
+  });
+
+  btnPortalManualEntry?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    openManualEntryModal();
+  });
+
+  btnManualEntryFallback?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    openManualEntryModal();
   });
 
   btnCloseQuotaModal?.addEventListener('click', (e) => {

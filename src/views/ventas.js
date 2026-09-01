@@ -256,13 +256,13 @@ function renderTransactionsTable(transactions, type) {
           
           if (lastDigit === '0') {
             cuitStatusBadge = `
-              <div style="font-size: 10px; color: #ef4444; background: rgba(239, 68, 68, 0.08); padding: 2px 6px; border-radius: var(--radius-sm); border: 1px solid rgba(239,68,68,0.2); font-weight: 600; display: inline-flex; align-items: center; gap: 4px; margin-top: 4px;">
+              <div title="Consumidor Final con riesgo fiscal. Posible emisor o receptor apócrifo detectado en base de datos ARCA (Riesgo APOC)." style="font-size: 10px; color: #ef4444; background: rgba(239, 68, 68, 0.08); padding: 2px 6px; border-radius: var(--radius-sm); border: 1px solid rgba(239,68,68,0.2); font-weight: 600; display: inline-flex; align-items: center; gap: 4px; margin-top: 4px; cursor: help;">
                 <i data-lucide="alert-triangle" style="width: 10px; height: 10px;"></i> RIESGO APOC
               </div>
             `;
           } else if (lastDigit === '9') {
             cuitStatusBadge = `
-              <div style="font-size: 10px; color: #f59e0b; background: rgba(245, 158, 11, 0.08); padding: 2px 6px; border-radius: var(--radius-sm); border: 1px solid rgba(245,158,11,0.2); font-weight: 600; display: inline-flex; align-items: center; gap: 4px; margin-top: 4px;">
+              <div title="La CUIT del contribuyente se encuentra INACTIVA / SUSPENDIDA en el padrón de ARCA. No computa Crédito Fiscal para el Libro IVA Digital o F.2051 hasta regularizar." style="font-size: 10px; color: #f59e0b; background: rgba(245, 158, 11, 0.08); padding: 2px 6px; border-radius: var(--radius-sm); border: 1px solid rgba(245,158,11,0.2); font-weight: 600; display: inline-flex; align-items: center; gap: 4px; margin-top: 4px; cursor: help;">
                 <i data-lucide="shield-alert" style="width: 10px; height: 10px;"></i> CUIT INACTIVA
               </div>
             `;

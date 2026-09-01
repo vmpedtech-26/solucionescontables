@@ -266,13 +266,37 @@ export function renderIVASimple() {
   // STANDARD RENDERING FOR RESPONSABLES INSCRIPTOS (RI)
   // -------------------------------------------------------------
   const debFiscal    = txs.ventas.reduce((s, v) => s + v.iva, 0);
-  const credFiscal   = txs.compras.reduce((s, c) => s + c.iva, 0);
-  const retPercSaldo = parseFloat(localStorage.getItem(`vmp_ret_perc_saldo_${company.id}`) || '0');
+  // Exclude CUIT inactiva from computed credit fiscal
+  const credFiscal   = txs.compras.reduce((s, c) => {
+    const cleanCuit = c.cuit.replace(/[^0-9]/g, '');
+    if (cleanCuit.endsWith('9')) return s;
+    return s + c.iva;
+  }, 0);
+
+  // Reconciled retenciones (excluye cuenta puente de $ 6.080,75)
+  let retPercSaldo = 0;
+  const userSetRet = localStorage.getItem(`vmp_ret_perc_saldo_${company.id}`);
+  if (userSetRet !== null) {
+    retPercSaldo = parseFloat(userSetRet || '0');
+  } else {
+    const storedRets = localStorage.getItem(`vmp_retenciones_${company.id}`);
+    if (storedRets) {
+      const list = JSON.parse(storedRets);
+      retPercSaldo = list.filter(r => r.conciliado).reduce((sum, r) => sum + r.monto, 0);
+    } else {
+      const defaultList = [
+        { id: 'r1', fecha: '2026-05-05', agente: 'Coto S.A.', cuit: '30-50790918-7', tipo: 'PERCEPCIÓN IVA', monto: 1850.20, fuente: 'factura', conciliado: true, certDisponible: true },
+        { id: 'r2', fecha: '2026-05-12', agente: 'Banco Nación Argentina', cuit: '30-55745039-6', tipo: 'RETENCIÓN SIRCREB', monto: 3200.00, fuente: 'banco', conciliado: false, certDisponible: false },
+        { id: 'r3', fecha: '2026-05-18', agente: 'La Rural S.A.', cuit: '30-67890123-5', tipo: 'PERCEPCIÓN IIBB', monto: 940.50, fuente: 'factura', conciliado: true, certDisponible: true },
+        { id: 'r4', fecha: '2026-05-20', agente: 'Carrefour Argentina', cuit: '30-60410619-5', tipo: 'PERCEPCIÓN IVA', monto: 2100.75, fuente: 'factura', conciliado: false, certDisponible: false },
+        { id: 'r5', fecha: '2026-05-22', agente: 'ARBA (Prov. Bs As)', cuit: '33-70523373-9', tipo: 'PERCEPCIÓN IIBB', monto: 780.00, fuente: 'banco', conciliado: false, certDisponible: false },
+      ];
+      retPercSaldo = defaultList.filter(r => r.conciliado).reduce((sum, r) => sum + r.monto, 0);
+    }
+  }
+
   const saldoFavor   = parseFloat(localStorage.getItem(`vmp_saldo_favor_${company.id}`) || '0');
   const saldoNeto    = debFiscal - credFiscal - retPercSaldo - saldoFavor;
-
-  const consistenciaOk = localStorage.getItem(`vmp_consist_ok_${company.id}`) === 'true';
-  const libroImportado = localStorage.getItem(`vmp_libro_importado_${company.id}`) === 'true';
 
   const venc      = getVencimientos(company.cuit);
 
@@ -288,6 +312,14 @@ export function renderIVASimple() {
   const totalActividadDF = actividadRows.reduce((s, r) => s + r.df, 0);
   const consistDiff = Math.abs(totalActividadDF - debFiscal);
   const consistOkCalc = consistDiff < 1; // less than $1 difference = OK
+
+  // Auto-validación si la diferencia es exactamente $ 0,00
+  if (consistDiff < 0.01 && localStorage.getItem(`vmp_consist_ok_${company.id}`) !== 'true') {
+    localStorage.setItem(`vmp_consist_ok_${company.id}`, 'true');
+  }
+
+  const consistenciaOk = localStorage.getItem(`vmp_consist_ok_${company.id}`) === 'true';
+  const libroImportado = localStorage.getItem(`vmp_libro_importado_${company.id}`) === 'true';
 
   const pasos = [
     { n:1, label:'Libros importados', icon:'upload',        done: libroImportado },
@@ -450,6 +482,13 @@ export function renderIVASimple() {
           <span class="badge" style="margin:0;font-size:10px;">SIRE / SICORE</span>
         </div>
         <div class="card-body">
+          <div style="background:rgba(239,68,68,0.03);border:1px solid rgba(239,68,68,0.2);border-radius:var(--radius-md);padding:14px 16px;margin-bottom:14px;font-size:12px;color:var(--text-secondary);">
+            <strong style="color:#f87171;display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+              <i data-lucide="alert-octagon" style="width:14px;height:14px;"></i> Cuenta Puente Retenciones:
+            </strong>
+            Hay <strong>$ 6.080,75</strong> de percepciones suspendidas (sin cert. o no conciliadas) que <strong>NO se computan</strong> en este F.2051 para evitar rechazos de ARCA.
+          </div>
+          
           <div style="background:rgba(245,158,11,0.03);border:1px solid rgba(245,158,11,0.15);border-radius:var(--radius-md);padding:14px 16px;margin-bottom:18px;font-size:12px;color:var(--text-secondary);">
             <strong style="color:#fbbf24;display:flex;align-items:center;gap:6px;margin-bottom:6px;">
               <i data-lucide="alert-triangle" style="width:14px;height:14px;"></i> Requisitos técnicos para CSV de percepciones (ARCA):
@@ -657,21 +696,156 @@ export function initIVASimple(mainApp) {
     mainApp.showToast('¡Archivo CSV del SICORE generado con formato de 16 caracteres!', 'success');
   });
 
-  // Presentar F.2051
+  // Presentar F.2051 con simulación de ARCA Live, fallos de red y reintentos
   btnPresentar?.addEventListener('click', (e) => {
     e.stopPropagation();
-    mainApp.showToast('Enlazando con pasarela fiscal de ARCA...', 'info');
-    
+
+    // Crear el overlay del modal
+    const modal = document.createElement('div');
+    modal.style.position = 'fixed';
+    modal.style.top = '0';
+    modal.style.left = '0';
+    modal.style.width = '100%';
+    modal.style.height = '100%';
+    modal.style.background = 'rgba(15, 23, 42, 0.7)';
+    modal.style.backdropFilter = 'blur(12px)';
+    modal.style.webkitBackdropFilter = 'blur(12px)';
+    modal.style.zIndex = '9999';
+    modal.style.display = 'flex';
+    modal.style.alignItems = 'center';
+    modal.style.justifyContent = 'center';
+    modal.style.opacity = '0';
+    modal.style.transition = 'opacity 0.25s ease';
+
+    modal.innerHTML = `
+      <div style="background:#ffffff; border:1px solid rgba(15,23,42,0.1); border-radius:16px; padding:32px; max-width:460px; width:90%; box-shadow:0 25px 50px -12px rgba(15,23,42,0.25); text-align:center; transform:scale(0.9); transition:transform 0.25s ease;" class="arca-modal-card">
+        <div id="arca-loading-state" style="display:flex; flex-direction:column; gap:16px; align-items:center;">
+          <div class="spinner" style="border-left-color:#6366f1; width:44px; height:44px; margin-bottom:8px; border-radius:50%; animation: spin 1s linear infinite;"></div>
+          <h4 id="arca-progress-title" style="font-family:var(--font-heading); font-size:16px; font-weight:800; color:#0f172a; margin:0;">Iniciando conexión con ARCA Live...</h4>
+          <p id="arca-progress-txt" style="font-size:12.5px; color:#475569; line-height:1.5; margin:0; max-width:320px;">Estableciendo canal cifrado SSL con los servidores del fisco...</p>
+        </div>
+
+        <div id="arca-failure-state" style="display:none; flex-direction:column; gap:16px; align-items:center;">
+          <div style="background:rgba(239,68,68,0.08); color:#ef4444; width:52px; height:52px; border-radius:50%; display:flex; align-items:center; justify-content:center;">
+            <i data-lucide="alert-triangle" style="width:28px; height:28px;"></i>
+          </div>
+          <h4 style="font-family:var(--font-heading); font-size:17px; font-weight:800; color:#ef4444; margin:0;">Error en la Presentación F.2051</h4>
+          <p style="font-size:13px; color:#475569; line-height:1.5; margin:0;">
+            El servidor de ARCA Live (ex-AFIP) no responde en el tiempo de espera legal.<br>
+            <span style="font-family:monospace; background:#f1f5f9; padding:2px 6px; border-radius:4px; font-size:11.5px; color:#ef4444; margin-top:8px; display:inline-block;">HTTP/1.1 504 Gateway Timeout (ARCA-WS-12)</span>
+          </p>
+          <div style="display:flex; gap:12px; width:100%; margin-top:8px;">
+            <button id="btn-cancel-arca" style="flex:1; padding:10px 16px; border:1px solid var(--border-color); border-radius:8px; background:#fff; color:#475569; font-weight:600; cursor:pointer; font-size:13px;">Cancelar</button>
+            <button id="btn-retry-arca" style="flex:1; padding:10px 16px; border:none; border-radius:8px; background:linear-gradient(135deg, #6366f1, #4f46e5); color:#fff; font-weight:600; cursor:pointer; font-size:13px; box-shadow:0 4px 12px rgba(99,102,241,0.25);">Reintentar Envío</button>
+          </div>
+        </div>
+
+        <div id="arca-success-state" style="display:none; flex-direction:column; gap:16px; align-items:center;">
+          <div style="background:rgba(16,185,129,0.08); color:#10b981; width:52px; height:52px; border-radius:50%; display:flex; align-items:center; justify-content:center;">
+            <i data-lucide="check-circle" style="width:28px; height:28px;"></i>
+          </div>
+          <h4 style="font-family:var(--font-heading); font-size:18px; font-weight:800; color:#10b981; margin:0;">DDJJ Presentada Exitosamente</h4>
+          
+          <div style="background:#f8fafc; border:1px solid var(--border-color); border-radius:10px; padding:16px; width:100%; text-align:left; font-size:12px; box-sizing:border-box;">
+            <div style="font-weight:700; color:#475569; border-bottom:1px dashed var(--border-color); padding-bottom:6px; margin-bottom:8px; font-size:13px;">ACUSE DE RECIBO OFICIAL (ARCA)</div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+              <span class="text-secondary">Trámite Nro:</span>
+              <strong class="font-mono" style="color:#0f172a;">ARCA-F2051-${Math.floor(100000000 + Math.random() * 900000000)}</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+              <span class="text-secondary">Fecha y Hora:</span>
+              <strong class="font-mono" style="color:#0f172a;">${new Date().toLocaleString('es-AR')}</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+              <span class="text-secondary">Contribuyente:</span>
+              <strong style="color:#0f172a;">${company.razon_social}</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+              <span class="text-secondary">Período Fiscal:</span>
+              <strong class="font-mono" style="color:#0f172a;">Mayo 2026</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between; border-top:1px dashed var(--border-color); padding-top:6px; margin-top:8px;">
+              <span class="text-secondary">Saldo a Pagar:</span>
+              <strong class="font-mono text-emerald" style="font-size:12.5px;">$ ${Math.round(saldoNeto).toLocaleString('es-AR')}</strong>
+            </div>
+            <div style="margin-top:12px; font-size:9.5px; color:var(--text-muted); line-height:1.4; word-break:break-all;">
+              <strong>HASH SHA-256:</strong><br>
+              e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+            </div>
+          </div>
+
+          <button id="btn-close-arca" class="btn btn-primary w-full" style="background:#6366f1; border-color:#6366f1; font-weight:700; height:40px; cursor:pointer;">
+            Entendido
+          </button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+    if (window.lucide) window.lucide.createIcons({ root: modal });
+
+    // Animación de entrada
     setTimeout(() => {
-      mainApp.showToast('Presentando declaración jurada de IVA F.2051...', 'info');
+      modal.style.opacity = '1';
+      modal.querySelector('.arca-modal-card').style.transform = 'scale(1)';
+    }, 20);
+
+    const runTransmission = (simulateFailure = true) => {
+      document.getElementById('arca-loading-state').style.display = 'flex';
+      document.getElementById('arca-failure-state').style.display = 'none';
+      document.getElementById('arca-success-state').style.display = 'none';
+
+      const title = document.getElementById('arca-progress-title');
+      const text = document.getElementById('arca-progress-txt');
+
       setTimeout(() => {
-        // Clear status
-        localStorage.removeItem(`vmp_consist_ok_${company.id}`);
-        localStorage.removeItem(`vmp_libro_importado_${company.id}`);
-        mainApp.showToast('¡DDJJ Presentada con éxito! Transacción impositiva grabada.', 'success');
+        title.textContent = "Transmitiendo datos XML a ARCA...";
+        text.textContent = "Subiendo liquidación F.2051 con desglose de CLAE y débitos/créditos...";
+
+        setTimeout(() => {
+          if (simulateFailure) {
+            document.getElementById('arca-loading-state').style.display = 'none';
+            document.getElementById('arca-failure-state').style.display = 'flex';
+          } else {
+            document.getElementById('arca-loading-state').style.display = 'none';
+            document.getElementById('arca-success-state').style.display = 'flex';
+            
+            localStorage.setItem(`vmp_f2051_presented_${company.id}`, 'true');
+            localStorage.removeItem(`vmp_consist_ok_${company.id}`);
+            localStorage.removeItem(`vmp_libro_importado_${company.id}`);
+          }
+        }, 1500);
+
+      }, 1500);
+    };
+
+    // La primera vez simulamos un fallo del webservice
+    runTransmission(true);
+
+    modal.querySelector('#btn-cancel-arca').addEventListener('click', () => {
+      modal.style.opacity = '0';
+      modal.querySelector('.arca-modal-card').style.transform = 'scale(0.9)';
+      setTimeout(() => {
+        document.body.removeChild(modal);
+      }, 250);
+    });
+
+    modal.querySelector('#btn-retry-arca').addEventListener('click', (e) => {
+      e.stopPropagation();
+      mainApp.showToast('Reintentando transmisión F.2051...', 'info');
+      runTransmission(false); // Segunda vez tiene éxito
+    });
+
+    modal.querySelector('#btn-close-arca').addEventListener('click', (e) => {
+      e.stopPropagation();
+      modal.style.opacity = '0';
+      modal.querySelector('.arca-modal-card').style.transform = 'scale(0.9)';
+      setTimeout(() => {
+        document.body.removeChild(modal);
+        mainApp.showToast('¡F.2051 presentado oficialmente y acuse registrado!', 'success');
         mainApp.router();
-      }, 1200);
-    }, 1000);
+      }, 250);
+    });
   });
 
   // Simulate Import Books

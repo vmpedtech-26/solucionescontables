@@ -24,7 +24,13 @@ function getRetenciones(companyId) {
 
 export function renderRetenciones() {
   const company = getActiveCompany();
-  const rets = getRetenciones(company.id);
+  const allRets = getRetenciones(company.id);
+
+  // Check for pre-filtering (from Dashboard alert card)
+  const isSircrebFiltered = window.location.hash.includes('filter=sircreb');
+  const rets = isSircrebFiltered 
+    ? allRets.filter(r => !r.conciliado && r.fuente === 'banco')
+    : allRets;
 
   const totalRet = rets.reduce((s, r) => s + r.monto, 0);
   const totalConc = rets.filter(r => r.conciliado).reduce((s, r) => s + r.monto, 0);
@@ -88,9 +94,16 @@ export function renderRetenciones() {
     <div class="card">
       <div class="card-header">
         <h3><i data-lucide="git-merge" style="color:#6366f1;"></i> Conciliación de 3 Fuentes</h3>
-        <div style="display:flex;gap:8px;">
-          <span style="font-size:10px;padding:2px 8px;border-radius:20px;background:rgba(99,102,241,0.08);color:#818cf8;border:1px solid rgba(99,102,241,0.2);">Libro Compras</span>
-          <span style="font-size:10px;padding:2px 8px;border-radius:20px;background:rgba(6,182,212,0.08);color:#22d3ee;border:1px solid rgba(6,182,212,0.2);">Extracto Bancario</span>
+        <div style="display:flex;gap:8px;align-items:center;">
+          ${isSircrebFiltered ? `
+            <span style="font-size:10px;padding:2px 8px;border-radius:20px;background:rgba(245,158,11,0.08);color:#fbbf24;border:1px solid rgba(245,158,11,0.2);display:inline-flex;align-items:center;gap:4px;">
+              Filtro: SIRCREB a conciliar
+              <a href="#/studio/retenciones" style="color:#f87171;text-decoration:none;font-weight:800;margin-left:4px;cursor:pointer;">[Quitar]</a>
+            </span>
+          ` : `
+            <span style="font-size:10px;padding:2px 8px;border-radius:20px;background:rgba(99,102,241,0.08);color:#818cf8;border:1px solid rgba(99,102,241,0.2);">Libro Compras</span>
+            <span style="font-size:10px;padding:2px 8px;border-radius:20px;background:rgba(6,182,212,0.08);color:#22d3ee;border:1px solid rgba(6,182,212,0.2);">Extracto Bancario</span>
+          `}
         </div>
       </div>
       <div class="card-body p-0">
@@ -222,34 +235,90 @@ export function initRetenciones(mainApp) {
     });
   });
 
-  // Exportar CSV SIRE (ambos botones)
+  // Exportar CSV SIRE (ambos botones) con modal de advertencia preventiva de Excel
   const exportarCSV = () => {
-    const rets = getRetenciones(company.id);
-    const bom = '\uFEFF';
-    let csv = 'Fecha;CUIT Agente;Tipo;Numero Comprobante;Monto;Estado\n';
+    // 1. Crear el overlay del modal
+    const modal = document.createElement('div');
+    modal.style.position = 'fixed';
+    modal.style.top = '0';
+    modal.style.left = '0';
+    modal.style.width = '100%';
+    modal.style.height = '100%';
+    modal.style.background = 'rgba(15, 23, 42, 0.7)';
+    modal.style.backdropFilter = 'blur(12px)';
+    modal.style.webkitBackdropFilter = 'blur(12px)';
+    modal.style.zIndex = '9999';
+    modal.style.display = 'flex';
+    modal.style.alignItems = 'center';
+    modal.style.justifyContent = 'center';
+    modal.style.opacity = '0';
+    modal.style.transition = 'opacity 0.25s ease';
 
-    rets.forEach(r => {
-      const cuit = r.cuit.replace(/-/g, '');
-      // Número de comprobante: factura 7 chars (5-8), orden de pago 16 chars
-      const tipo = r.tipo.includes('FACTURA') ? 'F' : 'O';
-      const numDoc = tipo === 'F'
-        ? r.id.replace('r', '').padStart(7, '0')               // 7 chars (entre 5 y 8)
-        : r.id.replace('r', '').padStart(16, '0');              // 16 chars exactos
-      const fechaArr = r.fecha.split('-');
-      const fechaFmt = `${fechaArr[2]}/${fechaArr[1]}/${fechaArr[0]}`;
-      csv += `${fechaFmt};${cuit};${r.tipo};${numDoc};${r.monto.toFixed(2).replace('.',',')};${r.conciliado ? 'CONCILIADA' : 'PENDIENTE'}\n`;
+    modal.innerHTML = `
+      <div style="background:#ffffff; border:1px solid rgba(15,23,42,0.1); border-radius:16px; padding:32px; max-width:440px; width:90%; box-shadow:0 25px 50px -12px rgba(15,23,42,0.25); text-align:center; transform:scale(0.9); transition:transform 0.25s ease;" class="csv-warning-card">
+        <div style="background:rgba(239,68,68,0.08); color:#ef4444; width:52px; height:52px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin-inline:auto; margin-bottom:20px;">
+          <i data-lucide="alert-octagon" style="width:28px; height:28px;"></i>
+        </div>
+        <h3 style="font-family:var(--font-heading); font-size:19px; font-weight:800; color:#0f172a; margin-top:0; margin-bottom:10px;">¡Advertencia Importante!</h3>
+        <p style="font-size:13.5px; color:#475569; line-height:1.6; margin-bottom:24px; text-align:left;">
+          El archivo CSV para <strong>ARCA (SIRE)</strong> se generará en formato UTF-8 delimitado por punto y coma.<br><br>
+          <strong style="color:#ef4444;">⚠ REGLA CRÍTICA:</strong> NO vuelvas a abrir el archivo exportado con <strong>Microsoft Excel</strong> en tu PC, ya que este programa reformatea y corrompe de manera silenciosa las fechas (convirtiéndolas a barras invertidas) y los CUITs (los convierte a notación científica).
+        </p>
+        <div style="display:flex; gap:12px;">
+          <button id="btn-cancel-csv-dl" style="flex:1; padding:10px 16px; border:1px solid var(--border-color); border-radius:8px; background:#fff; color:#475569; font-weight:600; cursor:pointer; font-size:13px; transition:background 0.2s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#fff'">Cancelar</button>
+          <button id="btn-confirm-csv-dl" style="flex:1; padding:10px 16px; border:none; border-radius:8px; background:linear-gradient(135deg, #6366f1, #4f46e5); color:#fff; font-weight:600; cursor:pointer; font-size:13px; box-shadow:0 4px 12px rgba(99,102,241,0.25);" onmouseover="this.style.opacity='0.95'" onmouseout="this.style.opacity='1'">Descargar CSV</button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+    if (window.lucide) window.lucide.createIcons({ root: modal });
+
+    // Animación de entrada
+    setTimeout(() => {
+      modal.style.opacity = '1';
+      modal.querySelector('.csv-warning-card').style.transform = 'scale(1)';
+    }, 20);
+
+    const closeModal = () => {
+      modal.style.opacity = '0';
+      modal.querySelector('.csv-warning-card').style.transform = 'scale(0.9)';
+      setTimeout(() => {
+        if (modal.parentNode) document.body.removeChild(modal);
+      }, 250);
+    };
+
+    modal.querySelector('#btn-cancel-csv-dl').addEventListener('click', closeModal);
+    
+    modal.querySelector('#btn-confirm-csv-dl').addEventListener('click', () => {
+      closeModal();
+      
+      const rets = getRetenciones(company.id);
+      const bom = '\uFEFF';
+      let csv = 'Fecha;CUIT Agente;Tipo;Numero Comprobante;Monto;Estado\n';
+
+      rets.forEach(r => {
+        const cuit = r.cuit.replace(/-/g, '');
+        const tipo = r.tipo.includes('FACTURA') ? 'F' : 'O';
+        const numDoc = tipo === 'F'
+          ? r.id.replace('r', '').padStart(7, '0')
+          : r.id.replace('r', '').padStart(16, '0');
+        const fechaArr = r.fecha.split('-');
+        const fechaFmt = `${fechaArr[2]}/${fechaArr[1]}/${fechaArr[0]}`;
+        csv += `${fechaFmt};${cuit};${r.tipo};${numDoc};${r.monto.toFixed(2).replace('.',',')};${r.conciliado ? 'CONCILIADA' : 'PENDIENTE'}\n`;
+      });
+
+      const blob = new Blob([bom + csv], { type: 'text/csv;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `sire-retenciones-${company.cuit.replace(/-/g,'')}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      mainApp.showToast('¡CSV del SIRE descargado con éxito!', 'success');
     });
-
-    const blob = new Blob([bom + csv], { type: 'text/csv;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `sire-retenciones-${company.cuit.replace(/-/g,'')}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    mainApp.showToast('CSV SIRE exportado en UTF-8. ¡No abrir con Excel!', 'success');
   };
 
   document.getElementById('btn-export-csv-sire')?.addEventListener('click', exportarCSV);

@@ -141,7 +141,33 @@ export function renderRT54() {
     ];
     localStorage.setItem(`vmp_axi_items_${company.id}`, JSON.stringify(defaultAxiItems));
   }
-  const axiItems = JSON.parse(localStorage.getItem(`vmp_axi_items_${company.id}`));
+  
+  let axiItems = JSON.parse(localStorage.getItem(`vmp_axi_items_${company.id}`));
+  
+  // Auto-sync digitalized purchases (es_activo === true) from ledger
+  const activeDbAssets = txs.compras.filter(c => c.es_activo === true);
+  let updatedAxiItems = [...axiItems];
+  let needsAxiUpdate = false;
+  
+  activeDbAssets.forEach(c => {
+    const exists = axiItems.some(item => item.id === c.id || item.concepto.includes(c.numero) || (item.concepto.includes(c.proveedor) && item.valor === c.total));
+    if (!exists) {
+      const origenStr = c.fecha ? c.fecha.substring(0, 7) : '2026-04';
+      updatedAxiItems.push({
+        id: c.id,
+        concepto: `${c.proveedor} (${c.tipo_comprobante} N° ${c.numero})`,
+        origen: origenStr,
+        valor: c.total,
+        tipo: "activo"
+      });
+      needsAxiUpdate = true;
+    }
+  });
+  
+  if (needsAxiUpdate) {
+    localStorage.setItem(`vmp_axi_items_${company.id}`, JSON.stringify(updatedAxiItems));
+    axiItems = updatedAxiItems;
+  }
 
   let totalHistoricAssets = 200000; // Caja y Bancos starts at 200,000
   let totalAdjustedAssets = 200000;
@@ -150,8 +176,9 @@ export function renderRT54() {
   let totalAdjustedEquity = 0;
 
   const axiRowsHtml = axiItems.map(item => {
+    const isBienesDeCambio = item.concepto.toLowerCase().includes('cambio');
     const ipcOrig = IPC_INDICES[item.origen] || 1500.0;
-    const coef = latestValue / ipcOrig;
+    const coef = isBienesDeCambio ? 1.0000 : (latestValue / ipcOrig);
     const adjusted = item.valor * coef;
     const adjustment = adjusted - item.valor;
 
@@ -168,7 +195,9 @@ export function renderRT54() {
         <td style="font-weight: 700; color: var(--color-primary);">${item.concepto}</td>
         <td class="text-center font-mono" style="font-size:11px;">${item.origen}</td>
         <td class="font-mono text-right">$ ${item.valor.toLocaleString('es-AR')}</td>
-        <td class="font-mono text-center text-secondary">${coef.toFixed(4)}</td>
+        <td class="font-mono text-center text-secondary" ${isBienesDeCambio ? 'title="Bajo RT 54, los Bienes de Cambio se valúan al costo de última compra. Al estar medidos a valores de cierre, no se reexpresan (coeficiente 1.0000)." style="cursor:help; text-decoration:underline dashed;"' : ''}>
+          ${coef.toFixed(4)} ${isBienesDeCambio ? 'ℹ️' : ''}
+        </td>
         <td class="font-mono text-right text-emerald" style="font-weight:700;">$ ${Math.round(adjusted).toLocaleString('es-AR')}</td>
         <td class="font-mono text-right" style="color: #fbbf24;">$ ${Math.round(adjustment).toLocaleString('es-AR')}</td>
         <td class="text-center">
@@ -625,7 +654,7 @@ export function renderRT54() {
             
             <!-- RECPAM balancing row -->
             <div style="display:flex; justify-content:space-between; font-weight:700; color: #fbbf24;">
-              <span>RECPAM (Resultado Inflacionario):</span>
+              <span title="RECPAM (Resultado por Exposición al Cambio en el Poder Adquisitivo de la Moneda): Es la contrapartida de la reexpresión de partidas no monetarias. Representa la ganancia o pérdida real por la pérdida de poder de compra de la moneda." style="cursor:help; border-bottom:1px dashed #fbbf24;">RECPAM (Resultado Inflacionario) ℹ️:</span>
               <span class="font-mono">$ ${Math.round(recpam).toLocaleString('es-AR')}</span>
             </div>
 

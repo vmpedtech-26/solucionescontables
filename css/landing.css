@@ -55,6 +55,7 @@ body {
   line-height: 1.5;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
+  zoom: 1.06;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -766,11 +767,18 @@ h1, h2, h3, h4, h5, h6 {
 
 .pricing-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 36px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
   align-items: stretch;
-  max-width: 800px;
+  max-width: 1140px;
   margin: 0 auto;
+}
+
+@media (max-width: 1199px) and (min-width: 969px) {
+  .pricing-grid {
+    gap: 16px;
+    padding: 0 20px;
+  }
 }
 
 .price-card {

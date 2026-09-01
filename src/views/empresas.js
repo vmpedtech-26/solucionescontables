@@ -102,7 +102,7 @@ export function renderEmpresas() {
                 </td>
                 <td class="font-mono" style="font-weight: 500;">${c.cuit}</td>
                 <td>
-                  <span class="badge" style="margin: 0; padding: 4px 12px; font-size: 11px; color: ${c.condicion_iva.includes('Inscripto') ? 'var(--color-teal-light)' : '#818cf8'}; border-color: ${c.condicion_iva.includes('Inscripto') ? 'rgba(13, 148, 136, 0.3)' : 'rgba(99, 102, 241, 0.3)'}; background: ${c.condicion_iva.includes('Inscripto') ? 'rgba(13, 148, 136, 0.08)' : 'rgba(99, 102, 241, 0.08)'}">
+                  <span class="badge" style="margin: 0; padding: 4px 12px; font-size: 11px; white-space: nowrap; display: inline-block; color: ${c.condicion_iva.includes('Inscripto') ? 'var(--color-teal-light)' : '#818cf8'}; border-color: ${c.condicion_iva.includes('Inscripto') ? 'rgba(13, 148, 136, 0.3)' : 'rgba(99, 102, 241, 0.3)'}; background: ${c.condicion_iva.includes('Inscripto') ? 'rgba(13, 148, 136, 0.08)' : 'rgba(99, 102, 241, 0.08)'}">
                     ${c.condicion_iva}
                   </span>
                 </td>

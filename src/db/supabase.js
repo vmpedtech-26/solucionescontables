@@ -2,9 +2,9 @@
    VMP Studio Contable - Supabase Integration Client
    ------------------------------------------------------------- */
 
-// Load credentials securely from Vite's environment variables
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+// Load credentials dynamically from localStorage or Vite environment variables
+const supabaseUrl = localStorage.getItem('vmp_supabase_url') || import.meta.env.VITE_SUPABASE_URL || '';
+const supabaseKey = localStorage.getItem('vmp_supabase_anon_key') || import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
 export const isSupabaseConfigured = supabaseUrl !== '' && supabaseKey !== '';
 

@@ -26,10 +26,11 @@ export function renderLanding() {
           <span class="bar"></span>
         </button>
         <nav class="lp-menu" id="lp-menu-nav">
-          <a href="#features" class="lp-menu-link">Beneficios</a>
+          <a href="#dashboard-showcase" class="lp-menu-link">Beneficios</a>
           <a href="#pricing" class="lp-menu-link">Inversión</a>
           <a href="#partners" class="lp-menu-link">Partners</a>
           <a href="#contact" class="lp-menu-link">Contacto</a>
+          <a href="#" class="lp-menu-link" id="nav-login-btn" style="font-weight: 700; color: var(--color-accent); display: flex; align-items: center; gap: 4px;"><i data-lucide="log-in" style="width: 14px; height: 14px;"></i>Iniciar Sesión</a>
           <a href="#contact" class="btn btn-outline btn-sm">Solicitar Demo</a>
         </nav>
       </div>
@@ -40,13 +41,13 @@ export function renderLanding() {
       <div class="container hero-grid">
         <div class="hero-content">
           <span class="badge"><i data-lucide="shield-check" style="width:12px; height:12px;"></i> El colaborador digital de tu Estudio Contable &middot; Desarrollado por VMP</span>
-          <h1 class="hero-title">El colaborador que tu <span class="gradient-text">estudio merece</span>.</h1>
-          <p class="hero-subtitle">No es un software más. Es un integrante virtual de tu equipo que automatiza la carga de comprobantes, liquida el IVA en segundos y vigila el límite de tus monotributistas — de forma autónoma, mientras vos te enfocás en el asesoramiento estratégico.</p>
+          <h1 class="hero-title">El integrante virtual que <span class="gradient-text">elimina la carga manual</span> de tu estudio.</h1>
+          <p class="hero-subtitle">Automatizá la importación de comprobantes, liquidá el IVA en segundos y vigilá el límite de tus monotributistas de forma autónoma. Evitá el tipeo repetitivo, los errores y las exclusiones sorpresa de ARCA.</p>
           <div class="hero-actions">
-            <a href="#contact" class="btn btn-primary">
-              Solicitar Acceso <i data-lucide="arrow-right"></i>
+            <a href="#" class="btn btn-primary" id="hero-login-btn">
+              Ingresar al Studio <i data-lucide="log-in"></i>
             </a>
-            <a href="#contact" class="btn btn-outline">Solicitar Asesoramiento</a>
+            <a href="#contact" class="btn btn-outline">Solicitar Demo</a>
           </div>
           
           <div class="hero-stats">
@@ -111,49 +112,6 @@ export function renderLanding() {
       </div>
     </section>
 
-    <!-- Features Section -->
-    <section id="features" class="features-section">
-      <div class="container">
-        <div class="section-header">
-          <h2>Ingeniería fiscal y contable adaptada a tu Estudio</h2>
-          <p>Optimizá la relación operativa y de recolección de datos con todas tus empresas clientes en un solo canal.</p>
-        </div>
-        <div class="features-grid">
-          <div class="feature-card" style="padding: 24px; overflow: hidden;">
-            <div class="feature-image-wrapper" style="width: 100%; height: 180px; border-radius: var(--radius-md); overflow: hidden; margin-bottom: 20px; border: 1px solid rgba(15, 23, 42, 0.06); position: relative;">
-              <img src="/client_portal_benefit.png" alt="Portal de Clientes Simplificado" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; display: block;" loading="lazy" class="benefit-img">
-              <div class="feature-icon" style="position: absolute; bottom: 12px; left: 12px; margin-bottom: 0; background: #ffffff; box-shadow: var(--shadow-sm); width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; z-index: 10; border: 1px solid rgba(15, 23, 42, 0.08);">
-                <i data-lucide="smartphone" style="width: 18px; height: 18px;"></i>
-              </div>
-            </div>
-            <h3>Portal de Clientes Simplificado</h3>
-            <p style="margin-top: 8px;">Tus clientes ingresan desde su celular y cargan fotos de tickets o arrastran PDFs de facturas. El portal realiza la pre-lectura y clasifica la información de compras al instante para tu revisión.</p>
-          </div>
-          
-          <div class="feature-card" style="padding: 24px; overflow: hidden;">
-            <div class="feature-image-wrapper" style="width: 100%; height: 180px; border-radius: var(--radius-md); overflow: hidden; margin-bottom: 20px; border: 1px solid rgba(15, 23, 42, 0.06); position: relative;">
-              <img src="/arca_sync_benefit.png" alt="Sincronización y Parser ARCA" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; display: block;" loading="lazy" class="benefit-img">
-              <div class="feature-icon" style="position: absolute; bottom: 12px; left: 12px; margin-bottom: 0; background: #ffffff; box-shadow: var(--shadow-sm); width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; z-index: 10; border: 1px solid rgba(15, 23, 42, 0.08);">
-                <i data-lucide="upload-cloud" style="width: 18px; height: 18px;"></i>
-              </div>
-            </div>
-            <h3>Sincronización y Parser ARCA</h3>
-            <p style="margin-top: 8px;">Cargá archivos Excel/TXT de ARCA (Mis Comprobantes). Nuestro motor interpreta alícuotas, neto y percepciones de cientos de facturas en menos de 10 segundos, eliminando errores de tipeo.</p>
-          </div>
-          
-          <div class="feature-card" style="padding: 24px; overflow: hidden;">
-            <div class="feature-image-wrapper" style="width: 100%; height: 180px; border-radius: var(--radius-md); overflow: hidden; margin-bottom: 20px; border: 1px solid rgba(15, 23, 42, 0.06); position: relative;">
-              <img src="/iva_digital_benefit.png" alt="Consolidación de Libro IVA Digital" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; display: block;" loading="lazy" class="benefit-img">
-              <div class="feature-icon" style="position: absolute; bottom: 12px; left: 12px; margin-bottom: 0; background: #ffffff; box-shadow: var(--shadow-sm); width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; z-index: 10; border: 1px solid rgba(15, 23, 42, 0.08);">
-                <i data-lucide="file-spreadsheet" style="width: 18px; height: 18px;"></i>
-              </div>
-            </div>
-            <h3>Consolidación de Libro IVA Digital</h3>
-            <p style="margin-top: 8px;">Visualizá tus libros mensuales de compras y ventas consolidados. Generá los archivos de texto delimitados oficiales listos para importar directamente en el portal de ARCA de forma regulada.</p>
-          </div>
-        </div>
-      </div>
-    </section>
 
     <!-- Dashboard Suite / Modules Showcase Section -->
     <section id="dashboard-showcase" class="showcase-section" style="padding: 100px 0; border-top: 1px solid rgba(226, 232, 240, 0.4); background: rgba(248, 250, 252, 0.5); position: relative; overflow: hidden;">
@@ -293,70 +251,113 @@ export function renderLanding() {
       </div>
     </section>
 
-    <!-- Pricing Section (Updated to License + Maintenance Model) -->
+    <!-- Pricing Section (Updated to 3-Tier Client-Based Model) -->
     <section id="pricing" class="pricing-section">
       <div class="container">
         <div class="section-header">
-          <h2>Un modelo de adquisición transparente y a medida</h2>
-          <p>Sin sorpresas por usuario ni cargos ocultos por cantidad de comprobantes procesados.</p>
+          <h2>Planes adaptados a la escala de tu estudio</h2>
+          <p>Elegí la licencia indicada según la cantidad de clientes (CUITs) que administres.</p>
         </div>
         <div class="pricing-grid">
           
-          <!-- Upfront license -->
-          <div class="price-card featured" style="text-align: center; display: flex; flex-direction: column; justify-content: space-between;">
-            <div>
-              <div class="featured-badge">Promoción Setup</div>
-              <div class="price-header" style="margin-top: 12px;">
-                <h3>Licencia de Adquisición</h3>
-                <p>Instalación del entorno en la nube, onboarding y alta de tu estudio.</p>
-              </div>
-
-              <!-- Price displaying custom quotation -->
-              <div class="price-amount" style="margin: 24px 0 28px; min-height: 80px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-                <span style="font-size: 11px; font-weight: 750; color: var(--color-accent); text-transform: uppercase; letter-spacing: 0.05em; background: rgba(5,150,105,0.06); padding: 4px 12px; border-radius: 12px; border: 1px solid rgba(5,150,105,0.12); margin-bottom: 8px;">Pago Único</span>
-                <span style="font-size: 22px; font-weight: 850; color: var(--color-primary); font-family: var(--font-heading);">Cotización Personalizada</span>
-                <span style="font-size: 11.5px; color: var(--text-secondary); margin-top: 4px;">Adaptado al tamaño de tu cartera</span>
-              </div>
-
-              <ul class="price-features" style="text-align: left; margin-bottom: 24px;">
-                <li><i data-lucide="check"></i> Servidor y base de datos dedicados en AWS/Railway</li>
-                <li><i data-lucide="check"></i> Soporte y alta de hasta 100 CUITs de clientes</li>
-                <li><i data-lucide="check"></i> Colaboradores del estudio ilimitados</li>
-                <li><i data-lucide="check"></i> Onboarding inicial y capacitación al equipo</li>
-              </ul>
-            </div>
-            <a href="#contact" class="btn btn-primary w-full">Solicitar Presupuesto</a>
-          </div>
-
-          <!-- Monthly maintenance -->
+          <!-- Plan Inicial -->
           <div class="price-card" style="text-align: center; border-color: var(--border-color); display: flex; flex-direction: column; justify-content: space-between;">
             <div>
               <div class="price-header" style="margin-top: 12px;">
-                <h3>Soporte y Mantenimiento</h3>
-                <p>Hospedaje, copias de seguridad y actualización legal.</p>
-              </div>
-              
-              <!-- Price displaying custom subscription -->
-              <div class="price-amount" style="margin: 24px 0 28px; min-height: 80px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-                <span style="font-size: 11px; font-weight: 750; color: #6366f1; text-transform: uppercase; letter-spacing: 0.05em; background: rgba(99,102,241,0.06); padding: 4px 12px; border-radius: 12px; border: 1px solid rgba(99,102,241,0.12); margin-bottom: 8px;">Abono Mensual</span>
-                <span style="font-size: 22px; font-weight: 850; color: var(--color-primary); font-family: var(--font-heading);">Suscripción Operativa</span>
-                <span style="font-size: 11.5px; color: var(--text-secondary); margin-top: 4px;">Hosting, Backups periódicos e IA OCR</span>
+                <h3 style="font-size: 20px; color: var(--color-primary);">Plan Inicial</h3>
+                <p style="font-size: 13px; color: var(--text-secondary); margin-top: 6px;">Hasta 15 clientes (CUITs)</p>
               </div>
 
-              <ul class="price-features" style="text-align: left; margin-bottom: 24px;">
-                <li><i data-lucide="check"></i> Soporte prioritario directo vía WhatsApp</li>
-                <li><i data-lucide="check"></i> Backups de datos automáticos diarios en la nube</li>
-                <li><i data-lucide="check"></i> Portal de Clientes móvil con IA ilimitado</li>
-                <li><i data-lucide="check"></i> Actualizaciones normativas ARCA bonificadas</li>
+              <div class="price-amount" style="margin: 20px 0 24px; min-height: 100px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                <div style="margin-bottom: 8px;">
+                  <span style="font-size: 11px; font-weight: 750; color: #6366f1; text-transform: uppercase; letter-spacing: 0.05em; background: rgba(99,102,241,0.06); padding: 4px 10px; border-radius: 12px; border: 1px solid rgba(99,102,241,0.12);">Setup Inicial</span>
+                  <div style="font-size: 24px; font-weight: 850; color: var(--color-primary); font-family: var(--font-heading); margin-top: 4px;">$ 150.000 <span style="font-size: 12px; font-weight: 500; color: var(--text-secondary);">ARS</span></div>
+                  <span style="font-size: 10.5px; color: var(--text-muted);">pago único de instalación</span>
+                </div>
+                <div style="border-top: 1px dashed var(--border-color); width: 80%; padding-top: 8px; margin-top: 4px;">
+                  <div style="font-size: 18px; font-weight: 800; color: var(--color-accent);">$ 39.000 <span style="font-size: 11px; font-weight: 500; color: var(--text-secondary);">/ mes</span></div>
+                  <span style="font-size: 10.5px; color: var(--text-muted);">abono de soporte y hosting</span>
+                </div>
+              </div>
+
+              <ul class="price-features" style="text-align: left; margin-bottom: 24px; font-size: 13.5px;">
+                <li><i data-lucide="check"></i> Sincronización y Parser ARCA</li>
+                <li><i data-lucide="check"></i> Libro IVA Digital (RG 4597)</li>
+                <li><i data-lucide="check"></i> RT 54 AxI (Ajuste por Inflación)</li>
+                <li><i data-lucide="check"></i> Soporte estándar vía email/chat</li>
+                <li><i data-lucide="check"></i> Backups diarios automáticos</li>
               </ul>
             </div>
-            <a href="#contact" class="btn btn-outline w-full">Consultar Abono</a>
+            <a href="#contact" class="btn btn-outline w-full">Elegir Plan Inicial</a>
+          </div>
+
+          <!-- Plan Profesional (Featured) -->
+          <div class="price-card featured" style="text-align: center; display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+              <div class="featured-badge" style="background: linear-gradient(135deg, var(--color-accent) 0%, #047857 100%);">Estudio Recomendado</div>
+              <div class="price-header" style="margin-top: 16px;">
+                <h3 style="font-size: 22px; color: var(--color-primary); font-weight: 800;">Plan Profesional</h3>
+                <p style="font-size: 13px; color: var(--text-secondary); margin-top: 6px;">Hasta 50 clientes (CUITs)</p>
+              </div>
+
+              <div class="price-amount" style="margin: 20px 0 24px; min-height: 100px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                <div style="margin-bottom: 8px;">
+                  <span style="font-size: 11px; font-weight: 750; color: var(--color-accent); text-transform: uppercase; letter-spacing: 0.05em; background: rgba(5,150,105,0.06); padding: 4px 10px; border-radius: 12px; border: 1px solid rgba(5,150,105,0.12);">Setup Inicial</span>
+                  <div style="font-size: 26px; font-weight: 850; color: var(--color-primary); font-family: var(--font-heading); margin-top: 4px;">$ 290.000 <span style="font-size: 12px; font-weight: 500; color: var(--text-secondary);">ARS</span></div>
+                  <span style="font-size: 10.5px; color: var(--text-muted);">pago único de instalación</span>
+                </div>
+                <div style="border-top: 1px dashed var(--border-color); width: 80%; padding-top: 8px; margin-top: 4px;">
+                  <div style="font-size: 20px; font-weight: 850; color: var(--color-accent);">$ 79.000 <span style="font-size: 11px; font-weight: 500; color: var(--text-secondary);">/ mes</span></div>
+                  <span style="font-size: 10.5px; color: var(--text-muted);">abono de soporte y hosting</span>
+                </div>
+              </div>
+
+              <ul class="price-features" style="text-align: left; margin-bottom: 24px; font-size: 13.5px;">
+                <li><i data-lucide="check"></i> <strong>Todos los beneficios del plan Inicial</strong></li>
+                <li><i data-lucide="check"></i> Consola de Robots RPA en la nube</li>
+                <li><i data-lucide="check"></i> Portal de Clientes móvil + IA OCR</li>
+                <li><i data-lucide="check"></i> Soporte prioritario vía WhatsApp</li>
+                <li><i data-lucide="check"></i> Colaboradores del estudio ilimitados</li>
+              </ul>
+            </div>
+            <a href="#contact" class="btn btn-primary w-full">Elegir Plan Profesional</a>
+          </div>
+
+          <!-- Plan Corporativo -->
+          <div class="price-card" style="text-align: center; border-color: var(--border-color); display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+              <div class="price-header" style="margin-top: 12px;">
+                <h3 style="font-size: 20px; color: var(--color-primary);">Plan Corporativo</h3>
+                <p style="font-size: 13px; color: var(--text-secondary); margin-top: 6px;">Hasta 150 clientes (CUITs)</p>
+              </div>
+
+              <div class="price-amount" style="margin: 20px 0 24px; min-height: 100px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                <div style="margin-bottom: 8px;">
+                  <span style="font-size: 11px; font-weight: 750; color: #6366f1; text-transform: uppercase; letter-spacing: 0.05em; background: rgba(99,102,241,0.06); padding: 4px 10px; border-radius: 12px; border: 1px solid rgba(99,102,241,0.12);">Setup Inicial</span>
+                  <div style="font-size: 24px; font-weight: 850; color: var(--color-primary); font-family: var(--font-heading); margin-top: 4px;">$ 490.000 <span style="font-size: 12px; font-weight: 500; color: var(--text-secondary);">ARS</span></div>
+                  <span style="font-size: 10.5px; color: var(--text-muted);">pago único de instalación</span>
+                </div>
+                <div style="border-top: 1px dashed var(--border-color); width: 80%; padding-top: 8px; margin-top: 4px;">
+                  <div style="font-size: 18px; font-weight: 800; color: var(--color-accent);">$ 149.000 <span style="font-size: 11px; font-weight: 500; color: var(--text-secondary);">/ mes</span></div>
+                  <span style="font-size: 10.5px; color: var(--text-muted);">abono de soporte y hosting</span>
+                </div>
+              </div>
+
+              <ul class="price-features" style="text-align: left; margin-bottom: 24px; font-size: 13.5px;">
+                <li><i data-lucide="check"></i> Servidor y base de datos dedicados</li>
+                <li><i data-lucide="check"></i> Soporte corporativo 24/7 con SLA</li>
+                <li><i data-lucide="check"></i> Actualizaciones normativas inmediatas</li>
+                <li><i data-lucide="check"></i> Capacitación personalizada in-company</li>
+                <li><i data-lucide="check"></i> Integraciones personalizadas a medida</li>
+              </ul>
+            </div>
+            <a href="#contact" class="btn btn-outline w-full">Elegir Plan Corporativo</a>
           </div>
 
         </div>
 
         <!-- Interactive ROI Calculator (Replaces BNA Converter) -->
-        <div style="margin-top: 50px; background: linear-gradient(135deg, rgba(15, 23, 42, 0.02) 0%, rgba(5, 150, 105, 0.02) 100%); border: 1.5px solid var(--border-color); border-radius: var(--radius-lg); padding: 32px; max-width: 760px; margin-inline: auto; text-align: left; box-shadow: var(--shadow-sm);">
+        <div style="margin-top: 50px; background: #ffffff; border: 1px solid rgba(15, 23, 42, 0.08); border-radius: var(--radius-lg); padding: 32px; max-width: 760px; margin-inline: auto; text-align: left; box-shadow: var(--shadow-md);">
           <div style="border-bottom: 1px dashed var(--border-color); padding-bottom:18px; margin-bottom:20px;">
             <h4 style="font-size: 17px; font-weight: 800; color: var(--color-primary); display:flex; align-items:center; gap:8px; margin:0; font-family: var(--font-heading);">
               <i data-lucide="trending-up" style="color: #059669; width: 20px; height: 20px;"></i>
@@ -532,22 +533,30 @@ export function renderLanding() {
             </div>
           </div>
           <div class="contact-form">
-            <h3 class="form-title">Solicitar Alta de Licencia VMP</h3>
+            <h3 class="form-title">Registrar Estudio (Prueba Gratis)</h3>
             <form id="lead-form">
-              <div class="form-group">
-                <label class="form-label">Nombre y Apellido</label>
-                <input type="text" class="form-input" id="lead-name" placeholder="Juan Perez" required>
+              <div class="form-group" style="margin-bottom: 12px;">
+                <label class="form-label" style="font-size:11.5px;">Nombre y Apellido / Razón Social</label>
+                <input type="text" class="form-input" id="lead-name" placeholder="Juan Perez" required style="padding: 10px 12px; font-size: 13px;">
               </div>
-              <div class="form-group">
-                <label class="form-label">Nombre del Estudio Contable</label>
-                <input type="text" class="form-input" id="lead-studio" placeholder="Estudio Perez & Asociados" required>
+              <div class="form-group" style="margin-bottom: 12px;">
+                <label class="form-label" style="font-size:11.5px;">Nombre del Estudio Contable</label>
+                <input type="text" class="form-input" id="lead-studio" placeholder="Estudio Perez & Asociados" required style="padding: 10px 12px; font-size: 13px;">
               </div>
-              <div class="form-group">
-                <label class="form-label">Email de Contacto</label>
-                <input type="email" class="form-input" id="lead-email" placeholder="juan@estudioperez.com.ar" required>
+              <div class="form-group" style="margin-bottom: 12px;">
+                <label class="form-label" style="font-size:11.5px;">CUIT (formato XX-XXXXXXXX-X)</label>
+                <input type="text" class="form-input" id="lead-cuit" placeholder="20-35849201-4" required style="padding: 10px 12px; font-size: 13px;">
               </div>
-              <button type="submit" class="btn btn-primary w-full">
-                Enviar y Acceder al Studio
+              <div class="form-group" style="margin-bottom: 12px;">
+                <label class="form-label" style="font-size:11.5px;">Email de Contacto</label>
+                <input type="email" class="form-input" id="lead-email" placeholder="juan@estudioperez.com.ar" required style="padding: 10px 12px; font-size: 13px;">
+              </div>
+              <div class="form-group" style="margin-bottom: 18px;">
+                <label class="form-label" style="font-size:11.5px;">Contraseña de Acceso</label>
+                <input type="password" class="form-input" id="lead-password" placeholder="••••••••" required style="padding: 10px 12px; font-size: 13px;">
+              </div>
+              <button type="submit" class="btn btn-primary w-full" style="padding: 12px; font-weight: 700;">
+                Registrar e Ingresar al Studio
               </button>
             </form>
           </div>
@@ -559,7 +568,7 @@ export function renderLanding() {
     <footer class="lp-footer">
       <div class="container" style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
         <div style="display: flex; gap: 32px; flex-wrap: wrap; justify-content: center; align-items: center;">
-          <a href="#features" class="lp-footer-link">Beneficios</a>
+          <a href="#dashboard-showcase" class="lp-footer-link">Beneficios</a>
           <a href="#pricing" class="lp-footer-link">Inversión</a>
           <a href="#partners" class="lp-footer-link">Partners</a>
           <a href="#contact" class="lp-footer-link">Contacto</a>
@@ -575,11 +584,53 @@ export function renderLanding() {
         <p style="font-size: 11.5px; color: var(--text-muted);">&copy; <span id="footer-year"></span> Soluciones Contables &mdash; Desarrollado por VMP S.A.S. Argentina</p>
       </div>
     </footer>
+
+    <!-- Login Modal Overlay -->
+    <div id="login-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 2000; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease;">
+      <div style="background: #ffffff; border: 1px solid rgba(15, 23, 42, 0.08); border-radius: 16px; padding: 36px; max-width: 400px; width: 100%; box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25); position: relative; transform: scale(0.95); transition: transform 0.3s ease;" id="login-modal-card">
+        <!-- Close Button -->
+        <button id="close-login-btn" style="position: absolute; top: 16px; right: 16px; background: transparent; border: none; color: #64748b; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 4px; border-radius: 50%; transition: background 0.2s;" onmouseover="this.style.background='#f1f5f9'; this.style.color='#0f172a'" onmouseout="this.style.background='transparent'; this.style.color='#64748b'">
+          <i data-lucide="x" style="width: 20px; height: 20px;"></i>
+        </button>
+        
+        <!-- Header -->
+        <div style="text-align: center; margin-bottom: 28px;">
+          <img src="/SolucionesContables_Logo.png" alt="Logo" style="width: 50px; height: 50px; border-radius: 8px; margin-bottom: 12px; border: 1px solid rgba(15, 23, 42, 0.1);" />
+          <h2 style="font-family: var(--font-heading); font-size: 20px; font-weight: 800; color: #0f172a; margin: 0;">Ingreso al Studio</h2>
+          <p style="font-size: 13px; color: #64748b; margin-top: 6px; margin-bottom: 0;">Ingresá tus credenciales de acceso profesional</p>
+        </div>
+        
+        <!-- Form -->
+        <form id="login-form">
+          <div style="margin-bottom: 18px;">
+            <label style="display: block; font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Usuario o CUIT</label>
+            <input type="text" id="login-username" placeholder="ej: admin@solucionescontables.site" required style="width: 100%; border: 1px solid rgba(15, 23, 42, 0.15); border-radius: 8px; padding: 12px 16px; font-size: 14px; font-family: var(--font-primary); color: #0f172a; outline: none; transition: border 0.2s;" onfocus="this.style.borderColor='#0f172a'" onblur="this.style.borderColor='rgba(15, 23, 42, 0.15)'">
+          </div>
+          
+          <div style="margin-bottom: 24px;">
+            <label style="display: block; font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Contraseña</label>
+            <input type="password" id="login-password" placeholder="••••••••" required style="width: 100%; border: 1px solid rgba(15, 23, 42, 0.15); border-radius: 8px; padding: 12px 16px; font-size: 14px; font-family: var(--font-primary); color: #0f172a; outline: none; transition: border 0.2s;" onfocus="this.style.borderColor='#0f172a'" onblur="this.style.borderColor='rgba(15, 23, 42, 0.15)'">
+          </div>
+          
+          <button type="submit" style="width: 100%; background: linear-gradient(135deg, #0f172a, #1c2541); color: white; border: 1px solid #0f172a; border-radius: 8px; padding: 12px 24px; font-family: var(--font-heading); font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);" onmouseover="this.style.background='linear-gradient(135deg, #1e293b, #0f172a)'; this.style.transform='translateY(-1px)'" onmouseout="this.style.background='linear-gradient(135deg, #0f172a, #1c2541)'; this.style.transform='translateY(0)'">
+            Iniciar Sesión
+          </button>
+        </form>
+        
+        <!-- Footer info -->
+        <div style="text-align: center; margin-top: 20px; font-size: 11px; color: #94a3b8; line-height: 1.4;">
+          Acceso restringido para estudios adheridos.<br>
+          ¿No tenés cuenta? <a href="#contact" id="login-signup-link" style="color: var(--color-accent); font-weight: 700; text-decoration: none;">Solicitá una demo</a>
+        </div>
+      </div>
+    </div>
   </div>
   `;
 }
 
+import { validarCUIT } from '../utils.js';
 import { supabase, isSupabaseConfigured } from '../db/supabase.js';
+import { getCompanies } from '../db/mockdb.js';
 
 export function initLanding(mainApp) {
   // Mobile Menu Toggler
@@ -724,39 +775,301 @@ export function initLanding(mainApp) {
     document.getElementById('partner-form').reset();
   });
 
-  // Manejo de envío de formulario de lead
+  // Manejo de envío de formulario de lead (Registro / Onboarding de Estudio)
   document.getElementById('lead-form')?.addEventListener('submit', (e) => {
     e.preventDefault();
     const name = document.getElementById('lead-name').value;
     const studio = document.getElementById('lead-studio').value;
+    const cuit = document.getElementById('lead-cuit').value;
     const email = document.getElementById('lead-email').value;
+    const password = document.getElementById('lead-password').value;
 
-    const isUnlocked = localStorage.getItem('vmp_premium_unlocked') === 'true';
-    if (isUnlocked) {
-      mainApp.showToast(`¡Gracias ${name}! Tu solicitud fue registrada. Entrando a la Suite...`, 'success');
-    } else {
-      mainApp.showToast(`¡Gracias ${name}! Tu solicitud fue registrada. Nos pondremos en contacto pronto.`, 'success');
+    // 1. Validar CUIT con algoritmo Módulo 11
+    const cleanCuit = cuit.replace(/[^0-9]/g, '');
+    const isCuitValid = validarCUIT(cuit);
+    if (!isCuitValid) {
+      mainApp.showToast('Advertencia: El CUIT ingresado no es válido bajo el algoritmo fiscal (Módulo 11), pero se permite registrar para pruebas.', 'warning');
     }
 
-    // Register lead in Supabase asynchronously in background
+    // 2. Crear y guardar nueva empresa/estudio en la base local (vmp_studio_companies)
+    const newCompany = {
+      id: "co-" + Date.now(),
+      razon_social: studio,
+      cuit: cuit,
+      condicion_iva: "Responsable Inscripto",
+      tipo: "SRL",
+      actividad: "Servicios del Estudio Contable",
+      inicio_actividades: new Date().toISOString().split('T')[0],
+      color: "#6366f1"
+    };
+
+    const cos = getCompanies() || [];
+    cos.push(newCompany);
+    localStorage.setItem('vmp_studio_companies', JSON.stringify(cos));
+
+    // Inicializar transacciones locales
+    const txs = JSON.parse(localStorage.getItem("vmp_studio_transactions") || '{}');
+    txs[newCompany.id] = { ventas: [], compras: [] };
+    localStorage.setItem("vmp_studio_transactions", JSON.stringify(txs));
+
+    // Guardar contraseña de acceso personalizada para este CUIT en localStorage
+    const customUsers = JSON.parse(localStorage.getItem('vmp_custom_users') || '[]');
+    customUsers.push({ cuit: cleanCuit, password: password, email: email, studio: studio });
+    localStorage.setItem('vmp_custom_users', JSON.stringify(customUsers));
+
+    // 3. Activar abono de prueba gratis automáticamente (Premium Unlocked)
+    localStorage.setItem('vmp_premium_unlocked', 'true');
+    localStorage.setItem('vmp_studio_active_co', newCompany.id);
+
+    // 4. Mostrar alerta de envío de email y redirección
+    mainApp.showToast(`¡Registro Exitoso! Activamos tu plan de prueba gratuito e ingresamos al panel contable.`, 'success');
+    
+    setTimeout(() => {
+      mainApp.showToast(`Simulador: Email de bienvenida con guía de inicio enviado a ${email}.`, 'info');
+    }, 800);
+
+    // Registrar lead en Supabase si está disponible
     if (isSupabaseConfigured && supabase) {
-      console.log("Supabase CRM: Registering B2B sales lead...", name);
       supabase.from('leads').insert([{ 
         name, 
         studio, 
-        email
-      }]).then(({ error }) => {
-        if (error) console.error("Supabase CRM lead error:", error);
-      }).catch(err => {
-        console.error("Supabase CRM lead exception:", err);
-      });
+        email,
+        cuit
+      }]).catch(err => console.error("Supabase lead log fail:", err));
     }
     
-    // Redirigir al studio después de 1.5s solo si está desbloqueado
-    if (isUnlocked) {
-      setTimeout(() => {
-        window.location.hash = '#/studio';
-      }, 1500);
-    }
+    // Redirigir al studio
+    setTimeout(() => {
+      window.location.hash = '#/studio';
+    }, 1800);
   });
+
+  // Login Modal Controller Logic
+  const loginModal = document.getElementById('login-modal');
+  const loginModalCard = document.getElementById('login-modal-card');
+  const navLoginBtn = document.getElementById('nav-login-btn');
+  const heroLoginBtn = document.getElementById('hero-login-btn');
+  const closeLoginBtn = document.getElementById('close-login-btn');
+  const loginForm = document.getElementById('login-form');
+  const loginUsernameInput = document.getElementById('login-username');
+  const loginPasswordInput = document.getElementById('login-password');
+  const loginSignupLink = document.getElementById('login-signup-link');
+
+  const openLoginModal = (e) => {
+    if (e) e.preventDefault();
+    const isUnlocked = localStorage.getItem('vmp_premium_unlocked') === 'true';
+    if (isUnlocked) {
+      // If already unlocked, enter directly
+      window.location.hash = '#/studio';
+      return;
+    }
+    if (loginModal && loginModalCard) {
+      loginModal.style.display = 'flex';
+      // Force reflow for animation transition
+      loginModal.offsetHeight;
+      loginModal.style.opacity = '1';
+      loginModalCard.style.transform = 'scale(1)';
+      if (loginUsernameInput) {
+        loginUsernameInput.value = '';
+        loginUsernameInput.focus();
+      }
+      if (loginPasswordInput) {
+        loginPasswordInput.value = '';
+      }
+    }
+  };
+
+  const closeLoginModal = (e) => {
+    if (e) e.preventDefault();
+    if (loginModal && loginModalCard) {
+      loginModal.style.opacity = '0';
+      loginModalCard.style.transform = 'scale(0.95)';
+      const onTransitionEnd = () => {
+        loginModal.style.display = 'none';
+        loginModal.removeEventListener('transitionend', onTransitionEnd);
+      };
+      loginModal.addEventListener('transitionend', onTransitionEnd);
+    }
+  };
+
+  if (navLoginBtn) navLoginBtn.addEventListener('click', openLoginModal);
+  if (heroLoginBtn) heroLoginBtn.addEventListener('click', openLoginModal);
+  if (closeLoginBtn) closeLoginBtn.addEventListener('click', closeLoginModal);
+  if (loginSignupLink) loginSignupLink.addEventListener('click', closeLoginModal);
+
+  if (loginModal) {
+    loginModal.addEventListener('click', (e) => {
+      if (e.target === loginModal) {
+        closeLoginModal();
+      }
+    });
+  }
+
+  if (loginForm) {
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const usernameOrCuit = loginUsernameInput ? loginUsernameInput.value.trim() : '';
+      const password = loginPasswordInput ? loginPasswordInput.value.trim() : '';
+
+      // Normalize usernameOrCuit (remove hyphens, spaces, convert to lowercase)
+      const cleanInput = usernameOrCuit.replace(/[-\s]/g, '').toLowerCase();
+
+      // If Supabase is configured, use it for real authentication
+      if (isSupabaseConfigured && supabase) {
+        mainApp.showToast('Autenticando en la nube...', 'info');
+        try {
+          let email = cleanInput;
+          if (!email.includes('@')) {
+            // It might be a CUIT or company name. Try to find if we have a company with this CUIT/name in our local database
+            let registeredCompanies = [];
+            try {
+              registeredCompanies = getCompanies();
+            } catch (err) {
+              console.error(err);
+            }
+            const matchedCo = registeredCompanies.find(company => {
+              const cleanCuit = company.cuit.replace(/[-\s]/g, '').toLowerCase();
+              const cleanName = company.razon_social.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+              const cleanInputAlphaNum = cleanInput.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+              return cleanCuit === cleanInput || cleanName === cleanInputAlphaNum;
+            });
+            if (matchedCo && matchedCo.email) {
+              email = matchedCo.email;
+            } else {
+              if (cleanInput.match(/^\d+$/)) {
+                // If it is just digits (CUIT), and we don't have a cached email, tell the user to use email
+                mainApp.showToast('Conexión Supabase activa: por favor ingrese su correo electrónico registrado.', 'error');
+                return;
+              }
+            }
+          }
+
+          const { data, error } = await supabase.auth.signInWithPassword({
+            email: email,
+            password: password
+          });
+
+          if (error) {
+            mainApp.showToast(`Error de autenticación: ${error.message}`, 'error');
+            return;
+          }
+
+          if (data && data.user) {
+            // Check if user is in 'estudios' table
+            const { data: estudio, error: estError } = await supabase
+              .from('estudios')
+              .select('*')
+              .eq('id', data.user.id)
+              .maybeSingle();
+
+            if (estError) {
+              console.error("Error querying 'estudios':", estError);
+            }
+
+            if (estudio) {
+              // Admin (Estudio Contable)
+              localStorage.setItem('vmp_premium_unlocked', 'true');
+              localStorage.removeItem('vmp_studio_active_co'); // Clear active company context
+              mainApp.showToast('¡Ingreso Estudio exitoso! Redirigiendo al Studio...', 'success');
+            } else {
+              // Client User (Empresa Cliente)
+              localStorage.setItem('vmp_premium_unlocked', 'false');
+              
+              // Set the active company from user metadata if present, or query public.empresas
+              let companyId = data.user.user_metadata?.company_id;
+              if (!companyId) {
+                const { data: coData } = await supabase
+                  .from('empresas')
+                  .select('id')
+                  .limit(1);
+                if (coData && coData.length > 0) {
+                  companyId = coData[0].id;
+                } else {
+                  companyId = 'co-1';
+                }
+              }
+              localStorage.setItem('vmp_studio_active_co', companyId);
+              mainApp.showToast('¡Ingreso Cliente exitoso! Redirigiendo al Portal...', 'success');
+            }
+
+            closeLoginModal();
+            setTimeout(() => {
+              window.location.hash = '#/studio';
+            }, 1200);
+            return;
+          }
+        } catch (err) {
+          console.error("Supabase login error:", err);
+          mainApp.showToast(`Error de conexión con Supabase: ${err.message}`, 'error');
+          return;
+        }
+      }
+
+      // --- Offline Sandbox Fallback ---
+      let registeredCompanies = [];
+      try {
+        registeredCompanies = getCompanies();
+      } catch (err) {
+        console.error("Error retrieving companies:", err);
+      }
+
+      // Check if input matches any registered CUIT (clean format) or is a registered company name
+      const isRegisteredCuit = registeredCompanies.some(company => {
+        const cleanCuit = company.cuit.replace(/[-\s]/g, '').toLowerCase();
+        return cleanCuit === cleanInput;
+      });
+
+      const isRegisteredName = registeredCompanies.some(company => {
+        const cleanName = company.razon_social.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+        const cleanInputAlphaNum = cleanInput.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+        return cleanName === cleanInputAlphaNum && cleanInputAlphaNum.length > 0;
+      });
+
+      const isAdmin = cleanInput === 'admin' || cleanInput === 'admin@solucionescontables.site';
+
+      const customUsers = JSON.parse(localStorage.getItem('vmp_custom_users') || '[]');
+      const matchedCustomUser = customUsers.find(u => u.cuit === cleanInput || u.email.toLowerCase() === cleanInput.toLowerCase());
+
+      if (!isAdmin && !isRegisteredCuit && !isRegisteredName && !matchedCustomUser) {
+        mainApp.showToast('El usuario o CUIT ingresado no se encuentra registrado en el sistema.', 'error');
+        if (loginUsernameInput) {
+          loginUsernameInput.focus();
+        }
+        return;
+      }
+
+      // Validate Password (master password or custom user password)
+      const isMasterPassword = password === 'vmp2026' || password === 'VMP2026';
+      const isCustomPassword = matchedCustomUser && matchedCustomUser.password === password;
+
+      if (isMasterPassword || isCustomPassword) {
+        localStorage.setItem('vmp_premium_unlocked', 'true');
+        
+        // If logged in using a client's CUIT/name, set their context to that company
+        if (isRegisteredCuit || isRegisteredName || matchedCustomUser) {
+          const searchCuit = matchedCustomUser ? matchedCustomUser.cuit : cleanInput;
+          const matchedCompany = registeredCompanies.find(company => {
+            const cleanCuit = company.cuit.replace(/[-\s]/g, '').toLowerCase();
+            const cleanName = company.razon_social.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+            return cleanCuit === searchCuit || cleanName === searchCuit;
+          });
+          if (matchedCompany) {
+            localStorage.setItem('vmp_studio_active_co', matchedCompany.id);
+          }
+        }
+
+        mainApp.showToast('¡Ingreso exitoso! Redirigiendo al Studio...', 'success');
+        closeLoginModal();
+        setTimeout(() => {
+          window.location.hash = '#/studio';
+        }, 1200);
+      } else {
+        mainApp.showToast('Contraseña incorrecta. Verifique la contraseña de acceso.', 'error');
+        if (loginPasswordInput) {
+          loginPasswordInput.value = '';
+          loginPasswordInput.focus();
+        }
+      }
+    });
+  }
 }
