@@ -20,8 +20,8 @@ export function renderWhatsApp() {
   // Mock chats list
   const chats = [
     { id: 'co-1', name: 'Transportes Patagónicos S.A.', lastMsg: 'Te paso el ticket del camión...', time: '11:42', avatar: '#0d9488', count: unreadCounts['co-1'] },
-    { id: 'co-2', name: 'TecnoDesarrollos Sur', lastMsg: 'Matias, ¿viste la recategorización?', time: 'Ayer', avatar: '#8A6D3B', count: unreadCounts['co-2'] },
-    { id: 'co-3', name: 'Alimentos del Valle S.R.L.', lastMsg: 'Factura de luz cargada.', time: 'Ayer', avatar: '#1F5C43', count: unreadCounts['co-3'] }
+    { id: 'co-2', name: 'TecnoDesarrollos Sur', lastMsg: 'Matias, ¿viste la recategorización?', time: 'Ayer', avatar: '#52525B', count: unreadCounts['co-2'] },
+    { id: 'co-3', name: 'Alimentos del Valle S.R.L.', lastMsg: 'Factura de luz cargada.', time: 'Ayer', avatar: '#16A34A', count: unreadCounts['co-3'] }
   ];
 
   const activeChat = chats.find(c => c.id === activeChatId) || chats[0];
@@ -140,7 +140,7 @@ export function renderWhatsApp() {
           </div>
         </div>
         <div style="display: flex; gap: 12px;">
-          <button class="btn btn-outline btn-sm" onclick="alert('Historial impositivo sincronizado con ARCA')" style="font-size: 11px; padding: 6px 12px; display: flex; align-items: center; gap: 4px; border-color: rgba(31,92,67,0.25);">
+          <button class="btn btn-outline btn-sm" onclick="alert('Historial impositivo sincronizado con ARCA')" style="font-size: 11px; padding: 6px 12px; display: flex; align-items: center; gap: 4px; border-color: rgba(22,163,74,0.25);">
             <i data-lucide="history" style="width: 13px; height: 13px;"></i> Auditoría
           </button>
         </div>
@@ -169,7 +169,7 @@ export function renderWhatsApp() {
 function renderOCRScannerPanel() {
   if (scanState === 'idle') {
     return `
-      <div style="margin-top: 12px; border: 1px dashed rgba(31, 92, 67, 0.3); border-radius: 6px; background: rgba(31, 92, 67, 0.02); padding: 12px; text-align: center;">
+      <div style="margin-top: 12px; border: 1px dashed rgba(22, 163, 74, 0.3); border-radius: 6px; background: rgba(22, 163, 74, 0.02); padding: 12px; text-align: center;">
         <p style="font-size: 11px; color: var(--text-secondary); margin: 0 0 8px 0;">📎 Se ha detectado un comprobante de compras en este chat.</p>
         <button class="btn btn-primary btn-sm" id="btn-start-ocr" style="background: var(--color-accent); border-color: var(--color-accent); font-weight: 700; width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 11px; padding: 8px;">
           <i data-lucide="scan"></i> Procesar con AI-OCR (Gemini)
@@ -180,7 +180,7 @@ function renderOCRScannerPanel() {
 
   if (scanState === 'scanning') {
     return `
-      <div style="margin-top: 12px; border: 1px solid rgba(31, 92, 67, 0.2); border-radius: 6px; background: rgba(31, 92, 67, 0.04); padding: 16px; text-align: center; position: relative; overflow: hidden;">
+      <div style="margin-top: 12px; border: 1px solid rgba(22, 163, 74, 0.2); border-radius: 6px; background: rgba(22, 163, 74, 0.04); padding: 16px; text-align: center; position: relative; overflow: hidden;">
         <!-- Laser Scanning Bar Animation -->
         <div class="ocr-scanner-laser" style="position: absolute; left: 0; right: 0; top: 0; height: 3px; background: var(--color-accent); box-shadow: 0 0 8px var(--color-accent); animation: scanLaser 1.5s ease-in-out infinite;"></div>
         
@@ -193,7 +193,7 @@ function renderOCRScannerPanel() {
 
   if (scanState === 'scanned') {
     return `
-      <div style="margin-top: 12px; border: 1px solid var(--color-accent-light); border-radius: 6px; background: rgba(47, 122, 89, 0.02); padding: 16px;">
+      <div style="margin-top: 12px; border: 1px solid var(--color-accent-light); border-radius: 6px; background: rgba(34, 197, 94, 0.02); padding: 16px;">
         <div style="display: flex; align-items: center; gap: 6px; color: var(--color-accent-light); font-size: 12.5px; font-weight: 750; margin-bottom: 12px;">
           <i data-lucide="check-circle" style="width: 16px; height: 16px;"></i> Datos Extraídos con Éxito (Confianza 98.4%)
         </div>
@@ -247,7 +247,7 @@ function renderOCRScannerPanel() {
 
   if (scanState === 'registered') {
     return `
-      <div style="margin-top: 12px; border: 1px solid var(--color-accent-light); border-radius: 6px; background: rgba(47, 122, 89, 0.06); padding: 14px;">
+      <div style="margin-top: 12px; border: 1px solid var(--color-accent-light); border-radius: 6px; background: rgba(34, 197, 94, 0.06); padding: 14px;">
         <div style="display: flex; align-items: center; gap: 6px; color: var(--color-accent-light); font-size: 12.5px; font-weight: 800;">
           <i data-lucide="shield-check" style="width: 16px; height: 16px;"></i> ¡Comprobante en Ledger!
         </div>
@@ -291,7 +291,7 @@ export function initWhatsApp(mainApp) {
       }
       .client .msg-bubble { background: #fff; align-self: flex-start; border-top-left-radius: 0; color: #1e293b; }
       .agent .msg-bubble { background: #d9fdd3; align-self: flex-end; border-top-right-radius: 0; color: #1e293b; }
-      .system .msg-bubble { background: rgba(31,92,67,0.06); border: 1px solid rgba(31,92,67,0.15); color: #4f46e5; text-align: center; font-size: 11px; max-width: 80%; border-radius: 12px; }
+      .system .msg-bubble { background: rgba(22,163,74,0.06); border: 1px solid rgba(22,163,74,0.15); color: #4f46e5; text-align: center; font-size: 11px; max-width: 80%; border-radius: 12px; }
       .attachment-bubble { width: 340px; max-width: 100%; }
       .msg-time { display: block; font-size: 9.5px; color: var(--text-muted); text-align: right; margin-top: 4px; }
       .file-attachment-card {
@@ -307,7 +307,7 @@ export function initWhatsApp(mainApp) {
       .fa-details { display: flex; flex-direction: column; overflow: hidden; }
       .fa-name { font-size: 11px; font-weight: 700; color: var(--color-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
       .fa-size { font-size: 9px; color: var(--text-secondary); }
-      .wa-chat-item.active { background: rgba(31, 92, 67, 0.06); border-left: 3px solid var(--color-accent); }
+      .wa-chat-item.active { background: rgba(22, 163, 74, 0.06); border-left: 3px solid var(--color-accent); }
       .wa-chat-item:hover { background: #f8fafc; }
     `;
     document.head.appendChild(style);

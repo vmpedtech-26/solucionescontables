@@ -57,7 +57,7 @@ export function renderIVA() {
 
   <!-- Exports Panel (Collapsible/Hidden by default) -->
   <div class="card" id="arca-exports-panel" style="display: none; margin-bottom: 32px; border-color: var(--color-indigo);">
-    <div class="card-header" style="background: rgba(31,92,67,0.02)">
+    <div class="card-header" style="background: rgba(22,163,74,0.02)">
       <h3 style="color:var(--color-accent-light)"><i data-lucide="share-2"></i> Generación de Archivos de Importación ARCA (Libro IVA Digital)</h3>
       <button class="btn-icon-sm" id="btn-close-exports" title="Cerrar"><i data-lucide="x"></i></button>
     </div>
@@ -230,7 +230,7 @@ export function renderIVA() {
                 <td style="font-weight: 600; font-size: 12.5px;">
                   <div>${item.cliente || item.proveedor}</div>
                   ${item.es_activo ? `
-                    <span style="font-size: 8px; font-weight: 700; color: var(--color-accent-light); background: rgba(31, 92, 67, 0.08); padding: 1px 4px; border-radius: 3px; border: 1px solid rgba(31, 92, 67, 0.2); display: inline-flex; align-items: center; gap: 2px; margin-top: 2px;">
+                    <span style="font-size: 8px; font-weight: 700; color: var(--color-accent-light); background: rgba(22, 163, 74, 0.08); padding: 1px 4px; border-radius: 3px; border: 1px solid rgba(22, 163, 74, 0.2); display: inline-flex; align-items: center; gap: 2px; margin-top: 2px;">
                       <i data-lucide="building" style="width: 8px; height: 8px;"></i> BIEN DE USO
                     </span>
                   ` : ''}

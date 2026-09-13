@@ -133,7 +133,7 @@ export function renderVentas() {
               <label style="display:flex; align-items:center; gap:6px; font-size:13px; cursor:pointer; padding:8px 12px; border:1px solid var(--border-color); border-radius:var(--radius-sm); flex:1; justify-content:center;" id="lbl-gasto">
                 <input type="radio" name="tx-es-activo" value="false" checked style="accent-color:var(--color-accent);"> Gasto
               </label>
-              <label style="display:flex; align-items:center; gap:6px; font-size:13px; cursor:pointer; padding:8px 12px; border:1px solid rgba(31,92,67,0.3); border-radius:var(--radius-sm); flex:1; justify-content:center; background:rgba(31,92,67,0.02);" id="lbl-activo">
+              <label style="display:flex; align-items:center; gap:6px; font-size:13px; cursor:pointer; padding:8px 12px; border:1px solid rgba(22,163,74,0.3); border-radius:var(--radius-sm); flex:1; justify-content:center; background:rgba(22,163,74,0.02);" id="lbl-activo">
                 <input type="radio" name="tx-es-activo" value="true" style="accent-color:var(--color-accent);"> Bien de Uso
               </label>
             </div>

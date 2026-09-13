@@ -18,7 +18,7 @@ export function renderConfiguracion() {
       <h1 class="view-title">Configuración ARCA</h1>
       <p class="view-subtitle">Vinculación de firmas digitales y certificados para facturación y Libro de IVA.</p>
     </div>
-    <div style="background: rgba(47, 122, 89, 0.08); border: 1px solid rgba(47, 122, 89, 0.2); padding: 8px 16px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; color: var(--color-accent);">
+    <div style="background: rgba(34, 197, 94, 0.08); border: 1px solid rgba(34, 197, 94, 0.2); padding: 8px 16px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; color: var(--color-accent);">
       Canal Seguro de Enlace Encriptado
     </div>
   </div>
@@ -40,7 +40,7 @@ export function renderConfiguracion() {
 
           <div style="display: flex; flex-direction: column; gap: 12px;">
             <!-- Hybrid option -->
-            <label class="trial-action-btn" style="border-color: ${modelType === 'hybrid' ? 'var(--color-accent)' : 'var(--border-color)'}; background: ${modelType === 'hybrid' ? 'rgba(31, 92, 67, 0.01)' : '#fff'}; display: flex; align-items: flex-start; gap: 14px; text-align: left; cursor: pointer;">
+            <label class="trial-action-btn" style="border-color: ${modelType === 'hybrid' ? 'var(--color-accent)' : 'var(--border-color)'}; background: ${modelType === 'hybrid' ? 'rgba(22, 163, 74, 0.01)' : '#fff'}; display: flex; align-items: flex-start; gap: 14px; text-align: left; cursor: pointer;">
               <input type="radio" name="arca-model-type" value="hybrid" ${modelType === 'hybrid' ? 'checked' : ''} style="margin-top: 4px; accent-color: var(--color-accent);">
               <div>
                 <h5 style="font-size: 13.5px; font-weight: 700; margin-bottom: 2px; color: var(--color-primary);">Modelo Híbrido Delegado (Recomendado)</h5>
@@ -51,7 +51,7 @@ export function renderConfiguracion() {
             </label>
 
             <!-- Individual option -->
-            <label class="trial-action-btn" style="border-color: ${modelType === 'individual' ? 'var(--color-accent)' : 'var(--border-color)'}; background: ${modelType === 'individual' ? 'rgba(31, 92, 67, 0.01)' : '#fff'}; display: flex; align-items: flex-start; gap: 14px; text-align: left; cursor: pointer;">
+            <label class="trial-action-btn" style="border-color: ${modelType === 'individual' ? 'var(--color-accent)' : 'var(--border-color)'}; background: ${modelType === 'individual' ? 'rgba(22, 163, 74, 0.01)' : '#fff'}; display: flex; align-items: flex-start; gap: 14px; text-align: left; cursor: pointer;">
               <input type="radio" name="arca-model-type" value="individual" ${modelType === 'individual' ? 'checked' : ''} style="margin-top: 4px; accent-color: var(--color-accent);">
               <div>
                 <h5 style="font-size: 13.5px; font-weight: 700; margin-bottom: 2px; color: var(--color-primary);">Modelo Certificados Individuales</h5>
@@ -68,14 +68,14 @@ export function renderConfiguracion() {
       <div class="card" id="cert-upload-panel">
         <div class="card-header">
           <h3><i data-lucide="shield-check" style="color: var(--color-accent);"></i> Firma Digital del Estudio</h3>
-          <span class="badge" style="margin: 0; font-size: 10px; color: var(--color-accent); border-color: rgba(47, 122, 89, 0.3); background: rgba(47, 122, 89, 0.05);">CUIT: 30-71938495-2</span>
+          <span class="badge" style="margin: 0; font-size: 10px; color: var(--color-accent); border-color: rgba(34, 197, 94, 0.3); background: rgba(34, 197, 94, 0.05);">CUIT: 30-71938495-2</span>
         </div>
         <div class="card-body">
           ${certUploaded ? `
             <!-- Uploaded active state -->
-            <div style="background: rgba(47, 122, 89, 0.02); border: 1px solid rgba(47, 122, 89, 0.15); border-radius: var(--radius-md); padding: 20px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+            <div style="background: rgba(34, 197, 94, 0.02); border: 1px solid rgba(34, 197, 94, 0.15); border-radius: var(--radius-md); padding: 20px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
               <div style="display: flex; align-items: center; gap: 14px;">
-                <div style="background: rgba(47, 122, 89, 0.08); color: var(--color-accent); width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <div style="background: rgba(34, 197, 94, 0.08); color: var(--color-accent); width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                   <i data-lucide="lock" style="width: 20px; height: 20px;"></i>
                 </div>
                 <div>
@@ -123,10 +123,10 @@ export function renderConfiguracion() {
       </div>
 
       <!-- Gemini API Key configuration card for the Studio -->
-      <div class="card" style="border-color: rgba(31, 92, 67, 0.3); background: rgba(31, 92, 67, 0.01);">
-        <div class="card-header" style="border-bottom-color: rgba(31, 92, 67, 0.1);">
+      <div class="card" style="border-color: rgba(22, 163, 74, 0.3); background: rgba(22, 163, 74, 0.01);">
+        <div class="card-header" style="border-bottom-color: rgba(22, 163, 74, 0.1);">
           <h3><i data-lucide="key" style="color: var(--color-accent);"></i> Motor IA del Estudio (Gemini OCR Centralizado)</h3>
-          <span class="badge" style="margin: 0; font-size: 10px; background: rgba(31, 92, 67, 0.08); color: var(--color-accent-light); border-color: rgba(31, 92, 67, 0.2);">Estudio Contable</span>
+          <span class="badge" style="margin: 0; font-size: 10px; background: rgba(22, 163, 74, 0.08); color: var(--color-accent-light); border-color: rgba(22, 163, 74, 0.2);">Estudio Contable</span>
         </div>
         <div class="card-body">
           <p class="text-secondary" style="font-size: 13px; line-height: 1.5; margin-bottom: 16px;">
@@ -149,10 +149,10 @@ export function renderConfiguracion() {
       </div>
 
       <!-- Supabase Sync configuration card -->
-      <div class="card" style="border-color: rgba(47, 122, 89, 0.3); background: rgba(47, 122, 89, 0.01);">
-        <div class="card-header" style="border-bottom-color: rgba(47, 122, 89, 0.1);">
+      <div class="card" style="border-color: rgba(34, 197, 94, 0.3); background: rgba(34, 197, 94, 0.01);">
+        <div class="card-header" style="border-bottom-color: rgba(34, 197, 94, 0.1);">
           <h3><i data-lucide="database" style="color: var(--color-accent);"></i> Base de Datos Cloud (Supabase Sync)</h3>
-          <span class="badge" style="margin: 0; font-size: 10px; background: rgba(47, 122, 89, 0.08); color: var(--color-accent); border-color: rgba(47, 122, 89, 0.2);">SaaS Cloud</span>
+          <span class="badge" style="margin: 0; font-size: 10px; background: rgba(34, 197, 94, 0.08); color: var(--color-accent); border-color: rgba(34, 197, 94, 0.2);">SaaS Cloud</span>
         </div>
         <div class="card-body">
           <p class="text-secondary" style="font-size: 13px; line-height: 1.5; margin-bottom: 16px;">
@@ -229,10 +229,10 @@ export function renderConfiguracion() {
       </div>
 
       <!-- RPA Robot Console Card [NEW MODULE] -->
-      <div class="card" style="border-color: rgba(47, 122, 89, 0.25);">
+      <div class="card" style="border-color: rgba(34, 197, 94, 0.25);">
         <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
           <h3><i data-lucide="bot" style="color: var(--color-accent);"></i> Consola de Robots RPA Cloud</h3>
-          <span class="badge" style="margin: 0; background: rgba(47, 122, 89, 0.08); color: var(--color-accent); border-color: rgba(47, 122, 89, 0.25);">Orquestador Activo</span>
+          <span class="badge" style="margin: 0; background: rgba(34, 197, 94, 0.08); color: var(--color-accent); border-color: rgba(34, 197, 94, 0.25);">Orquestador Activo</span>
         </div>
         <div class="card-body">
           <p class="text-secondary" style="font-size: 12.5px; margin-bottom: 18px; line-height: 1.4;">
@@ -244,7 +244,7 @@ export function renderConfiguracion() {
             <div style="background: rgba(248, 250, 252, 0.6); border: 1px solid var(--border-color); padding: 10px 12px; border-radius: 6px; display: flex; flex-direction: column; gap: 4px;">
               <div style="display: flex; justify-content: space-between; align-items: center;">
                 <span style="font-size: 11.5px; font-weight: 750; color: var(--color-primary);">RPA ARCA Comprobantes</span>
-                <span style="background: rgba(47, 122, 89, 0.1); color: var(--color-accent-light); font-size: 8.5px; font-weight: 800; padding: 1px 6px; border-radius: 10px;">IDLE</span>
+                <span style="background: rgba(34, 197, 94, 0.1); color: var(--color-accent-light); font-size: 8.5px; font-weight: 800; padding: 1px 6px; border-radius: 10px;">IDLE</span>
               </div>
               <span style="font-size: 9.5px; color: var(--text-secondary);">Sincronizado hace 4 hs · Diario</span>
             </div>
@@ -252,7 +252,7 @@ export function renderConfiguracion() {
             <div style="background: rgba(248, 250, 252, 0.6); border: 1px solid var(--border-color); padding: 10px 12px; border-radius: 6px; display: flex; flex-direction: column; gap: 4px;">
               <div style="display: flex; justify-content: space-between; align-items: center;">
                 <span style="font-size: 11.5px; font-weight: 750; color: var(--color-primary);">RPA Rentas (ARBA/AGIP)</span>
-                <span style="background: rgba(47, 122, 89, 0.1); color: var(--color-accent-light); font-size: 8.5px; font-weight: 800; padding: 1px 6px; border-radius: 10px;">IDLE</span>
+                <span style="background: rgba(34, 197, 94, 0.1); color: var(--color-accent-light); font-size: 8.5px; font-weight: 800; padding: 1px 6px; border-radius: 10px;">IDLE</span>
               </div>
               <span style="font-size: 9.5px; color: var(--text-secondary);">Sincronizado hace 6 hs · Diario</span>
             </div>
@@ -260,7 +260,7 @@ export function renderConfiguracion() {
             <div style="background: rgba(248, 250, 252, 0.6); border: 1px solid var(--border-color); padding: 10px 12px; border-radius: 6px; display: flex; flex-direction: column; gap: 4px;">
               <div style="display: flex; justify-content: space-between; align-items: center;">
                 <span style="font-size: 11.5px; font-weight: 750; color: var(--color-primary);">RPA SICORE Retenciones</span>
-                <span style="background: rgba(47, 122, 89, 0.1); color: var(--color-accent-light); font-size: 8.5px; font-weight: 800; padding: 1px 6px; border-radius: 10px;">IDLE</span>
+                <span style="background: rgba(34, 197, 94, 0.1); color: var(--color-accent-light); font-size: 8.5px; font-weight: 800; padding: 1px 6px; border-radius: 10px;">IDLE</span>
               </div>
               <span style="font-size: 9.5px; color: var(--text-secondary);">Sincronizado hace 6 hs · Cada 12h</span>
             </div>
@@ -307,7 +307,7 @@ export function renderConfiguracion() {
 
       <!-- ARCA Delegation Instructions -->
       <div class="card">
-        <div class="card-header" style="border-bottom-color: rgba(31, 92, 67, 0.1); background: rgba(31,92,67,0.01);">
+        <div class="card-header" style="border-bottom-color: rgba(22, 163, 74, 0.1); background: rgba(22,163,74,0.01);">
           <h3 style="color:var(--color-accent-light);"><i data-lucide="help-circle"></i> ¿Cómo delega el cliente en ARCA?</h3>
         </div>
         <div class="card-body">

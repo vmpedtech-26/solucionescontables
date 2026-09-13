@@ -24,13 +24,13 @@ export function renderAyuda() {
       <h1 class="view-title">Instructivo & Onboarding</h1>
       <p class="view-subtitle">Guía paso a paso para configurar el sistema y capacitar a tus clientes.</p>
     </div>
-    <div style="background: rgba(31, 92, 67, 0.08); border: 1px solid rgba(31, 92, 67, 0.2); padding: 8px 16px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; color: #4f46e5;">
+    <div style="background: rgba(22, 163, 74, 0.08); border: 1px solid rgba(22, 163, 74, 0.2); padding: 8px 16px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; color: #4f46e5;">
       💡 Asistente de Configuración 2026
     </div>
   </div>
 
   <!-- Onboarding Progress Tracker -->
-  <div class="card" style="margin-bottom: 24px; background: linear-gradient(135deg, rgba(31, 92, 67, 0.02) 0%, rgba(13, 148, 136, 0.02) 100%); border-color: rgba(31, 92, 67, 0.15);">
+  <div class="card" style="margin-bottom: 24px; background: linear-gradient(135deg, rgba(22, 163, 74, 0.02) 0%, rgba(13, 148, 136, 0.02) 100%); border-color: rgba(22, 163, 74, 0.15);">
     <div class="card-body">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
         <div>
@@ -192,13 +192,13 @@ const TabContents = {
         <div class="grid-resp-4" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;">
 
           <div style="border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 12px; text-align: center;">
-            <div style="background: rgba(31, 92, 67, 0.06); color: var(--color-accent); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px;">1</div>
+            <div style="background: rgba(22, 163, 74, 0.06); color: var(--color-accent); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px;">1</div>
             <h5 style="font-size: 12px; font-weight: 700; margin-bottom: 4px;">Enlazar ARCA</h5>
             <p style="font-size: 10px; color: var(--text-secondary); line-height: 1.3; margin: 0;">Configurás la firma digital del estudio y el bot conecta ARCA.</p>
           </div>
 
           <div style="border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 12px; text-align: center;">
-            <div style="background: rgba(47, 122, 89, 0.06); color: var(--color-accent-light); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px;">2</div>
+            <div style="background: rgba(34, 197, 94, 0.06); color: var(--color-accent-light); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px;">2</div>
             <h5 style="font-size: 12px; font-weight: 700; margin-bottom: 4px;">Co-creación</h5>
             <p style="font-size: 10px; color: var(--text-secondary); line-height: 1.3; margin: 0;">El cliente sube comprobantes por el celular y el bot lee ARCA.</p>
           </div>
@@ -240,8 +240,8 @@ const TabContents = {
       </p>
 
       <!-- Steps for Accountant -->
-      <div class="card" style="border-color: rgba(31, 92, 67, 0.15);">
-        <div class="card-header" style="background: rgba(31, 92, 67, 0.01); padding: 12px 16px;">
+      <div class="card" style="border-color: rgba(22, 163, 74, 0.15);">
+        <div class="card-header" style="background: rgba(22, 163, 74, 0.01); padding: 12px 16px;">
           <h4 style="font-size: 13px; font-weight: 700; color: #4f46e5; margin: 0; display: flex; align-items: center; gap: 6px;">
             <i data-lucide="folder-key"></i> Paso 1: Configurar la Firma del Estudio Contable
           </h4>
@@ -257,8 +257,8 @@ const TabContents = {
       </div>
 
       <!-- Steps for Client -->
-      <div class="card" style="border-color: rgba(47, 122, 89, 0.15);">
-        <div class="card-header" style="background: rgba(47, 122, 89, 0.01); padding: 12px 16px;">
+      <div class="card" style="border-color: rgba(34, 197, 94, 0.15);">
+        <div class="card-header" style="background: rgba(34, 197, 94, 0.01); padding: 12px 16px;">
           <h4 style="font-size: 13px; font-weight: 700; color: var(--color-accent); margin: 0; display: flex; align-items: center; gap: 6px;">
             <i data-lucide="user-check"></i> Paso 2: El cliente realiza la delegación (Copia y enviale esto por Whatsapp)
           </h4>
@@ -298,7 +298,7 @@ const TabContents = {
       <div style="border: 1px solid var(--border-color); border-radius: var(--radius-md); overflow: hidden;">
         <div style="padding: 12px 16px; background: var(--bg-secondary); border-bottom: 1px solid var(--border-color); font-weight: 700; font-size: 13px; color: var(--color-primary); display: flex; justify-content: space-between; align-items: center;">
           <span>1. IVA Simple · Formulario 2051 (ARCA 2026)</span>
-          <span class="badge" style="margin:0; background: rgba(31,92,67,0.06); border-color: rgba(31,92,67,0.15); color: var(--color-accent); font-size: 10px;">Normativo</span>
+          <span class="badge" style="margin:0; background: rgba(22,163,74,0.06); border-color: rgba(22,163,74,0.15); color: var(--color-accent); font-size: 10px;">Normativo</span>
         </div>
         <div style="padding: 16px; font-size: 12px; line-height: 1.5; color: var(--text-secondary);">
           Diseñado para el nuevo régimen unificado de liquidación de IVA.
@@ -314,7 +314,7 @@ const TabContents = {
       <div style="border: 1px solid var(--border-color); border-radius: var(--radius-md); overflow: hidden;">
         <div style="padding: 12px 16px; background: var(--bg-secondary); border-bottom: 1px solid var(--border-color); font-weight: 700; font-size: 13px; color: var(--color-primary); display: flex; justify-content: space-between; align-items: center;">
           <span>2. Retenciones y Percepciones · Conciliación 3 Fuentes</span>
-          <span class="badge" style="margin:0; background: rgba(31,92,67,0.06); border-color: rgba(31,92,67,0.15); color: var(--color-accent); font-size: 10px;">Control Financiero</span>
+          <span class="badge" style="margin:0; background: rgba(22,163,74,0.06); border-color: rgba(22,163,74,0.15); color: var(--color-accent); font-size: 10px;">Control Financiero</span>
         </div>
         <div style="padding: 16px; font-size: 12px; line-height: 1.5; color: var(--text-secondary);">
           Evita la pérdida de crédito fiscal por retenciones no computadas.
@@ -353,7 +353,7 @@ const TabContents = {
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start;">
         
         <!-- Módulo 1 -->
-        <div style="background: rgba(31, 92, 67, 0.01); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 20px;">
+        <div style="background: rgba(22, 163, 74, 0.01); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 20px;">
           <h4 style="font-size: 14px; font-weight: 800; color: var(--color-accent-light); margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
             <i data-lucide="camera" style="width: 18px; height: 18px;"></i>
             1. Digitalización de Comprobantes (OCR con IA)
@@ -369,7 +369,7 @@ const TabContents = {
         </div>
 
         <!-- Módulo 2 -->
-        <div style="background: rgba(47, 122, 89, 0.01); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 20px;">
+        <div style="background: rgba(34, 197, 94, 0.01); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 20px;">
           <h4 style="font-size: 14px; font-weight: 800; color: var(--color-accent-light); margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
             <i data-lucide="zap" style="width: 18px; height: 18px;"></i>
             2. Facturador Directo ARCA (ex-AFIP) Live
@@ -395,7 +395,7 @@ const TabContents = {
           </p>
         </div>
 
-        <div style="background: rgba(31, 92, 67, 0.03); border: 1px solid rgba(31, 92, 67, 0.12); border-radius: var(--radius-md); padding: 16px; text-align: center;">
+        <div style="background: rgba(22, 163, 74, 0.03); border: 1px solid rgba(22, 163, 74, 0.12); border-radius: var(--radius-md); padding: 16px; text-align: center;">
           <h4 style="font-size: 12.5px; font-weight: 700; color: var(--color-accent-light); margin-bottom: 6px; display: flex; align-items: center; justify-content: center; gap: 6px;">
             <i data-lucide="smartphone"></i> Acceso a la Experiencia
           </h4>

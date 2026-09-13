@@ -167,7 +167,7 @@ export function renderDashboardHome() {
   </div>
 
   <!-- Consola de Enlace ARCA Live -->
-  <div style="background: linear-gradient(135deg, rgba(13, 148, 136, 0.04) 0%, rgba(31, 92, 67, 0.04) 100%); border: 1px solid rgba(13, 148, 136, 0.2); border-radius: var(--radius-md); padding: 18px 24px; margin-bottom: 24px;">
+  <div style="background: linear-gradient(135deg, rgba(13, 148, 136, 0.04) 0%, rgba(22, 163, 74, 0.04) 100%); border: 1px solid rgba(13, 148, 136, 0.2); border-radius: var(--radius-md); padding: 18px 24px; margin-bottom: 24px;">
     <div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 16px;">
       <div style="display: flex; align-items: center; gap: 12px;">
         <div style="background: rgba(13, 148, 136, 0.08); border: 1px solid rgba(13, 148, 136, 0.2); width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--color-accent); flex-shrink: 0;">
@@ -176,7 +176,7 @@ export function renderDashboardHome() {
         <div>
           <h4 style="font-size: 14.5px; font-weight: 800; color: var(--color-primary); margin: 0 0 3px 0; display: flex; align-items: center; gap: 8px;">
             Consola de Enlace ARCA (ex-AFIP) 
-            <span style="background: rgba(47, 122, 89, 0.12); color: var(--color-accent); font-size: 9.5px; font-weight: 800; padding: 2px 8px; border-radius: 12px; border: 1px solid rgba(47, 122, 89, 0.2);">LIVE</span>
+            <span style="background: rgba(34, 197, 94, 0.12); color: var(--color-accent); font-size: 9.5px; font-weight: 800; padding: 2px 8px; border-radius: 12px; border: 1px solid rgba(34, 197, 94, 0.2);">LIVE</span>
           </h4>
           <p style="font-size: 12px; color: var(--text-secondary); margin: 0; line-height: 1.4;">
             Conectado de forma segura mediante firma digital criptográfica del estudio contable.
@@ -184,7 +184,7 @@ export function renderDashboardHome() {
         </div>
       </div>
       <div style="display: flex; gap: 10px;">
-        <button class="btn btn-outline btn-sm" onclick="alert('Estudio Contable Comahue\\n\\nSaaS VMP Studio v3.2.0-prod\\nFirma Activa: estudio_comahue_arca_2026.crt\\nEnlace: Homologado y Encriptado')" style="font-size: 11px; padding: 6px 12px; display: flex; align-items: center; gap: 4px; border-color: rgba(31,92,67,0.25);">
+        <button class="btn btn-outline btn-sm" onclick="alert('Estudio Contable Comahue\\n\\nSaaS VMP Studio v3.2.0-prod\\nFirma Activa: estudio_comahue_arca_2026.crt\\nEnlace: Homologado y Encriptado')" style="font-size: 11px; padding: 6px 12px; display: flex; align-items: center; gap: 4px; border-color: rgba(22,163,74,0.25);">
           <i data-lucide="shield-check" style="width: 13px; height: 13px;"></i> Auditoría de Canal
         </button>
       </div>
@@ -229,10 +229,10 @@ export function renderDashboardHome() {
   </div>
 
   <!-- Centro de Control Preventivo (AI Guard Hub) [NEW PILAR 4] -->
-  <div class="card" style="margin-bottom: 28px; border-color: rgba(129, 140, 248, 0.25); background: linear-gradient(135deg, rgba(31, 92, 67, 0.01) 0%, rgba(13, 148, 136, 0.01) 100%);">
-    <div class="card-header" style="border-bottom-color: rgba(31, 92, 67, 0.1); display:flex; justify-content:space-between; align-items:center;">
+  <div class="card" style="margin-bottom: 28px; border-color: rgba(129, 140, 248, 0.25); background: linear-gradient(135deg, rgba(22, 163, 74, 0.01) 0%, rgba(13, 148, 136, 0.01) 100%);">
+    <div class="card-header" style="border-bottom-color: rgba(22, 163, 74, 0.1); display:flex; justify-content:space-between; align-items:center;">
       <h3 style="color:var(--color-accent-light); display:flex; align-items:center; gap:8px;"><i data-lucide="shield-alert"></i> Centro de Control Preventivo (AI Guard)</h3>
-      <span class="badge" style="margin: 0; background: rgba(31, 92, 67, 0.08); color: var(--color-accent-light); border-color: rgba(31, 92, 67, 0.2); font-weight:700;">Auditoría Activa 24/7</span>
+      <span class="badge" style="margin: 0; background: rgba(22, 163, 74, 0.08); color: var(--color-accent-light); border-color: rgba(22, 163, 74, 0.2); font-weight:700;">Auditoría Activa 24/7</span>
     </div>
     <div class="card-body" style="display:flex; flex-direction:column; gap:10px; padding: 16px 20px;">
       ${aiGuardHTML}
@@ -245,7 +245,7 @@ export function renderDashboardHome() {
     <div class="card-body" style="padding: 20px 24px;">
       <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; flex-wrap: wrap; gap: 12px;">
         <div>
-          <span class="badge" style="background: rgba(31, 92, 67, 0.05); color: var(--color-accent); border-color: rgba(31, 92, 67, 0.15); font-weight: 700; margin: 0; padding: 4px 10px; font-size: 10.5px;">MONOTRIBUTO SAFE-GUARD</span>
+          <span class="badge" style="background: rgba(22, 163, 74, 0.05); color: var(--color-accent); border-color: rgba(22, 163, 74, 0.15); font-weight: 700; margin: 0; padding: 4px 10px; font-size: 10.5px;">MONOTRIBUTO SAFE-GUARD</span>
           <h3 style="font-size: 15px; font-weight: 750; color: var(--color-primary); margin-top: 8px; margin-bottom: 4px;">Alerta de Control de Categoría H (Servicios)</h3>
           <p style="font-size: 12px; color: var(--text-secondary); margin: 0;">Límite anual acumulado antes de la exclusión automática de oficio de ARCA.</p>
         </div>
@@ -271,11 +271,11 @@ export function renderDashboardHome() {
   ` : ''}
 
   <!-- Interactive Studio Modules Guide -->
-  <div class="card production-modules-card" style="margin-bottom: 28px; background: linear-gradient(135deg, rgba(31, 92, 67, 0.01) 0%, rgba(31, 92, 67, 0.01) 100%); border-color: rgba(31, 92, 67, 0.12);">
+  <div class="card production-modules-card" style="margin-bottom: 28px; background: linear-gradient(135deg, rgba(22, 163, 74, 0.01) 0%, rgba(22, 163, 74, 0.01) 100%); border-color: rgba(22, 163, 74, 0.12);">
     <div class="card-body" style="padding: 20px 24px;">
       <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; flex-wrap: wrap;">
         <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-          <span class="badge" style="background: rgba(31, 92, 67, 0.08); color: var(--color-accent); border-color: rgba(31, 92, 67, 0.2); font-weight: 700; margin: 0; padding: 4px 10px; font-size: 11px;">MÓDULOS DE PRODUCCIÓN STUDIO</span>
+          <span class="badge" style="background: rgba(22, 163, 74, 0.08); color: var(--color-accent); border-color: rgba(22, 163, 74, 0.2); font-weight: 700; margin: 0; padding: 4px 10px; font-size: 11px;">MÓDULOS DE PRODUCCIÓN STUDIO</span>
           <h4 style="font-size: 13px; color: var(--text-secondary); font-weight: 600; margin: 0;">Acceso directo a las herramientas fiscales de tu Suite Profesional</h4>
         </div>
         <a href="#/studio/ayuda" class="btn btn-primary btn-sm" style="font-size: 11px; padding: 6px 12px; background: var(--color-accent); border-color: var(--color-accent); display: flex; align-items: center; gap: 4px; box-shadow: var(--shadow-sm); text-decoration: none; color: white;">
@@ -285,7 +285,7 @@ export function renderDashboardHome() {
       <div class="trial-actions-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;">
         
         <a href="#/studio/ventas" class="trial-action-btn">
-          <div class="ta-btn-icon" style="background: rgba(31, 92, 67, 0.08); color: var(--color-accent);">
+          <div class="ta-btn-icon" style="background: rgba(22, 163, 74, 0.08); color: var(--color-accent);">
             <i data-lucide="file-text"></i>
           </div>
           <div class="ta-btn-content">
@@ -307,7 +307,7 @@ export function renderDashboardHome() {
         </a>
 
         <a href="#/studio/configuracion" class="trial-action-btn">
-          <div class="ta-btn-icon" style="background: rgba(47, 122, 89, 0.08); color: var(--color-accent-light);">
+          <div class="ta-btn-icon" style="background: rgba(34, 197, 94, 0.08); color: var(--color-accent-light);">
             <i data-lucide="link"></i>
           </div>
           <div class="ta-btn-content">
@@ -441,10 +441,10 @@ export function renderDashboardHome() {
   </div>
 
   <!-- ── CONSOLA DE VENCIMIENTOS MULTI-CLIENTE INTERCONECTADA (NEW MODULE) ── -->
-  <div class="card" style="margin-top: 28px; border-color: rgba(31, 92, 67, 0.25);">
+  <div class="card" style="margin-top: 28px; border-color: rgba(22, 163, 74, 0.25);">
     <div class="card-header" style="border-bottom: 1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center;">
       <h3><i data-lucide="calendar" style="color: var(--color-accent);"></i> Agenda de Vencimientos Impositivos Multi-Cliente</h3>
-      <span class="badge" style="margin: 0; background: rgba(31, 92, 67, 0.08); color: var(--color-accent-light); border-color: rgba(31, 92, 67, 0.25);">Control de Plazos CUIT</span>
+      <span class="badge" style="margin: 0; background: rgba(22, 163, 74, 0.08); color: var(--color-accent-light); border-color: rgba(22, 163, 74, 0.25);">Control de Plazos CUIT</span>
     </div>
     <div class="card-body">
       <p class="text-secondary" style="font-size: 13px; margin-bottom: 16px;">

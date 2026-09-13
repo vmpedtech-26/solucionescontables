@@ -74,8 +74,8 @@ export function renderIVASimple() {
 
     // 3. Warning engine and insights
     let statusColor = 'var(--color-accent-light)'; // Green
-    let statusBg = 'rgba(47, 122, 89, 0.04)';
-    let statusBorder = 'rgba(47, 122, 89, 0.2)';
+    let statusBg = 'rgba(34, 197, 94, 0.04)';
+    let statusBorder = 'rgba(34, 197, 94, 0.2)';
     let statusLabel = 'SALUDABLE';
     let statusInsight = `El nivel de facturación de tu cliente está bajo control. Se encuentra a un **${(100 - percentCategory).toFixed(1)}%** del tope de la Categoría ${activeLetter}. Facturación mensual sugerida: **$ ${(catDetails.maxIngresos / 12).toLocaleString('es-AR')}**.`;
 
@@ -99,7 +99,7 @@ export function renderIVASimple() {
         <h1 class="view-title">Consola de Control de Monotributo</h1>
         <p class="view-subtitle">Monitoreo continuo de exclusión, límites de categorías y recategorización semestral.</p>
       </div>
-      <div style="background: rgba(31, 92, 67, 0.08); border: 1px solid rgba(31, 92, 67, 0.2); padding: 8px 16px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; color: var(--color-accent-light);">
+      <div style="background: rgba(22, 163, 74, 0.08); border: 1px solid rgba(22, 163, 74, 0.2); padding: 8px 16px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; color: var(--color-accent-light);">
         Contribuyente: ${company.razon_social} (${company.condicion_iva})
       </div>
     </div>
@@ -206,7 +206,7 @@ export function renderIVASimple() {
           </form>
 
           <!-- Result Suggestion Report Box -->
-          <div id="recat-result-box" style="display: none; background: rgba(31, 92, 67, 0.03); border: 1.5px dashed rgba(31, 92, 67, 0.25); border-radius: var(--radius-sm); padding: 14px; margin-top: 16px;">
+          <div id="recat-result-box" style="display: none; background: rgba(22, 163, 74, 0.03); border: 1.5px dashed rgba(22, 163, 74, 0.25); border-radius: var(--radius-sm); padding: 14px; margin-top: 16px;">
             <h4 style="font-size: 13px; font-weight: 800; color: var(--color-accent-light); margin-bottom: 8px; display: flex; align-items: center; gap: 4px;">
               <i data-lucide="check-square"></i> Dictamen y Categoría Sugerida
             </h4>
@@ -236,7 +236,7 @@ export function renderIVASimple() {
                   const val = MONOTRIBUTO_CATEGORIAS_2026[k];
                   const isCurrent = k === activeLetter;
                   return `
-                    <tr style="${isCurrent ? 'background: rgba(31, 92, 67, 0.08); font-weight: 800;' : ''}">
+                    <tr style="${isCurrent ? 'background: rgba(22, 163, 74, 0.08); font-weight: 800;' : ''}">
                       <td>Categoría ${k} ${isCurrent ? '🎯' : ''}</td>
                       <td class="font-mono text-right">$ ${val.maxIngresos.toLocaleString('es-AR')}</td>
                       <td class="font-mono text-right">${val.cuotaServicios > 0 ? '$ ' + val.cuotaServicios.toLocaleString('es-AR') : 'Excluido'}</td>
@@ -335,7 +335,7 @@ export function renderIVASimple() {
       <p class="view-subtitle">Circuito de liquidación mensual · ${mesActual}</p>
     </div>
     <div style="display:flex;gap:10px;align-items:center;">
-      <div style="background:rgba(31,92,67,0.08);border:1px solid rgba(31,92,67,0.2);padding:7px 14px;border-radius:var(--radius-sm);font-size:12px;font-weight:600;color:var(--color-accent-light);">
+      <div style="background:rgba(22,163,74,0.08);border:1px solid rgba(22,163,74,0.2);padding:7px 14px;border-radius:var(--radius-sm);font-size:12px;font-weight:600;color:var(--color-accent-light);">
         CUIT: ${company.cuit}
       </div>
       <button class="btn btn-primary" id="btn-presentar-f2051" ${!consistenciaOk ? 'disabled' : ''} style="${!consistenciaOk ? 'opacity:.45;cursor:not-allowed;' : ''}">
@@ -349,7 +349,7 @@ export function renderIVASimple() {
     ${pasos.map((s, i) => `
       <div style="flex:1;display:flex;align-items:center;gap:0;">
         <div style="flex:1;text-align:center;position:relative;z-index:1;">
-          <div style="width:40px;height:40px;border-radius:50%;border:2px solid ${s.done ? 'var(--color-accent)' : 'var(--border-color)'};background:${s.done ? 'rgba(47,122,89,0.1)' : 'rgba(255,255,255,0.02)'};display:flex;align-items:center;justify-content:center;margin:0 auto 8px;color:${s.done ? 'var(--color-accent)' : 'var(--text-secondary)'};">
+          <div style="width:40px;height:40px;border-radius:50%;border:2px solid ${s.done ? 'var(--color-accent)' : 'var(--border-color)'};background:${s.done ? 'rgba(34,197,94,0.1)' : 'rgba(255,255,255,0.02)'};display:flex;align-items:center;justify-content:center;margin:0 auto 8px;color:${s.done ? 'var(--color-accent)' : 'var(--text-secondary)'};">
             <i data-lucide="${s.icon}" style="width:18px;height:18px;"></i>
           </div>
           <p style="font-size:11px;font-weight:600;color:${s.done ? 'var(--color-accent)' : 'var(--text-secondary)'};">${s.label}</p>
@@ -376,13 +376,13 @@ export function renderIVASimple() {
             Las <strong>ventas con CAE se precargan automáticamente</strong> desde ARCA.
           </p>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
-            <div class="import-area" id="drop-compras-cbte" style="padding:18px;margin:0;cursor:pointer;border-color:${libroImportado ? 'var(--color-accent)' : 'var(--border-color)'};background:${libroImportado ? 'rgba(47,122,89,0.02)' : 'rgba(255,255,255,0.01)'};">
+            <div class="import-area" id="drop-compras-cbte" style="padding:18px;margin:0;cursor:pointer;border-color:${libroImportado ? 'var(--color-accent)' : 'var(--border-color)'};background:${libroImportado ? 'rgba(34,197,94,0.02)' : 'rgba(255,255,255,0.01)'};">
               <i data-lucide="file-text" style="width:28px;height:28px;color:var(--color-accent);margin-bottom:8px;"></i>
               <h5 style="font-size:12px;font-weight:700;">LIBRO_IVA_COMPRAS_CBTE.txt</h5>
               <p style="font-size:9.5px;color:var(--text-secondary);margin-top:4px;">Comprobantes del Libro de Compras</p>
               <input type="file" id="file-compras-cbte" style="display:none;" accept=".txt,.zip">
             </div>
-            <div class="import-area" id="drop-compras-ali" style="padding:18px;margin:0;cursor:pointer;border-color:${libroImportado ? 'var(--color-accent)' : 'var(--border-color)'};background:${libroImportado ? 'rgba(47,122,89,0.02)' : 'rgba(255,255,255,0.01)'};">
+            <div class="import-area" id="drop-compras-ali" style="padding:18px;margin:0;cursor:pointer;border-color:${libroImportado ? 'var(--color-accent)' : 'var(--border-color)'};background:${libroImportado ? 'rgba(34,197,94,0.02)' : 'rgba(255,255,255,0.01)'};">
               <i data-lucide="percent" style="width:28px;height:28px;color:var(--color-accent);margin-bottom:8px;"></i>
               <h5 style="font-size:12px;font-weight:700;">LIBRO_IVA_COMPRAS_ALICUOTAS.txt</h5>
               <p style="font-size:9.5px;color:var(--text-secondary);margin-top:4px;">Alícuotas del Libro de Compras</p>
@@ -402,13 +402,13 @@ export function renderIVASimple() {
       </div>
 
       <!-- Consistencia -->
-      <div class="card" data-consist-ok-calc="${consistOkCalc}" style="border-color:${consistenciaOk ? 'rgba(47,122,89,0.3)' : consistOkCalc ? 'rgba(31,92,67,0.2)' : 'rgba(239,68,68,0.3)'}; margin-bottom:0;">
-        <div class="card-header" style="background:${consistenciaOk ? 'rgba(47,122,89,0.02)' : consistOkCalc ? 'rgba(31,92,67,0.01)' : 'rgba(239,68,68,0.02)'};">
+      <div class="card" data-consist-ok-calc="${consistOkCalc}" style="border-color:${consistenciaOk ? 'rgba(34,197,94,0.3)' : consistOkCalc ? 'rgba(22,163,74,0.2)' : 'rgba(239,68,68,0.3)'}; margin-bottom:0;">
+        <div class="card-header" style="background:${consistenciaOk ? 'rgba(34,197,94,0.02)' : consistOkCalc ? 'rgba(22,163,74,0.01)' : 'rgba(239,68,68,0.02)'};">
           <h3>
             <i data-lucide="${consistenciaOk ? 'check-circle-2' : 'bar-chart-2'}" style="color:${consistenciaOk ? 'var(--color-accent)' : 'var(--color-accent-light)'};"></i>
             Cuadrante de Consistencia de Débito Fiscal
           </h3>
-          <span style="font-size:11px;font-weight:800;padding:3px 10px;border-radius:20px;background:${consistenciaOk ? 'rgba(47,122,89,0.1)' : consistOkCalc ? 'rgba(31,92,67,0.08)' : 'rgba(239,68,68,0.1)'};color:${consistenciaOk ? 'var(--color-accent)' : consistOkCalc ? 'var(--color-accent-light)' : '#f87171'};border:1px solid ${consistenciaOk ? 'rgba(47,122,89,0.3)' : consistOkCalc ? 'rgba(31,92,67,0.2)' : 'rgba(239,68,68,0.3)'};">
+          <span style="font-size:11px;font-weight:800;padding:3px 10px;border-radius:20px;background:${consistenciaOk ? 'rgba(34,197,94,0.1)' : consistOkCalc ? 'rgba(22,163,74,0.08)' : 'rgba(239,68,68,0.1)'};color:${consistenciaOk ? 'var(--color-accent)' : consistOkCalc ? 'var(--color-accent-light)' : '#f87171'};border:1px solid ${consistenciaOk ? 'rgba(34,197,94,0.3)' : consistOkCalc ? 'rgba(22,163,74,0.2)' : 'rgba(239,68,68,0.3)'};">
             ${consistenciaOk ? '● VERDE — Validado' : consistOkCalc ? '○ Sin validar — Puede confirmar' : '● ROJO — Diferencia detectada'}
           </span>
         </div>
@@ -556,7 +556,7 @@ export function renderIVASimple() {
           <h3><i data-lucide="calendar" style="color:var(--color-accent);"></i> Vencimiento Impositivo</h3>
         </div>
         <div class="card-body">
-          <div style="background:rgba(31,92,67,0.03);border:1px solid rgba(31,92,67,0.15);border-radius:var(--radius-sm);padding:12px 14px;text-align:center;font-size:13px;">
+          <div style="background:rgba(22,163,74,0.03);border:1px solid rgba(22,163,74,0.15);border-radius:var(--radius-sm);padding:12px 14px;text-align:center;font-size:13px;">
             La fecha límite para la presentación de DDJJ y pago del saldo neto es el 
             <strong style="color:var(--color-accent-light);display:block;font-size:15px;margin-top:6px;">${venc.iva.dia} de Junio de 2026</strong>
           </div>
@@ -740,12 +740,12 @@ export function initIVASimple(mainApp) {
           </p>
           <div style="display:flex; gap:12px; width:100%; margin-top:8px;">
             <button id="btn-cancel-arca" style="flex:1; padding:10px 16px; border:1px solid var(--border-color); border-radius:8px; background:#fff; color:var(--text-secondary); font-weight:600; cursor:pointer; font-size:13px;">Cancelar</button>
-            <button id="btn-retry-arca" style="flex:1; padding:10px 16px; border:none; border-radius:8px; background:linear-gradient(135deg, var(--color-accent), #4f46e5); color:#fff; font-weight:600; cursor:pointer; font-size:13px; box-shadow:0 4px 12px rgba(31,92,67,0.25);">Reintentar Envío</button>
+            <button id="btn-retry-arca" style="flex:1; padding:10px 16px; border:none; border-radius:8px; background:linear-gradient(135deg, var(--color-accent), #4f46e5); color:#fff; font-weight:600; cursor:pointer; font-size:13px; box-shadow:0 4px 12px rgba(22,163,74,0.25);">Reintentar Envío</button>
           </div>
         </div>
 
         <div id="arca-success-state" style="display:none; flex-direction:column; gap:16px; align-items:center;">
-          <div style="background:rgba(47,122,89,0.08); color:var(--color-accent-light); width:52px; height:52px; border-radius:50%; display:flex; align-items:center; justify-content:center;">
+          <div style="background:rgba(34,197,94,0.08); color:var(--color-accent-light); width:52px; height:52px; border-radius:50%; display:flex; align-items:center; justify-content:center;">
             <i data-lucide="check-circle" style="width:28px; height:28px;"></i>
           </div>
           <h4 style="font-family:var(--font-heading); font-size:18px; font-weight:800; color:var(--color-accent-light); margin:0;">DDJJ Presentada Exitosamente</h4>

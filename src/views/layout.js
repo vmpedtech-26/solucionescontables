@@ -42,7 +42,7 @@ export function renderDashboardLayout(childHTML, activeRoute) {
     `;
   } else {
     syncPillHTML = `
-      <div id="topbar-sync-status-indicator" style="display: flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: var(--radius-full); font-size: 11px; font-weight: 700; background: rgba(47, 122, 89, 0.06); border: 1px solid rgba(47, 122, 89, 0.2); transition: all 0.25s ease;">
+      <div id="topbar-sync-status-indicator" style="display: flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: var(--radius-full); font-size: 11px; font-weight: 700; background: rgba(34, 197, 94, 0.06); border: 1px solid rgba(34, 197, 94, 0.2); transition: all 0.25s ease;">
         <span class="sync-dot" style="background:var(--color-accent-light); box-shadow:0 0 8px var(--color-accent-light); width:8px; height:8px; border-radius:50%; display:inline-block;"></span>
         <span style="color:var(--color-accent-light);">Sincronizado</span>
       </div>
@@ -279,7 +279,7 @@ export function initDashboardLayout(mainApp) {
       .company-selector-container { cursor: pointer; transition: all 0.2s; }
       .company-selector-container:hover { border-color: var(--color-accent-light) !important; }
       .dropdown-item { transition: background 0.15s; }
-      .dropdown-item:hover { background: rgba(31, 92, 67, 0.04); }
+      .dropdown-item:hover { background: rgba(22, 163, 74, 0.04); }
       .dropdown-item.active { background: rgba(13, 148, 136, 0.05); }
       .company-dropdown.show { display: block !important; }
     `;
@@ -430,8 +430,8 @@ export function initDashboardLayout(mainApp) {
         <span style="color:#fbbf24; font-size:11px; font-weight:700; margin-left:2px;">Sync Pendiente</span>
       `;
     } else {
-      syncIndicator.style.background = 'rgba(47, 122, 89, 0.06)';
-      syncIndicator.style.border = '1px solid rgba(47, 122, 89, 0.2)';
+      syncIndicator.style.background = 'rgba(34, 197, 94, 0.06)';
+      syncIndicator.style.border = '1px solid rgba(34, 197, 94, 0.2)';
       syncIndicator.innerHTML = `
         <span class="sync-dot" style="background:var(--color-accent-light); box-shadow:0 0 8px var(--color-accent-light); width:8px; height:8px; border-radius:50%; display:inline-block;"></span> 
         <span style="color:var(--color-accent-light); font-size:11px; font-weight:700; margin-left:2px;">Sincronizado</span>

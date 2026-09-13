@@ -20,8 +20,8 @@ export function renderRT54() {
     pequena: {
       label: 'Entidad Pequeña',
       color: 'var(--color-accent-light)',
-      bg: 'rgba(47,122,89,0.04)',
-      border: 'rgba(47,122,89,0.2)',
+      bg: 'rgba(34,197,94,0.04)',
+      border: 'rgba(34,197,94,0.2)',
       simplificaciones: [
         'No segregar Componentes Financieros Implícitos (CFI) en transacciones normales.',
         'Exención total de Impuesto Diferido — solo registrar impuesto corriente.',
@@ -226,7 +226,7 @@ export function renderRT54() {
       <h1 class="view-title">Panel Contable · RT 54 FACPCE</h1>
       <p class="view-subtitle">Categorización de entidades, valuación de inventarios y amortizaciones de Bienes de Uso.</p>
     </div>
-    <div style="background:rgba(31,92,67,0.08);border:1px solid rgba(31,92,67,0.2);padding:7px 14px;border-radius:var(--radius-sm);font-size:12px;font-weight:600;color:var(--color-accent-light);">
+    <div style="background:rgba(22,163,74,0.08);border:1px solid rgba(22,163,74,0.2);padding:7px 14px;border-radius:var(--radius-sm);font-size:12px;font-weight:600;color:var(--color-accent-light);">
       Normativa Contable FACPCE 2026
     </div>
   </div>
@@ -295,7 +295,7 @@ export function renderRT54() {
     <div class="card" style="margin-bottom: 0;">
       <div class="card-header">
         <h3><i data-lucide="package" style="color:var(--color-accent);"></i> Valuación de Bienes de Cambio</h3>
-        <span class="badge" style="margin:0;font-size:10px;color:var(--color-accent-light);border-color:rgba(47,122,89,0.25);background:rgba(47,122,89,0.05);">Costo Última Compra</span>
+        <span class="badge" style="margin:0;font-size:10px;color:var(--color-accent-light);border-color:rgba(34,197,94,0.25);background:rgba(34,197,94,0.05);">Costo Última Compra</span>
       </div>
       <div class="card-body">
         <p class="text-secondary" style="font-size:12.5px;margin-bottom:16px;">
@@ -303,7 +303,7 @@ export function renderRT54() {
         </p>
 
         ${ultimaCompra ? `
-        <div style="background:rgba(47,122,89,0.03);border:1px solid rgba(47,122,89,0.15);border-radius:var(--radius-md);padding:14px;margin-bottom:16px;">
+        <div style="background:rgba(34,197,94,0.03);border:1px solid rgba(34,197,94,0.15);border-radius:var(--radius-md);padding:14px;margin-bottom:16px;">
           <p style="font-size:11px;font-weight:700;color:var(--text-secondary);margin-bottom:6px;">ÚLTIMA COMPRA REGISTRADA</p>
           <div style="font-size:13px;font-weight:700;">${ultimaCompra.proveedor}</div>
           <div class="font-mono" style="font-size:11.5px;color:var(--text-secondary);">${ultimaCompra.fecha.split('-').reverse().join('/')} · Factura ${ultimaCompra.numero}</div>
@@ -357,10 +357,10 @@ export function renderRT54() {
   </div>
 
   <!-- ── SUB-LIBRO DE BIENES DE USO Y AMORTIZACIONES RT 54 (NEW MODULE) ── -->
-  <div class="card" style="margin-bottom: 24px; border-color: rgba(31, 92, 67, 0.25);">
+  <div class="card" style="margin-bottom: 24px; border-color: rgba(22, 163, 74, 0.25);">
     <div class="card-header" style="border-bottom: 1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center;">
       <h3><i data-lucide="calculator" style="color: var(--color-accent);"></i> Sub-Libro de Activos y Amortizaciones Automáticas (RT 54)</h3>
-      <span class="badge" style="margin: 0; background: rgba(31, 92, 67, 0.08); color: var(--color-accent-light); border-color: rgba(31, 92, 67, 0.25);">Bienes de Uso Sincronizados</span>
+      <span class="badge" style="margin: 0; background: rgba(22, 163, 74, 0.08); color: var(--color-accent-light); border-color: rgba(22, 163, 74, 0.25);">Bienes de Uso Sincronizados</span>
     </div>
     <div class="card-body">
       <p class="text-secondary" style="font-size: 13px; margin-bottom: 16px;">
@@ -464,7 +464,7 @@ export function renderRT54() {
               </div>
               <div>
                 ${isAsientoRegistrado ? `
-                  <span style="font-size: 10.5px; font-weight: 700; color: var(--color-accent-light); background: rgba(47, 122, 89, 0.08); border: 1px solid rgba(47, 122, 89, 0.25); padding: 3px 8px; border-radius: 4px; display:flex; align-items:center; gap:2px;">
+                  <span style="font-size: 10.5px; font-weight: 700; color: var(--color-accent-light); background: rgba(34, 197, 94, 0.08); border: 1px solid rgba(34, 197, 94, 0.25); padding: 3px 8px; border-radius: 4px; display:flex; align-items:center; gap:2px;">
                     <i data-lucide="check-circle-2" style="width:12px; height:12px;"></i> ASENTADO
                   </span>
                 ` : `
@@ -496,7 +496,7 @@ export function renderRT54() {
   </div>
 
   <!-- ── SIMULADOR DE AJUSTE POR INFLACIÓN CONTABLE (AxI - RT 54) [NEW MODULE] ── -->
-  <div class="card" style="margin-bottom: 24px; border-color: rgba(31, 92, 67, 0.25);">
+  <div class="card" style="margin-bottom: 24px; border-color: rgba(22, 163, 74, 0.25);">
     <style>
       @keyframes spin {
         from { transform: rotate(0deg); }
@@ -509,10 +509,10 @@ export function renderRT54() {
     <div class="card-header" style="border-bottom: 1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center; flex-wrap: wrap; gap: 10px;">
       <h3><i data-lucide="trending-up" style="color: var(--color-accent);"></i> Simulador de Ajuste por Inflación Contable (AxI — RT 54)</h3>
       <div style="display:flex; align-items:center; gap:8px;">
-        <button id="btn-sync-ipc" class="btn btn-outline btn-sm" style="font-size:11px; padding: 5px 10px; display:flex; align-items:center; gap:6px; margin:0; height:auto; border-color:rgba(31, 92, 67, 0.3); color:var(--color-accent-light); font-weight:600;">
+        <button id="btn-sync-ipc" class="btn btn-outline btn-sm" style="font-size:11px; padding: 5px 10px; display:flex; align-items:center; gap:6px; margin:0; height:auto; border-color:rgba(22, 163, 74, 0.3); color:var(--color-accent-light); font-weight:600;">
           <i data-lucide="refresh-cw" style="width:12px; height:12px;" id="icon-sync-ipc"></i> Sincronizar Índices IPC
         </button>
-        <span class="badge" style="margin: 0; background: rgba(31, 92, 67, 0.08); color: var(--color-accent-light); border-color: rgba(31, 92, 67, 0.25);">Índice IPC Cierre: ${latestValue.toFixed(2)} (${latestPeriod})</span>
+        <span class="badge" style="margin: 0; background: rgba(22, 163, 74, 0.08); color: var(--color-accent-light); border-color: rgba(22, 163, 74, 0.25);">Índice IPC Cierre: ${latestValue.toFixed(2)} (${latestPeriod})</span>
       </div>
     </div>
     <div class="card-body">
@@ -617,8 +617,8 @@ export function renderRT54() {
         </div>
 
         <!-- Adjusted (Homogeneous) Balance Sheet -->
-        <div style="background: rgba(31, 92, 67, 0.02); border: 1px solid rgba(31, 92, 67, 0.2); border-radius: var(--radius-sm); padding: 14px;">
-          <h5 style="font-size:11.5px; font-weight:700; color:var(--color-accent-light); text-transform:uppercase; border-bottom:1px solid rgba(31,92,67,0.15); padding-bottom:6px; margin-bottom:8px;">Balance Reexpresado (RT 54) a ${formatPeriodName(latestPeriod)}</h5>
+        <div style="background: rgba(22, 163, 74, 0.02); border: 1px solid rgba(22, 163, 74, 0.2); border-radius: var(--radius-sm); padding: 14px;">
+          <h5 style="font-size:11.5px; font-weight:700; color:var(--color-accent-light); text-transform:uppercase; border-bottom:1px solid rgba(22,163,74,0.15); padding-bottom:6px; margin-bottom:8px;">Balance Reexpresado (RT 54) a ${formatPeriodName(latestPeriod)}</h5>
           <div style="display:flex; flex-direction:column; gap:6px; font-size:11.5px;">
             <div style="display:flex; justify-content:space-between;">
               <span class="text-secondary">Caja y Bancos (Monetario):</span>
@@ -635,11 +635,11 @@ export function renderRT54() {
               </div>
               `;
             }).join('')}
-            <div style="display:flex; justify-content:space-between; font-weight:800; border-top:1px solid rgba(31,92,67,0.15); padding-top:4px; color: var(--color-accent-light);">
+            <div style="display:flex; justify-content:space-between; font-weight:800; border-top:1px solid rgba(22,163,74,0.15); padding-top:4px; color: var(--color-accent-light);">
               <span>TOTAL ACTIVO AJUSTADO:</span>
               <span class="font-mono">$ ${Math.round(totalAdjustedAssets).toLocaleString('es-AR')}</span>
             </div>
-            <div style="margin-top:8px; border-top: 1px dashed rgba(31,92,67,0.15); padding-top:8px;"></div>
+            <div style="margin-top:8px; border-top: 1px dashed rgba(22,163,74,0.15); padding-top:8px;"></div>
             ${axiItems.filter(i => i.tipo === 'patrimonio').map(i => {
               const ipcOrig = IPC_INDICES[i.origen] || 1500.0;
               const coef = latestValue / ipcOrig;
@@ -658,7 +658,7 @@ export function renderRT54() {
               <span class="font-mono">$ ${Math.round(recpam).toLocaleString('es-AR')}</span>
             </div>
 
-            <div style="display:flex; justify-content:space-between; font-weight:800; border-top:1px solid rgba(31,92,67,0.15); padding-top:4px; color: var(--color-accent-light);">
+            <div style="display:flex; justify-content:space-between; font-weight:800; border-top:1px solid rgba(22,163,74,0.15); padding-top:4px; color: var(--color-accent-light);">
               <span>TOTAL PASIVO + PN + RECPAM:</span>
               <span class="font-mono">$ ${Math.round(totalAdjustedLiabEquity).toLocaleString('es-AR')}</span>
             </div>
@@ -799,10 +799,10 @@ export function renderRT54() {
   </div>
 
   <!-- RG 5824/2026 -->
-  <div class="card" style="margin-top:24px;border-color:rgba(47,122,89,0.2);background:rgba(47,122,89,0.01); margin-bottom: 0;">
+  <div class="card" style="margin-top:24px;border-color:rgba(34,197,94,0.2);background:rgba(34,197,94,0.01); margin-bottom: 0;">
     <div class="card-header">
       <h3><i data-lucide="layers-2" style="color:var(--color-accent);"></i> RG 5824/2026 — Facturación Consolidada Mensual</h3>
-      <span style="font-size:10px;font-weight:700;color:var(--color-accent);background:rgba(47,122,89,0.08);padding:3px 10px;border-radius:20px;border:1px solid rgba(47,122,89,0.25);">Vigente desde 1° Julio 2026</span>
+      <span style="font-size:10px;font-weight:700;color:var(--color-accent);background:rgba(34,197,94,0.08);padding:3px 10px;border-radius:20px;border:1px solid rgba(34,197,94,0.25);">Vigente desde 1° Julio 2026</span>
     </div>
     <div class="card-body">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">

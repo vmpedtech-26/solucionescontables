@@ -101,7 +101,7 @@ export function renderRetenciones() {
               <a href="#/studio/retenciones" style="color:#f87171;text-decoration:none;font-weight:800;margin-left:4px;cursor:pointer;">[Quitar]</a>
             </span>
           ` : `
-            <span style="font-size:10px;padding:2px 8px;border-radius:20px;background:rgba(31,92,67,0.08);color:var(--color-accent-light);border:1px solid rgba(31,92,67,0.2);">Libro Compras</span>
+            <span style="font-size:10px;padding:2px 8px;border-radius:20px;background:rgba(22,163,74,0.08);color:var(--color-accent-light);border:1px solid rgba(22,163,74,0.2);">Libro Compras</span>
             <span style="font-size:10px;padding:2px 8px;border-radius:20px;background:rgba(6,182,212,0.08);color:#22d3ee;border:1px solid rgba(6,182,212,0.2);">Extracto Bancario</span>
           `}
         </div>
@@ -167,8 +167,8 @@ export function renderRetenciones() {
 
     <!-- Panel lateral: instrucciones CSV -->
     <div style="display:flex;flex-direction:column;gap:20px;">
-      <div class="card" style="border-color:rgba(31,92,67,0.15);background:rgba(31,92,67,0.01);">
-        <div class="card-header" style="background:rgba(31,92,67,0.02);">
+      <div class="card" style="border-color:rgba(22,163,74,0.15);background:rgba(22,163,74,0.01);">
+        <div class="card-header" style="background:rgba(22,163,74,0.02);">
           <h3 style="font-size:13px;color:var(--color-accent-light);"><i data-lucide="file-code-2"></i> Formato CSV para ARCA</h3>
         </div>
         <div class="card-body" style="display:flex;flex-direction:column;gap:12px;">
@@ -266,7 +266,7 @@ export function initRetenciones(mainApp) {
         </p>
         <div style="display:flex; gap:12px;">
           <button id="btn-cancel-csv-dl" style="flex:1; padding:10px 16px; border:1px solid var(--border-color); border-radius:8px; background:#fff; color:var(--text-secondary); font-weight:600; cursor:pointer; font-size:13px; transition:background 0.2s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#fff'">Cancelar</button>
-          <button id="btn-confirm-csv-dl" style="flex:1; padding:10px 16px; border:none; border-radius:8px; background:linear-gradient(135deg, var(--color-accent), #4f46e5); color:#fff; font-weight:600; cursor:pointer; font-size:13px; box-shadow:0 4px 12px rgba(31,92,67,0.25);" onmouseover="this.style.opacity='0.95'" onmouseout="this.style.opacity='1'">Descargar CSV</button>
+          <button id="btn-confirm-csv-dl" style="flex:1; padding:10px 16px; border:none; border-radius:8px; background:linear-gradient(135deg, var(--color-accent), #4f46e5); color:#fff; font-weight:600; cursor:pointer; font-size:13px; box-shadow:0 4px 12px rgba(22,163,74,0.25);" onmouseover="this.style.opacity='0.95'" onmouseout="this.style.opacity='1'">Descargar CSV</button>
         </div>
       </div>
     `;

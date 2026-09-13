@@ -368,9 +368,9 @@
   justify-content: center;
 }
 
-.kpi-card.sales .kpi-icon { background: rgba(31, 92, 67, 0.08); color: var(--color-accent); }
+.kpi-card.sales .kpi-icon { background: rgba(22, 163, 74, 0.08); color: var(--color-accent); }
 .kpi-card.purchases .kpi-icon { background: rgba(220, 38, 38, 0.08); color: #dc2626; }
-.kpi-card.tax .kpi-icon { background: rgba(138, 109, 59, 0.1); color: var(--color-highlight); }
+.kpi-card.tax .kpi-icon { background: rgba(82, 82, 91, 0.1); color: var(--color-highlight); }
 .kpi-card.active-company .kpi-icon { background: rgba(22, 48, 42, 0.08); color: var(--color-primary); }
 
 .kpi-val {
@@ -907,8 +907,8 @@
   width: 52px;
   height: 52px;
   border-radius: 50%;
-  background: rgba(31, 92, 67, 0.06);
-  border: 1px solid rgba(31, 92, 67, 0.15);
+  background: rgba(22, 163, 74, 0.06);
+  border: 1px solid rgba(22, 163, 74, 0.15);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1000,8 +1000,8 @@
 }
 
 .history-nav-btn:hover {
-  background: rgba(31, 92, 67, 0.05) !important;
-  border-color: rgba(31, 92, 67, 0.3) !important;
+  background: rgba(22, 163, 74, 0.05) !important;
+  border-color: rgba(22, 163, 74, 0.3) !important;
   color: var(--color-accent) !important;
   transform: translateY(-1px);
 }
@@ -1012,7 +1012,7 @@
 
 .history-nav-btn:focus-visible {
   border-color: var(--color-accent) !important;
-  box-shadow: 0 0 0 2px rgba(31, 92, 67, 0.2) !important;
+  box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.2) !important;
 }
 
 

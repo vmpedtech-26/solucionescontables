@@ -103,7 +103,7 @@ export function renderPortalCliente() {
       <h1 class="view-title">Portal del Cliente (Suite Operativa)</h1>
       <p class="view-subtitle">Consola de facturación y digitalización de comprobantes para la empresa activa.</p>
     </div>
-    <div style="background: rgba(31, 92, 67, 0.08); border: 1px solid rgba(31, 92, 67, 0.2); padding: 8px 16px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; color: var(--color-accent-light);">
+    <div style="background: rgba(22, 163, 74, 0.08); border: 1px solid rgba(22, 163, 74, 0.2); padding: 8px 16px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; color: var(--color-accent-light);">
       Acceso: Cliente Final (${activeCompany.razon_social})
     </div>
   </div>
@@ -126,10 +126,10 @@ export function renderPortalCliente() {
       </div>
 
       <!-- Gemini API Status Card (Inherited from the Studio) -->
-      <div id="gemini-status-card" class="card" style="border-color: rgba(31, 92, 67, 0.2); background: rgba(31, 92, 67, 0.01); margin-bottom: 0;">
+      <div id="gemini-status-card" class="card" style="border-color: rgba(22, 163, 74, 0.2); background: rgba(22, 163, 74, 0.01); margin-bottom: 0;">
         <div class="card-body" style="padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
           <div style="display: flex; align-items: center; gap: 12px; min-width: 250px;">
-            <div style="background: rgba(31, 92, 67, 0.08); color: var(--color-accent-light); width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink:0;">
+            <div style="background: rgba(22, 163, 74, 0.08); color: var(--color-accent-light); width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink:0;">
               <i data-lucide="sparkles"></i>
             </div>
             <div>
@@ -139,7 +139,7 @@ export function renderPortalCliente() {
           </div>
           <div style="display: flex; gap: 8px; align-items: center;">
             ${hasApiKey ? `
-              <span style="font-size: 11px; font-weight: 700; color: var(--color-accent-light); background: rgba(47, 122, 89, 0.08); padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(47, 122, 89, 0.2); display: flex; align-items: center; gap: 4px;">
+              <span style="font-size: 11px; font-weight: 700; color: var(--color-accent-light); background: rgba(34, 197, 94, 0.08); padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(34, 197, 94, 0.2); display: flex; align-items: center; gap: 4px;">
                 <span style="width: 6px; height: 6px; border-radius: 50%; background: var(--color-accent-light);"></span>
                 IA Conectada
               </span>
@@ -165,31 +165,31 @@ export function renderPortalCliente() {
           </p>
 
           <!-- Dynamic Dropzone -->
-          <div class="import-area" id="ticket-dropzone" style="border-color: rgba(31, 92, 67, 0.3); background: rgba(31, 92, 67, 0.01); padding: 32px; margin-bottom: 0;">
-            <div class="import-icon" style="background: rgba(31, 92, 67, 0.08); color: var(--color-accent-light); border-color: rgba(31, 92, 67, 0.2);">
+          <div class="import-area" id="ticket-dropzone" style="border-color: rgba(22, 163, 74, 0.3); background: rgba(22, 163, 74, 0.01); padding: 32px; margin-bottom: 0;">
+            <div class="import-icon" style="background: rgba(22, 163, 74, 0.08); color: var(--color-accent-light); border-color: rgba(22, 163, 74, 0.2);">
               <i data-lucide="camera"></i>
             </div>
             <h4 style="font-size: 14px; font-weight: 700;">Arrastrá el ticket o sacá una foto</h4>
             <p style="font-size: 12px; margin-top: 4px; margin-bottom: 16px;">Soportamos JPG, PNG y PDF (facturas electrónicas de email).</p>
             
-            <label class="btn btn-outline btn-sm" style="border-color: rgba(31, 92, 67, 0.3); color: var(--color-accent-light); cursor: pointer;">
+            <label class="btn btn-outline btn-sm" style="border-color: rgba(22, 163, 74, 0.3); color: var(--color-accent-light); cursor: pointer;">
               <i data-lucide="upload"></i> Elegir Archivo
               <input type="file" id="ticket-file-input" style="display: none;" accept="image/*,application/pdf">
             </label>
 
             <div class="demo-afip-pills" style="margin-top: 16px; display: flex; gap: 8px; justify-content: center;">
-              <div class="afip-sample-pill" id="btn-simulate-ticket" style="border-color: rgba(31, 92, 67, 0.25);">
+              <div class="afip-sample-pill" id="btn-simulate-ticket" style="border-color: rgba(22, 163, 74, 0.25);">
                 <i data-lucide="refresh-cw" style="width: 12px; height: 12px; display: inline; vertical-align: middle; margin-right: 4px; color:var(--color-accent-light);"></i>
                 Digitalizar Gasto de Combustible
               </div>
-              <div class="afip-sample-pill" id="btn-simulate-asset" style="border-color: rgba(31, 92, 67, 0.4); color: var(--color-accent-light); font-weight: 600;">
+              <div class="afip-sample-pill" id="btn-simulate-asset" style="border-color: rgba(22, 163, 74, 0.4); color: var(--color-accent-light); font-weight: 600;">
                 <i data-lucide="refresh-cw" style="width: 12px; height: 12px; display: inline; vertical-align: middle; margin-right: 4px; color:var(--color-accent-light);"></i>
                 Digitalizar Compra de Notebook
               </div>
             </div>
 
             <!-- Quota meter/status -->
-            <div id="ocr-quota-container" style="margin-top: 24px; width: 100%; max-width: 320px; margin-left: auto; margin-right: auto; padding: 12px; border-radius: 8px; background: rgba(31, 92, 67, 0.03); border: 1px solid rgba(31, 92, 67, 0.1);">
+            <div id="ocr-quota-container" style="margin-top: 24px; width: 100%; max-width: 320px; margin-left: auto; margin-right: auto; padding: 12px; border-radius: 8px; background: rgba(22, 163, 74, 0.03); border: 1px solid rgba(22, 163, 74, 0.1);">
               <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11.5px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px;">
                 <span style="display: flex; align-items: center; gap: 4px;"><i data-lucide="sparkles" style="width: 12px; height: 12px; color: var(--color-accent-light);"></i> Cupo Gemini OCR mensual:</span>
                 <span id="ocr-quota-text" style="color: var(--color-primary);">${ocrScans} / ${ocrLimit}</span>
@@ -205,7 +205,7 @@ export function renderPortalCliente() {
                   <button type="button" id="btn-portal-manual-entry" class="btn btn-outline btn-xs" style="font-size: 9.5px; padding: 2px 8px; height: auto; border-color: rgba(245, 158, 11, 0.3); color: #fbbf24; font-weight: 700;">
                     Carga Manual
                   </button>
-                  <button type="button" id="btn-increase-ocr-quota" class="btn btn-outline btn-xs" style="font-size: 9.5px; padding: 2px 8px; height: auto; border-color: rgba(31, 92, 67, 0.3); color: var(--color-accent-light); font-weight: 700;">
+                  <button type="button" id="btn-increase-ocr-quota" class="btn btn-outline btn-xs" style="font-size: 9.5px; padding: 2px 8px; height: auto; border-color: rgba(22, 163, 74, 0.3); color: var(--color-accent-light); font-weight: 700;">
                     Aumentar Límite
                   </button>
                 </div>
@@ -228,7 +228,7 @@ export function renderPortalCliente() {
             <i data-lucide="zap" style="color: var(--color-accent);"></i> 
             <h3 style="margin: 0;">Emitir Factura Electrónica ARCA</h3>
           </div>
-          <span class="badge" style="margin: 0; font-size: 10px; background: rgba(47, 122, 89, 0.08); color: var(--color-accent-light); border-color: rgba(47, 122, 89, 0.2);">WSFE v1.3 Directo</span>
+          <span class="badge" style="margin: 0; font-size: 10px; background: rgba(34, 197, 94, 0.08); color: var(--color-accent-light); border-color: rgba(34, 197, 94, 0.2);">WSFE v1.3 Directo</span>
         </div>
         <div class="card-body">
           <form id="billing-form" style="display: flex; flex-direction: column; gap: 18px;">
@@ -318,8 +318,8 @@ export function renderPortalCliente() {
             </div>
 
             <!-- Tax breakdowns & Perception Engine -->
-            <div style="background: rgba(31, 92, 67, 0.02); border: 1px solid rgba(31, 92, 67, 0.15); border-radius: var(--radius-sm); padding: 14px; display: flex; flex-direction: column; gap: 8px;">
-              <div style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 10px; align-items: center; border-bottom: 1px dashed rgba(31, 92, 67, 0.15); padding-bottom: 10px; margin-bottom: 6px;">
+            <div style="background: rgba(22, 163, 74, 0.02); border: 1px solid rgba(22, 163, 74, 0.15); border-radius: var(--radius-sm); padding: 14px; display: flex; flex-direction: column; gap: 8px;">
+              <div style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 10px; align-items: center; border-bottom: 1px dashed rgba(22, 163, 74, 0.15); padding-bottom: 10px; margin-bottom: 6px;">
                 <label style="font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 6px; cursor: pointer; color: var(--color-primary); margin:0;">
                   <input type="checkbox" id="chk-apply-iibb" style="width:14px; height:14px; cursor:pointer;">
                   Liquidar Percepción IIBB
@@ -345,7 +345,7 @@ export function renderPortalCliente() {
                 <span>Percepción IIBB:</span>
                 <span class="font-mono" style="font-weight: 700; color: #e11d48;" id="invoice-calc-iibb">$ 0,00</span>
               </div>
-              <div style="display: flex; justify-content: space-between; font-size: 14.5px; font-weight: 800; border-top: 1px solid rgba(31, 92, 67, 0.15); padding-top: 8px;">
+              <div style="display: flex; justify-content: space-between; font-size: 14.5px; font-weight: 800; border-top: 1px solid rgba(22, 163, 74, 0.15); padding-top: 8px;">
                 <span style="color: var(--color-primary);">TOTAL FACTURADO:</span>
                 <span class="font-mono" style="color: var(--color-accent);" id="invoice-calc-total">$ 0,00</span>
               </div>
@@ -412,7 +412,7 @@ export function renderPortalCliente() {
           <!-- SUCCESS INVOICE RECEIPT -->
           <div id="invoice-success-receipt" style="display: none; flex-direction: column; gap: 20px;">
             <div style="text-align: center; padding: 10px 0 0 0;">
-              <div style="background: rgba(47, 122, 89, 0.08); border: 1px solid rgba(47, 122, 89, 0.2); width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--color-accent-light); margin: 0 auto 10px;">
+              <div style="background: rgba(34, 197, 94, 0.08); border: 1px solid rgba(34, 197, 94, 0.2); width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--color-accent-light); margin: 0 auto 10px;">
                 <i data-lucide="check-circle-2" style="width: 22px; height: 22px;"></i>
               </div>
               <h4 style="font-size: 15px; font-weight: 800; color: var(--color-primary); margin-bottom: 4px;">¡Comprobante Autorizado por ARCA!</h4>
@@ -430,7 +430,7 @@ export function renderPortalCliente() {
             </div>
 
             <div style="display: flex; gap: 8px;">
-              <button class="btn btn-outline" id="btn-export-reginfo" style="flex: 1; border-color: rgba(31, 92, 67, 0.3); color: var(--color-accent); font-weight:700; font-size: 11.5px; padding: 8px; display: flex; align-items: center; justify-content: center; gap: 4px;">
+              <button class="btn btn-outline" id="btn-export-reginfo" style="flex: 1; border-color: rgba(22, 163, 74, 0.3); color: var(--color-accent); font-weight:700; font-size: 11.5px; padding: 8px; display: flex; align-items: center; justify-content: center; gap: 4px;">
                 <i data-lucide="file-text"></i> Libro IVA Digital AFIP (.txt)
               </button>
               <button class="btn btn-primary" id="btn-emit-another-invoice" style="flex: 1; background: var(--color-accent); border-color: var(--color-accent); font-weight: 700; padding: 8px; display: flex; align-items: center; justify-content: center; gap: 4px;">
@@ -451,7 +451,7 @@ export function renderPortalCliente() {
       <div id="portal-live-preview-card" class="card" style="display: none; border-color: var(--border-color); overflow: hidden;">
         <div class="card-header" style="background: var(--bg-secondary); border-bottom: 1px solid var(--border-color); padding: 10px 16px; display: flex; justify-content: space-between; align-items: center;">
           <h4 style="font-size: 11.5px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin: 0;">Previsualización en Tiempo Real</h4>
-          <span style="font-size: 10px; font-weight: 700; color: var(--color-accent); background: rgba(31, 92, 67, 0.08); padding: 2px 8px; border-radius: 4px;">Factura Electrónica</span>
+          <span style="font-size: 10px; font-weight: 700; color: var(--color-accent); background: rgba(22, 163, 74, 0.08); padding: 2px 8px; border-radius: 4px;">Factura Electrónica</span>
         </div>
         <div class="card-body" style="padding: 16px; background: var(--bg-secondary);">
           
@@ -467,7 +467,7 @@ export function renderPortalCliente() {
       <div class="card" style="margin-bottom: 0;">
         <div class="card-header" style="border-bottom: 1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center;">
           <h3 style="margin:0;"><i data-lucide="check-square"></i> Registro de Comprobantes</h3>
-          <span class="badge" style="margin: 0; font-size: 10px; color:var(--color-accent-light); border-color: rgba(31, 92, 67, 0.2); background: rgba(31, 92, 67, 0.05);">Control Mensual</span>
+          <span class="badge" style="margin: 0; font-size: 10px; color:var(--color-accent-light); border-color: rgba(22, 163, 74, 0.2); background: rgba(22, 163, 74, 0.05);">Control Mensual</span>
         </div>
         <div class="card-body p-0">
           <div class="table-responsive">
@@ -490,7 +490,7 @@ export function renderPortalCliente() {
                       <div style="font-size: 10px; color: var(--text-secondary); display: flex; align-items: center; gap: 4px; margin-top: 2px;">
                         <i data-lucide="file" style="width: 10px; height: 10px;"></i> ${t.archivo}
                         ${t.es_activo ? `
-                          <span style="font-size: 8px; font-weight: 700; color: var(--color-accent-light); background: rgba(31, 92, 67, 0.08); padding: 1px 4px; border-radius: 3px; border: 1px solid rgba(31, 92, 67, 0.2);">BIEN DE USO</span>
+                          <span style="font-size: 8px; font-weight: 700; color: var(--color-accent-light); background: rgba(22, 163, 74, 0.08); padding: 1px 4px; border-radius: 3px; border: 1px solid rgba(22, 163, 74, 0.2);">BIEN DE USO</span>
                         ` : `
                           <span style="font-size: 8px; font-weight: 600; color: var(--text-muted); background: var(--bg-secondary); padding: 1px 4px; border-radius: 3px; border: 1px solid var(--border-color);">${t.tipo === 'Venta' ? 'VENTA EMITIDA' : 'GASTO (' + (t.categoria || 'General') + ')'}</span>
                         `}
@@ -506,7 +506,7 @@ export function renderPortalCliente() {
                     </td>
                     <td class="text-center">
                       ${t.tipo !== 'Venta' ? `
-                        <button class="btn btn-outline btn-xs btn-reconstruct-ticket" data-id="${t.id}" title="Reconstruir comprobante térmico: Genera una réplica digital exacta del ticket en base a la información extraída por la IA, lista para descargar o imprimir." style="display:inline-flex; align-items:center; gap:2px; font-size:9.5px; padding: 2px 6px; border-color: rgba(31, 92, 67, 0.3); color:var(--color-accent-light);">
+                        <button class="btn btn-outline btn-xs btn-reconstruct-ticket" data-id="${t.id}" title="Reconstruir comprobante térmico: Genera una réplica digital exacta del ticket en base a la información extraída por la IA, lista para descargar o imprimir." style="display:inline-flex; align-items:center; gap:2px; font-size:9.5px; padding: 2px 6px; border-color: rgba(22, 163, 74, 0.3); color:var(--color-accent-light);">
                           <i data-lucide="sparkles" style="width:10px; height:10px; color:var(--color-accent-light);"></i> Reconstruir
                         </button>
                       ` : `
@@ -528,7 +528,7 @@ export function renderPortalCliente() {
   <!-- Modal Reconstrucción Térmica Vectorial [NEW FEATURE] -->
   <div id="reconstruct-modal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; padding: 20px; animation: fadeIn 0.25s ease;">
     <div class="card" style="width: 100%; max-width: 440px; border-color: var(--border-color); overflow: hidden; transform: scale(0.95); animation: zoomIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;">
-      <div class="card-header" style="background: rgba(31, 92, 67, 0.03); border-bottom-color: var(--border-color); display:flex; justify-content:space-between; align-items:center;">
+      <div class="card-header" style="background: rgba(22, 163, 74, 0.03); border-bottom-color: var(--border-color); display:flex; justify-content:space-between; align-items:center;">
         <h3 style="color:var(--color-accent-light); display:flex; align-items:center; gap:6px;"><i data-lucide="sparkles"></i> Reconstrucción de Ticket OCR</h3>
         <button class="btn-icon-sm" id="btn-close-reconstruct-modal" title="Cerrar"><i data-lucide="x"></i></button>
       </div>
@@ -651,7 +651,7 @@ export function initPortalCliente(mainApp) {
     style.id = styleId;
     style.innerHTML = `
       .portal-tab-btn { background: transparent; border: 1px solid transparent; color: var(--text-secondary); cursor: pointer; transition: all 0.2s; }
-      .portal-tab-btn:hover { background: rgba(31, 92, 67, 0.04); color: var(--color-primary); }
+      .portal-tab-btn:hover { background: rgba(22, 163, 74, 0.04); color: var(--color-primary); }
       .portal-tab-btn.active { background: var(--color-accent) !important; border-color: var(--color-accent) !important; color: white !important; box-shadow: var(--shadow-sm); }
       
       .afip-invoice-wrapper { background: #fff; border: 1.5px solid var(--text-primary); border-radius: var(--radius-sm); padding: 16px; color: #000; box-shadow: var(--shadow-sm); transition: all 0.2s; }
@@ -678,7 +678,7 @@ export function initPortalCliente(mainApp) {
       .invoice-theme-navy .accent-text-theme { color: #1d4ed8 !important; }
 
       .afip-sample-pill { cursor: pointer; transition: all 0.2s; }
-      .afip-sample-pill:hover { border-color: var(--color-accent) !important; background: rgba(31, 92, 67, 0.02); }
+      .afip-sample-pill:hover { border-color: var(--color-accent) !important; background: rgba(22, 163, 74, 0.02); }
       
       .item-remove-btn { color: #ef4444; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 4px; border-radius: 4px; transition: background 0.2s; }
       .item-remove-btn:hover { background: rgba(239, 68, 68, 0.08); }
@@ -1679,7 +1679,7 @@ export function initPortalCliente(mainApp) {
           <div style="font-size: 10px; color: var(--text-secondary); display: flex; align-items: center; gap: 4px; margin-top: 2px;">
             <i data-lucide="file" style="width: 10px; height: 10px;"></i> ${t.archivo}
             ${t.es_activo ? `
-              <span style="font-size: 8px; font-weight: 700; color: var(--color-accent-light); background: rgba(31, 92, 67, 0.08); padding: 1px 4px; border-radius: 3px; border: 1px solid rgba(31, 92, 67, 0.2);">BIEN DE USO</span>
+              <span style="font-size: 8px; font-weight: 700; color: var(--color-accent-light); background: rgba(22, 163, 74, 0.08); padding: 1px 4px; border-radius: 3px; border: 1px solid rgba(22, 163, 74, 0.2);">BIEN DE USO</span>
             ` : `
               <span style="font-size: 8px; font-weight: 600; color: var(--text-muted); background: var(--bg-secondary); padding: 1px 4px; border-radius: 3px; border: 1px solid var(--border-color);">${t.tipo === 'Venta' ? 'VENTA EMITIDA' : 'GASTO (' + (t.categoria || 'General') + ')'}</span>
             `}

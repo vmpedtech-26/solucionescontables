@@ -30,7 +30,7 @@ export function renderImportacion() {
       <h1 class="view-title">Importación & Reconciliación ARCA</h1>
       <p class="view-subtitle">Consola impositiva para la sincronización y auditoría cruzada de comprobantes con ARCA.</p>
     </div>
-    <div style="background: rgba(31, 92, 67, 0.08); border: 1px solid rgba(31, 92, 67, 0.2); padding: 8px 16px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; color: var(--color-accent-light);">
+    <div style="background: rgba(22, 163, 74, 0.08); border: 1px solid rgba(22, 163, 74, 0.2); padding: 8px 16px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; color: var(--color-accent-light);">
       Empresa: ${activeCompany.razon_social}
     </div>
   </div>
@@ -56,24 +56,24 @@ export function renderImportacion() {
     <div class="card" style="margin-bottom: 24px;">
       <div class="card-body">
         <!-- Drag & Drop Zone -->
-        <div class="import-area" id="afip-dropzone" style="border-color: rgba(31, 92, 67, 0.3); background: rgba(31, 92, 67, 0.01);">
-          <div class="import-icon" style="background: rgba(31, 92, 67, 0.08); color: var(--color-accent-light); border-color: rgba(31, 92, 67, 0.2);">
+        <div class="import-area" id="afip-dropzone" style="border-color: rgba(22, 163, 74, 0.3); background: rgba(22, 163, 74, 0.01);">
+          <div class="import-icon" style="background: rgba(22, 163, 74, 0.08); color: var(--color-accent-light); border-color: rgba(22, 163, 74, 0.2);">
             <i data-lucide="file-text"></i>
           </div>
           <h4 id="dropzone-title" style="font-size: 14px; font-weight: 700;">Arrastrá aquí tus comprobantes ARCA</h4>
           <p id="dropzone-desc" style="font-size: 12px; margin-top: 4px; margin-bottom: 16px;">Soportamos formatos oficiales de ARCA (Excel .xls / .xlsx, TXT o CSV de "Mis Comprobantes").</p>
           
-          <label class="btn btn-outline btn-sm" style="cursor: pointer; border-color: rgba(31, 92, 67, 0.3); color: var(--color-accent-light);">
+          <label class="btn btn-outline btn-sm" style="cursor: pointer; border-color: rgba(22, 163, 74, 0.3); color: var(--color-accent-light);">
             Examinar Archivo Real
             <input type="file" id="afip-file-input" style="display: none;" accept=".csv,.txt,.xlsx,.xls">
           </label>
 
           <div class="demo-afip-pills" style="margin-top: 16px; display: flex; gap: 8px; justify-content: center;">
-            <div class="afip-sample-pill" id="btn-simulate-emitidas" style="border-color: rgba(31, 92, 67, 0.25);">
+            <div class="afip-sample-pill" id="btn-simulate-emitidas" style="border-color: rgba(22, 163, 74, 0.25);">
               <i data-lucide="refresh-cw" style="width: 12px; height: 12px; display: inline; vertical-align: middle; margin-right: 4px; color:var(--color-accent-light);"></i>
               Sincronizar Emitidas ARCA (Ventas)
             </div>
-            <div class="afip-sample-pill" id="btn-simulate-recibidas" style="border-color: rgba(31, 92, 67, 0.25);">
+            <div class="afip-sample-pill" id="btn-simulate-recibidas" style="border-color: rgba(22, 163, 74, 0.25);">
               <i data-lucide="refresh-cw" style="width: 12px; height: 12px; display: inline; vertical-align: middle; margin-right: 4px; color:var(--color-accent-light);"></i>
               Sincronizar Recibidas ARCA (Compras)
             </div>
@@ -126,7 +126,7 @@ export function renderImportacion() {
           <li>En el listado, seleccioná <strong>"Exportar" → Formato XLS o CSV</strong>. El sistema descarga el archivo directamente sin necesidad del botón Excel antiguo.</li>
           <li>¡Listo! Arrastrá ese archivo descargado en este panel y el sistema cargará todo al instante.</li>
         </ul>
-        <div style="margin-top:16px; background:rgba(31,92,67,0.03); border:1px solid rgba(31,92,67,0.15); border-radius:var(--radius-sm); padding:12px 16px; font-size:12px; color:var(--text-secondary);">
+        <div style="margin-top:16px; background:rgba(22,163,74,0.03); border:1px solid rgba(22,163,74,0.15); border-radius:var(--radius-sm); padding:12px 16px; font-size:12px; color:var(--text-secondary);">
           <strong style="color:var(--color-accent-light);">Tip RPA:</strong> Para automatizar la descarga sin ingresar manualmente, configurá el bot de descarga en <strong>Configuración ARCA</strong>. Los robots descargan en horarios nocturnos con la clave fiscal del administrador.
         </div>
       </div>
@@ -138,7 +138,7 @@ export function renderImportacion() {
     <div class="card">
       <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
         <h3><i data-lucide="scale" style="color: var(--color-accent);"></i> Cruce de Cuentas y Auditoría Cruzada</h3>
-        <span class="badge" style="margin: 0; background: rgba(31, 92, 67, 0.08); color: var(--color-accent-light); border-color: rgba(31, 92, 67, 0.2);">ARCA vs VMP Studio</span>
+        <span class="badge" style="margin: 0; background: rgba(22, 163, 74, 0.08); color: var(--color-accent-light); border-color: rgba(22, 163, 74, 0.2);">ARCA vs VMP Studio</span>
       </div>
       <div class="card-body">
         <p class="text-secondary" style="font-size: 13.5px; margin-bottom: 16px;">
@@ -147,17 +147,17 @@ export function renderImportacion() {
 
         <!-- Quick actions reconciler buttons -->
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
-          <button class="btn btn-outline" id="btn-reconcile-compras" style="display: flex; align-items: center; justify-content: center; gap: 6px; border-color: rgba(31, 92, 67, 0.25);">
+          <button class="btn btn-outline" id="btn-reconcile-compras" style="display: flex; align-items: center; justify-content: center; gap: 6px; border-color: rgba(22, 163, 74, 0.25);">
             <i data-lucide="arrow-down" style="color: var(--color-accent);"></i> Reconciliar Compras (Mis Comprobantes Recibidos)
           </button>
-          <button class="btn btn-outline" id="btn-reconcile-ventas" style="display: flex; align-items: center; justify-content: center; gap: 6px; border-color: rgba(31, 92, 67, 0.25);">
+          <button class="btn btn-outline" id="btn-reconcile-ventas" style="display: flex; align-items: center; justify-content: center; gap: 6px; border-color: rgba(22, 163, 74, 0.25);">
             <i data-lucide="arrow-up" style="color: var(--color-accent-light);"></i> Reconciliar Ventas (Mis Comprobantes Emitidos)
           </button>
         </div>
 
         <!-- Reconciliation status dashboard metrics cards -->
         <div id="reconcile-metrics-dashboard" class="grid-resp-3" style="display: none; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 20px;">
-          <div style="background: rgba(47, 122, 89, 0.04); border: 1px solid rgba(47, 122, 89, 0.2); border-radius: var(--radius-sm); padding: 14px;">
+          <div style="background: rgba(34, 197, 94, 0.04); border: 1px solid rgba(34, 197, 94, 0.2); border-radius: var(--radius-sm); padding: 14px;">
             <div style="font-size: 11px; font-weight: 800; color: var(--color-accent-light); text-transform: uppercase;">Coincidentes</div>
             <div class="font-mono" id="rec-val-coincident" style="font-size: 24px; font-weight: 800; margin-top: 4px; color: var(--color-primary);">0</div>
             <div style="font-size: 11px; color: var(--text-secondary); margin-top: 2px;">Cruce exacto en CUIT y monto.</div>
@@ -312,11 +312,11 @@ export function renderImportacion() {
         <div id="bank-results-container" style="display: none; flex-direction: column; gap: 20px; border-top: 1px solid var(--border-color); padding-top: 20px;">
           
           <div class="grid-resp-4" style="display:grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 8px;">
-            <div style="background: rgba(47, 122, 89, 0.03); border: 1px solid rgba(47, 122, 89, 0.15); border-radius: var(--radius-sm); padding: 10px;">
+            <div style="background: rgba(34, 197, 94, 0.03); border: 1px solid rgba(34, 197, 94, 0.15); border-radius: var(--radius-sm); padding: 10px;">
               <div style="font-size: 10px; font-weight: 800; color: var(--color-accent-light); text-transform: uppercase;">Movimientos</div>
               <div class="font-mono" style="font-size: 20px; font-weight: 800; margin-top: 2px;">5</div>
             </div>
-            <div style="background: rgba(47, 122, 89, 0.03); border: 1px solid rgba(47, 122, 89, 0.15); border-radius: var(--radius-sm); padding: 10px;">
+            <div style="background: rgba(34, 197, 94, 0.03); border: 1px solid rgba(34, 197, 94, 0.15); border-radius: var(--radius-sm); padding: 10px;">
               <div style="font-size: 10px; font-weight: 800; color: var(--color-accent-light); text-transform: uppercase;">Cruces Directos</div>
               <div class="font-mono" style="font-size: 20px; font-weight: 800; margin-top: 2px; color: var(--color-accent-light);">3</div>
             </div>
@@ -354,9 +354,9 @@ export function renderImportacion() {
                   <td class="font-mono text-right text-emerald" style="font-weight:700;">$ 181.500,00</td>
                   <td style="color:var(--color-accent); font-weight:600;">Factura A N° 0003-00000850</td>
                   <td class="text-center font-mono text-muted">$ 0,00</td>
-                  <td class="text-center"><span style="font-size: 9.5px; font-weight:700; color:var(--color-accent-light); background:rgba(47, 122, 89, 0.08); padding:2px 6px; border-radius:4px;">100% COINCIDENTE</span></td>
+                  <td class="text-center"><span style="font-size: 9.5px; font-weight:700; color:var(--color-accent-light); background:rgba(34, 197, 94, 0.08); padding:2px 6px; border-radius:4px;">100% COINCIDENTE</span></td>
                   <td class="text-center">
-                    <span style="font-size: 9.5px; font-weight:700; color:var(--color-accent-light); background:rgba(47, 122, 89, 0.08); padding:2px 8px; border-radius:4px; display:inline-block;">
+                    <span style="font-size: 9.5px; font-weight:700; color:var(--color-accent-light); background:rgba(34, 197, 94, 0.08); padding:2px 8px; border-radius:4px; display:inline-block;">
                       Conciliado
                     </span>
                   </td>
@@ -367,9 +367,9 @@ export function renderImportacion() {
                   <td class="font-mono text-right" style="font-weight:700; color:#ef4444;">-$ 217.800,00</td>
                   <td style="color:var(--color-accent); font-weight:600;">Factura A N° 4820-00239481</td>
                   <td class="text-center font-mono text-muted">$ 0,00</td>
-                  <td class="text-center"><span style="font-size: 9.5px; font-weight:700; color:var(--color-accent-light); background:rgba(47, 122, 89, 0.08); padding:2px 6px; border-radius:4px;">100% COINCIDENTE</span></td>
+                  <td class="text-center"><span style="font-size: 9.5px; font-weight:700; color:var(--color-accent-light); background:rgba(34, 197, 94, 0.08); padding:2px 6px; border-radius:4px;">100% COINCIDENTE</span></td>
                   <td class="text-center">
-                    <span style="font-size: 9.5px; font-weight:700; color:var(--color-accent-light); background:rgba(47, 122, 89, 0.08); padding:2px 8px; border-radius:4px; display:inline-block;">
+                    <span style="font-size: 9.5px; font-weight:700; color:var(--color-accent-light); background:rgba(34, 197, 94, 0.08); padding:2px 8px; border-radius:4px; display:inline-block;">
                       Conciliado
                     </span>
                   </td>
@@ -380,9 +380,9 @@ export function renderImportacion() {
                   <td class="font-mono text-right text-emerald" style="font-weight:700;">$ 302.500,00</td>
                   <td style="color:var(--color-accent); font-weight:600;">Factura A N° 0003-00000845</td>
                   <td class="text-center font-mono text-muted">$ 0,00</td>
-                  <td class="text-center"><span style="font-size: 9.5px; font-weight:700; color:var(--color-accent-light); background:rgba(47, 122, 89, 0.08); padding:2px 6px; border-radius:4px;">100% COINCIDENTE</span></td>
+                  <td class="text-center"><span style="font-size: 9.5px; font-weight:700; color:var(--color-accent-light); background:rgba(34, 197, 94, 0.08); padding:2px 6px; border-radius:4px;">100% COINCIDENTE</span></td>
                   <td class="text-center">
-                    <span style="font-size: 9.5px; font-weight:700; color:var(--color-accent-light); background:rgba(47, 122, 89, 0.08); padding:2px 8px; border-radius:4px; display:inline-block;">
+                    <span style="font-size: 9.5px; font-weight:700; color:var(--color-accent-light); background:rgba(34, 197, 94, 0.08); padding:2px 8px; border-radius:4px; display:inline-block;">
                       Conciliado
                     </span>
                   </td>
@@ -683,13 +683,13 @@ export function initImportacion(mainApp) {
       tbodyCoincident.innerHTML = coincident.map(pair => `
         <tr>
           <td class="font-mono text-sm">${pair.afip.fecha.split('-').reverse().join('/')}</td>
-          <td><span class="badge-status active" style="font-size:10px; padding:1px 6px; background: rgba(47, 122, 89, 0.08); color: var(--color-accent-light);">${pair.afip.tipo_comprobante}</span></td>
+          <td><span class="badge-status active" style="font-size:10px; padding:1px 6px; background: rgba(34, 197, 94, 0.08); color: var(--color-accent-light);">${pair.afip.tipo_comprobante}</span></td>
           <td class="font-mono text-sm">${pair.afip.numero}</td>
           <td style="font-weight:600;">${type === 'compras' ? pair.afip.proveedor : pair.afip.cliente}</td>
           <td class="font-mono">${pair.afip.cuit}</td>
           <td class="font-mono text-right" style="font-weight:700;">$ ${pair.afip.total.toLocaleString('es-AR')}</td>
           <td class="text-center">
-            <span style="font-size: 10px; font-weight:700; color:var(--color-accent-light); background:rgba(47, 122, 89, 0.08); padding:2px 8px; border-radius:4px;">
+            <span style="font-size: 10px; font-weight:700; color:var(--color-accent-light); background:rgba(34, 197, 94, 0.08); padding:2px 8px; border-radius:4px;">
               ✅ CONCILIADO
             </span>
           </td>
