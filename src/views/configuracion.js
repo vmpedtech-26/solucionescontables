@@ -18,7 +18,7 @@ export function renderConfiguracion() {
       <h1 class="view-title">Configuración ARCA</h1>
       <p class="view-subtitle">Vinculación de firmas digitales y certificados para facturación y Libro de IVA.</p>
     </div>
-    <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.2); padding: 8px 16px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; color: var(--color-accent);">
+    <div style="background: rgba(47, 122, 89, 0.08); border: 1px solid rgba(47, 122, 89, 0.2); padding: 8px 16px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; color: var(--color-accent);">
       Canal Seguro de Enlace Encriptado
     </div>
   </div>
@@ -31,7 +31,7 @@ export function renderConfiguracion() {
       <!-- Model selector card -->
       <div class="card">
         <div class="card-header">
-          <h3><i data-lucide="git-fork" style="color: #6366f1;"></i> Modelo de Vinculación ARCA</h3>
+          <h3><i data-lucide="git-fork" style="color: var(--color-accent);"></i> Modelo de Vinculación ARCA</h3>
         </div>
         <div class="card-body">
           <p class="text-secondary" style="font-size: 13.5px; margin-bottom: 20px;">
@@ -40,8 +40,8 @@ export function renderConfiguracion() {
 
           <div style="display: flex; flex-direction: column; gap: 12px;">
             <!-- Hybrid option -->
-            <label class="trial-action-btn" style="border-color: ${modelType === 'hybrid' ? '#6366f1' : 'var(--border-color)'}; background: ${modelType === 'hybrid' ? 'rgba(99, 102, 241, 0.01)' : '#fff'}; display: flex; align-items: flex-start; gap: 14px; text-align: left; cursor: pointer;">
-              <input type="radio" name="arca-model-type" value="hybrid" ${modelType === 'hybrid' ? 'checked' : ''} style="margin-top: 4px; accent-color: #6366f1;">
+            <label class="trial-action-btn" style="border-color: ${modelType === 'hybrid' ? 'var(--color-accent)' : 'var(--border-color)'}; background: ${modelType === 'hybrid' ? 'rgba(31, 92, 67, 0.01)' : '#fff'}; display: flex; align-items: flex-start; gap: 14px; text-align: left; cursor: pointer;">
+              <input type="radio" name="arca-model-type" value="hybrid" ${modelType === 'hybrid' ? 'checked' : ''} style="margin-top: 4px; accent-color: var(--color-accent);">
               <div>
                 <h5 style="font-size: 13.5px; font-weight: 700; margin-bottom: 2px; color: var(--color-primary);">Modelo Híbrido Delegado (Recomendado)</h5>
                 <p style="font-size: 11px; color: var(--text-secondary); white-space: normal; line-height: 1.4;">
@@ -51,8 +51,8 @@ export function renderConfiguracion() {
             </label>
 
             <!-- Individual option -->
-            <label class="trial-action-btn" style="border-color: ${modelType === 'individual' ? '#6366f1' : 'var(--border-color)'}; background: ${modelType === 'individual' ? 'rgba(99, 102, 241, 0.01)' : '#fff'}; display: flex; align-items: flex-start; gap: 14px; text-align: left; cursor: pointer;">
-              <input type="radio" name="arca-model-type" value="individual" ${modelType === 'individual' ? 'checked' : ''} style="margin-top: 4px; accent-color: #6366f1;">
+            <label class="trial-action-btn" style="border-color: ${modelType === 'individual' ? 'var(--color-accent)' : 'var(--border-color)'}; background: ${modelType === 'individual' ? 'rgba(31, 92, 67, 0.01)' : '#fff'}; display: flex; align-items: flex-start; gap: 14px; text-align: left; cursor: pointer;">
+              <input type="radio" name="arca-model-type" value="individual" ${modelType === 'individual' ? 'checked' : ''} style="margin-top: 4px; accent-color: var(--color-accent);">
               <div>
                 <h5 style="font-size: 13.5px; font-weight: 700; margin-bottom: 2px; color: var(--color-primary);">Modelo Certificados Individuales</h5>
                 <p style="font-size: 11px; color: var(--text-secondary); white-space: normal; line-height: 1.4;">
@@ -68,14 +68,14 @@ export function renderConfiguracion() {
       <div class="card" id="cert-upload-panel">
         <div class="card-header">
           <h3><i data-lucide="shield-check" style="color: var(--color-accent);"></i> Firma Digital del Estudio</h3>
-          <span class="badge" style="margin: 0; font-size: 10px; color: var(--color-accent); border-color: rgba(16, 185, 129, 0.3); background: rgba(16, 185, 129, 0.05);">CUIT: 30-71938495-2</span>
+          <span class="badge" style="margin: 0; font-size: 10px; color: var(--color-accent); border-color: rgba(47, 122, 89, 0.3); background: rgba(47, 122, 89, 0.05);">CUIT: 30-71938495-2</span>
         </div>
         <div class="card-body">
           ${certUploaded ? `
             <!-- Uploaded active state -->
-            <div style="background: rgba(16, 185, 129, 0.02); border: 1px solid rgba(16, 185, 129, 0.15); border-radius: var(--radius-md); padding: 20px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+            <div style="background: rgba(47, 122, 89, 0.02); border: 1px solid rgba(47, 122, 89, 0.15); border-radius: var(--radius-md); padding: 20px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
               <div style="display: flex; align-items: center; gap: 14px;">
-                <div style="background: rgba(16, 185, 129, 0.08); color: var(--color-accent); width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <div style="background: rgba(47, 122, 89, 0.08); color: var(--color-accent); width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                   <i data-lucide="lock" style="width: 20px; height: 20px;"></i>
                 </div>
                 <div>
@@ -97,7 +97,7 @@ export function renderConfiguracion() {
               
               <!-- CRT Upload Box -->
               <div class="import-area" id="crt-dropzone" style="padding: 20px; margin-bottom: 0; cursor: pointer;">
-                <i data-lucide="file-badge" style="width: 28px; height: 28px; color: #6366f1; margin-bottom: 8px;"></i>
+                <i data-lucide="file-badge" style="width: 28px; height: 28px; color: var(--color-accent); margin-bottom: 8px;"></i>
                 <h5 style="font-size: 12px; font-weight: 700;">Subir Certificado (.crt)</h5>
                 <p style="font-size: 9.5px; color: var(--text-secondary); margin-top: 4px;">Archivo de Certificado ARCA</p>
                 <input type="file" id="crt-file-input" style="display: none;" accept=".crt,.pem">
@@ -105,7 +105,7 @@ export function renderConfiguracion() {
 
               <!-- KEY Upload Box -->
               <div class="import-area" id="key-dropzone" style="padding: 20px; margin-bottom: 0; cursor: pointer;">
-                <i data-lucide="key" style="width: 28px; height: 28px; color: #6366f1; margin-bottom: 8px;"></i>
+                <i data-lucide="key" style="width: 28px; height: 28px; color: var(--color-accent); margin-bottom: 8px;"></i>
                 <h5 style="font-size: 12px; font-weight: 700;">Subir Clave Privada (.key)</h5>
                 <p style="font-size: 9.5px; color: var(--text-secondary); margin-top: 4px;">Clave privada generada en CSR</p>
                 <input type="file" id="key-file-input" style="display: none;" accept=".key">
@@ -114,7 +114,7 @@ export function renderConfiguracion() {
             </div>
             
             <div style="text-align: center;">
-              <button class="btn btn-primary" id="btn-simulate-upload-cert" style="background: #6366f1; border-color: #6366f1; font-size: 12.5px; padding: 8px 16px;">
+              <button class="btn btn-primary" id="btn-simulate-upload-cert" style="background: var(--color-accent); border-color: var(--color-accent); font-size: 12.5px; padding: 8px 16px;">
                 <i data-lucide="shield-check"></i> Enlazar y Homologar Firma Digital
               </button>
             </div>
@@ -123,10 +123,10 @@ export function renderConfiguracion() {
       </div>
 
       <!-- Gemini API Key configuration card for the Studio -->
-      <div class="card" style="border-color: rgba(99, 102, 241, 0.3); background: rgba(99, 102, 241, 0.01);">
-        <div class="card-header" style="border-bottom-color: rgba(99, 102, 241, 0.1);">
-          <h3><i data-lucide="key" style="color: #6366f1;"></i> Motor IA del Estudio (Gemini OCR Centralizado)</h3>
-          <span class="badge" style="margin: 0; font-size: 10px; background: rgba(99, 102, 241, 0.08); color: #818cf8; border-color: rgba(99, 102, 241, 0.2);">Estudio Contable</span>
+      <div class="card" style="border-color: rgba(31, 92, 67, 0.3); background: rgba(31, 92, 67, 0.01);">
+        <div class="card-header" style="border-bottom-color: rgba(31, 92, 67, 0.1);">
+          <h3><i data-lucide="key" style="color: var(--color-accent);"></i> Motor IA del Estudio (Gemini OCR Centralizado)</h3>
+          <span class="badge" style="margin: 0; font-size: 10px; background: rgba(31, 92, 67, 0.08); color: var(--color-accent-light); border-color: rgba(31, 92, 67, 0.2);">Estudio Contable</span>
         </div>
         <div class="card-body">
           <p class="text-secondary" style="font-size: 13px; line-height: 1.5; margin-bottom: 16px;">
@@ -137,22 +137,22 @@ export function renderConfiguracion() {
               <label style="font-size: 11.5px; font-weight: 600; display: block; margin-bottom: 6px;">Gemini API Key del Estudio</label>
               <input type="password" id="gemini-api-key-input" class="form-input" style="width: 100%; padding: 8px 12px; font-size: 12.5px; background: #fff;" placeholder="Pega tu API Key de Google Gemini..." value="${localStorage.getItem('vmp_gemini_api_key') || ''}">
             </div>
-            <button id="btn-save-gemini-key" class="btn btn-primary" style="background: #6366f1; border-color: #6366f1; height: 38px;">
+            <button id="btn-save-gemini-key" class="btn btn-primary" style="background: var(--color-accent); border-color: var(--color-accent); height: 38px;">
               Guardar Clave
             </button>
           </div>
           <div style="margin-top: 12px; display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-secondary);">
-            <i data-lucide="info" style="width: 13px; height: 13px; color: #818cf8;"></i>
-            <span>¿No tenés una clave? Podés obtener una gratis en <a href="https://aistudio.google.com/" target="_blank" style="color: #818cf8; text-decoration: underline; font-weight: 600;">Google AI Studio</a>.</span>
+            <i data-lucide="info" style="width: 13px; height: 13px; color: var(--color-accent-light);"></i>
+            <span>¿No tenés una clave? Podés obtener una gratis en <a href="https://aistudio.google.com/" target="_blank" style="color: var(--color-accent-light); text-decoration: underline; font-weight: 600;">Google AI Studio</a>.</span>
           </div>
         </div>
       </div>
 
       <!-- Supabase Sync configuration card -->
-      <div class="card" style="border-color: rgba(16, 185, 129, 0.3); background: rgba(16, 185, 129, 0.01);">
-        <div class="card-header" style="border-bottom-color: rgba(16, 185, 129, 0.1);">
+      <div class="card" style="border-color: rgba(47, 122, 89, 0.3); background: rgba(47, 122, 89, 0.01);">
+        <div class="card-header" style="border-bottom-color: rgba(47, 122, 89, 0.1);">
           <h3><i data-lucide="database" style="color: var(--color-accent);"></i> Base de Datos Cloud (Supabase Sync)</h3>
-          <span class="badge" style="margin: 0; font-size: 10px; background: rgba(16, 185, 129, 0.08); color: var(--color-accent); border-color: rgba(16, 185, 129, 0.2);">SaaS Cloud</span>
+          <span class="badge" style="margin: 0; font-size: 10px; background: rgba(47, 122, 89, 0.08); color: var(--color-accent); border-color: rgba(47, 122, 89, 0.2);">SaaS Cloud</span>
         </div>
         <div class="card-body">
           <p class="text-secondary" style="font-size: 13px; line-height: 1.5; margin-bottom: 16px;">
@@ -188,7 +188,7 @@ export function renderConfiguracion() {
       <!-- Delegated status panel -->
       <div class="card">
         <div class="card-header">
-          <h3><i data-lucide="users" style="color: #6366f1;"></i> Control de CUITs Delegados</h3>
+          <h3><i data-lucide="users" style="color: var(--color-accent);"></i> Control de CUITs Delegados</h3>
           <span class="badge" style="margin: 0; font-size: 10px;">${companies.length} Empresas</span>
         </div>
         <div class="card-body p-0">
@@ -229,10 +229,10 @@ export function renderConfiguracion() {
       </div>
 
       <!-- RPA Robot Console Card [NEW MODULE] -->
-      <div class="card" style="border-color: rgba(16, 185, 129, 0.25);">
+      <div class="card" style="border-color: rgba(47, 122, 89, 0.25);">
         <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
           <h3><i data-lucide="bot" style="color: var(--color-accent);"></i> Consola de Robots RPA Cloud</h3>
-          <span class="badge" style="margin: 0; background: rgba(16, 185, 129, 0.08); color: var(--color-accent); border-color: rgba(16, 185, 129, 0.25);">Orquestador Activo</span>
+          <span class="badge" style="margin: 0; background: rgba(47, 122, 89, 0.08); color: var(--color-accent); border-color: rgba(47, 122, 89, 0.25);">Orquestador Activo</span>
         </div>
         <div class="card-body">
           <p class="text-secondary" style="font-size: 12.5px; margin-bottom: 18px; line-height: 1.4;">
@@ -244,7 +244,7 @@ export function renderConfiguracion() {
             <div style="background: rgba(248, 250, 252, 0.6); border: 1px solid var(--border-color); padding: 10px 12px; border-radius: 6px; display: flex; flex-direction: column; gap: 4px;">
               <div style="display: flex; justify-content: space-between; align-items: center;">
                 <span style="font-size: 11.5px; font-weight: 750; color: var(--color-primary);">RPA ARCA Comprobantes</span>
-                <span style="background: rgba(16, 185, 129, 0.1); color: #10b981; font-size: 8.5px; font-weight: 800; padding: 1px 6px; border-radius: 10px;">IDLE</span>
+                <span style="background: rgba(47, 122, 89, 0.1); color: var(--color-accent-light); font-size: 8.5px; font-weight: 800; padding: 1px 6px; border-radius: 10px;">IDLE</span>
               </div>
               <span style="font-size: 9.5px; color: var(--text-secondary);">Sincronizado hace 4 hs · Diario</span>
             </div>
@@ -252,7 +252,7 @@ export function renderConfiguracion() {
             <div style="background: rgba(248, 250, 252, 0.6); border: 1px solid var(--border-color); padding: 10px 12px; border-radius: 6px; display: flex; flex-direction: column; gap: 4px;">
               <div style="display: flex; justify-content: space-between; align-items: center;">
                 <span style="font-size: 11.5px; font-weight: 750; color: var(--color-primary);">RPA Rentas (ARBA/AGIP)</span>
-                <span style="background: rgba(16, 185, 129, 0.1); color: #10b981; font-size: 8.5px; font-weight: 800; padding: 1px 6px; border-radius: 10px;">IDLE</span>
+                <span style="background: rgba(47, 122, 89, 0.1); color: var(--color-accent-light); font-size: 8.5px; font-weight: 800; padding: 1px 6px; border-radius: 10px;">IDLE</span>
               </div>
               <span style="font-size: 9.5px; color: var(--text-secondary);">Sincronizado hace 6 hs · Diario</span>
             </div>
@@ -260,7 +260,7 @@ export function renderConfiguracion() {
             <div style="background: rgba(248, 250, 252, 0.6); border: 1px solid var(--border-color); padding: 10px 12px; border-radius: 6px; display: flex; flex-direction: column; gap: 4px;">
               <div style="display: flex; justify-content: space-between; align-items: center;">
                 <span style="font-size: 11.5px; font-weight: 750; color: var(--color-primary);">RPA SICORE Retenciones</span>
-                <span style="background: rgba(16, 185, 129, 0.1); color: #10b981; font-size: 8.5px; font-weight: 800; padding: 1px 6px; border-radius: 10px;">IDLE</span>
+                <span style="background: rgba(47, 122, 89, 0.1); color: var(--color-accent-light); font-size: 8.5px; font-weight: 800; padding: 1px 6px; border-radius: 10px;">IDLE</span>
               </div>
               <span style="font-size: 9.5px; color: var(--text-secondary);">Sincronizado hace 6 hs · Cada 12h</span>
             </div>
@@ -288,7 +288,7 @@ export function renderConfiguracion() {
             </select>
           </div>
 
-          <button class="btn btn-primary w-full" id="btn-run-rpa" style="background: linear-gradient(135deg, var(--color-accent) 0%, #10b981 100%); border:none; font-weight:800; font-size:12.5px; height:38px; display:flex; align-items:center; justify-content:center; gap:6px;">
+          <button class="btn btn-primary w-full" id="btn-run-rpa" style="background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-light) 100%); border:none; font-weight:800; font-size:12.5px; height:38px; display:flex; align-items:center; justify-content:center; gap:6px;">
             <i data-lucide="play" style="width:14px; height:14px;"></i> Sincronizar Robots RPA Ahora
           </button>
 
@@ -307,8 +307,8 @@ export function renderConfiguracion() {
 
       <!-- ARCA Delegation Instructions -->
       <div class="card">
-        <div class="card-header" style="border-bottom-color: rgba(99, 102, 241, 0.1); background: rgba(99,102,241,0.01);">
-          <h3 style="color:#818cf8;"><i data-lucide="help-circle"></i> ¿Cómo delega el cliente en ARCA?</h3>
+        <div class="card-header" style="border-bottom-color: rgba(31, 92, 67, 0.1); background: rgba(31,92,67,0.01);">
+          <h3 style="color:var(--color-accent-light);"><i data-lucide="help-circle"></i> ¿Cómo delega el cliente en ARCA?</h3>
         </div>
         <div class="card-body">
           <p class="text-secondary" style="font-size: 12px; line-height: 1.4; margin-bottom: 14px;">
@@ -452,19 +452,19 @@ export function initConfiguracion(mainApp) {
     const cuitEstudio = activeCompany.cuit || "30-71938495-2";
 
     const logLines = [
-      { t: 0, text: `[RPA BOT] Sincronizador de base tributaria RPA iniciado... v2.6.4-stable`, color: '#6366f1' },
+      { t: 0, text: `[RPA BOT] Sincronizador de base tributaria RPA iniciado... v2.6.4-stable`, color: 'var(--color-accent)' },
       { t: 600, text: `[RPA BOT] Configurando sandbox Chromium Headless seguro...`, color: '#94a3b8' },
       { t: 1200, text: `[RPA BOT] Enrutando a pasarela de autenticación: https://auth.afip.gob.ar/`, color: '#38bdf8' },
-      { t: 2000, text: `[RPA BOT] Ejecutando bypass CAPTCHA matemático de ARCA... [OK] (Score: 0.99)`, color: '#10b981' },
-      { t: 2800, text: `[RPA BOT] Autenticando con credenciales seguras de CUIT ${cuitEstudio}... Acceso Otorgado.`, color: '#34d399' },
+      { t: 2000, text: `[RPA BOT] Ejecutando bypass CAPTCHA matemático de ARCA... [OK] (Score: 0.99)`, color: 'var(--color-accent-light)' },
+      { t: 2800, text: `[RPA BOT] Autenticando con credenciales seguras de CUIT ${cuitEstudio}... Acceso Otorgado.`, color: 'var(--color-accent-light)' },
       { t: 3600, text: `[RPA BOT] Accediendo a servicio 'Domicilio Fiscal Electrónico (DFE)'...`, color: '#a78bfa' },
       { t: 4200, text: `[RPA BOT] DFE Check: 0 notificaciones nuevas / 0 alertas pendientes de lectura.`, color: '#f472b6' },
       { t: 5000, text: `[RPA BOT] Accediendo a 'Mis Comprobantes' (Ventas/Compras)...`, color: '#a78bfa' },
       { t: 5700, text: `[RPA BOT] Sincronizando compras del período actual para ${activeCompany.razon_social}...`, color: '#94a3b8' },
       { t: 6400, text: `[RPA BOT] Descargando y parseando archivo oficial .CSV desde ARCA...`, color: '#94a3b8' },
-      { t: 7100, text: `[RPA BOT] Cruce contable finalizado: 12 compras coincidentes importadas en el ledger contable.`, color: '#10b981' },
-      { t: 7800, text: `[RPA BOT] Sincronización exitosa. Base de datos del estudio contable al día.`, color: '#34d399' },
-      { t: 8400, text: `[RPA BOT] Instancia Chromium cerrada. Proceso finalizado.`, color: '#6366f1' }
+      { t: 7100, text: `[RPA BOT] Cruce contable finalizado: 12 compras coincidentes importadas en el ledger contable.`, color: 'var(--color-accent-light)' },
+      { t: 7800, text: `[RPA BOT] Sincronización exitosa. Base de datos del estudio contable al día.`, color: 'var(--color-accent-light)' },
+      { t: 8400, text: `[RPA BOT] Instancia Chromium cerrada. Proceso finalizado.`, color: 'var(--color-accent)' }
     ];
 
     logLines.forEach(line => {
@@ -482,7 +482,7 @@ export function initConfiguracion(mainApp) {
           if (window.lucide) window.lucide.createIcons({ root: btnRunRpa });
           
           rpaStatus.textContent = '● COMPLETADO';
-          rpaStatus.style.color = '#10b981';
+          rpaStatus.style.color = 'var(--color-accent-light)';
           rpaStatus.style.animation = 'none';
 
           mainApp.showToast("¡Robots RPA sincronizaron y conciliaron con éxito el DFE y Mis Comprobantes!", "success");

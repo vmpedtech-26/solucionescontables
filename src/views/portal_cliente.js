@@ -103,7 +103,7 @@ export function renderPortalCliente() {
       <h1 class="view-title">Portal del Cliente (Suite Operativa)</h1>
       <p class="view-subtitle">Consola de facturación y digitalización de comprobantes para la empresa activa.</p>
     </div>
-    <div style="background: rgba(99, 102, 241, 0.08); border: 1px solid rgba(99, 102, 241, 0.2); padding: 8px 16px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; color: #818cf8;">
+    <div style="background: rgba(31, 92, 67, 0.08); border: 1px solid rgba(31, 92, 67, 0.2); padding: 8px 16px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; color: var(--color-accent-light);">
       Acceso: Cliente Final (${activeCompany.razon_social})
     </div>
   </div>
@@ -126,10 +126,10 @@ export function renderPortalCliente() {
       </div>
 
       <!-- Gemini API Status Card (Inherited from the Studio) -->
-      <div id="gemini-status-card" class="card" style="border-color: rgba(99, 102, 241, 0.2); background: rgba(99, 102, 241, 0.01); margin-bottom: 0;">
+      <div id="gemini-status-card" class="card" style="border-color: rgba(31, 92, 67, 0.2); background: rgba(31, 92, 67, 0.01); margin-bottom: 0;">
         <div class="card-body" style="padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
           <div style="display: flex; align-items: center; gap: 12px; min-width: 250px;">
-            <div style="background: rgba(99, 102, 241, 0.08); color: #818cf8; width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink:0;">
+            <div style="background: rgba(31, 92, 67, 0.08); color: var(--color-accent-light); width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink:0;">
               <i data-lucide="sparkles"></i>
             </div>
             <div>
@@ -139,8 +139,8 @@ export function renderPortalCliente() {
           </div>
           <div style="display: flex; gap: 8px; align-items: center;">
             ${hasApiKey ? `
-              <span style="font-size: 11px; font-weight: 700; color: #10b981; background: rgba(16, 185, 129, 0.08); padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(16, 185, 129, 0.2); display: flex; align-items: center; gap: 4px;">
-                <span style="width: 6px; height: 6px; border-radius: 50%; background: #10b981;"></span>
+              <span style="font-size: 11px; font-weight: 700; color: var(--color-accent-light); background: rgba(47, 122, 89, 0.08); padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(47, 122, 89, 0.2); display: flex; align-items: center; gap: 4px;">
+                <span style="width: 6px; height: 6px; border-radius: 50%; background: var(--color-accent-light);"></span>
                 IA Conectada
               </span>
             ` : `
@@ -165,37 +165,37 @@ export function renderPortalCliente() {
           </p>
 
           <!-- Dynamic Dropzone -->
-          <div class="import-area" id="ticket-dropzone" style="border-color: rgba(99, 102, 241, 0.3); background: rgba(99, 102, 241, 0.01); padding: 32px; margin-bottom: 0;">
-            <div class="import-icon" style="background: rgba(99, 102, 241, 0.08); color: #818cf8; border-color: rgba(99, 102, 241, 0.2);">
+          <div class="import-area" id="ticket-dropzone" style="border-color: rgba(31, 92, 67, 0.3); background: rgba(31, 92, 67, 0.01); padding: 32px; margin-bottom: 0;">
+            <div class="import-icon" style="background: rgba(31, 92, 67, 0.08); color: var(--color-accent-light); border-color: rgba(31, 92, 67, 0.2);">
               <i data-lucide="camera"></i>
             </div>
             <h4 style="font-size: 14px; font-weight: 700;">Arrastrá el ticket o sacá una foto</h4>
             <p style="font-size: 12px; margin-top: 4px; margin-bottom: 16px;">Soportamos JPG, PNG y PDF (facturas electrónicas de email).</p>
             
-            <label class="btn btn-outline btn-sm" style="border-color: rgba(99, 102, 241, 0.3); color: #818cf8; cursor: pointer;">
+            <label class="btn btn-outline btn-sm" style="border-color: rgba(31, 92, 67, 0.3); color: var(--color-accent-light); cursor: pointer;">
               <i data-lucide="upload"></i> Elegir Archivo
               <input type="file" id="ticket-file-input" style="display: none;" accept="image/*,application/pdf">
             </label>
 
             <div class="demo-afip-pills" style="margin-top: 16px; display: flex; gap: 8px; justify-content: center;">
-              <div class="afip-sample-pill" id="btn-simulate-ticket" style="border-color: rgba(99, 102, 241, 0.25);">
-                <i data-lucide="refresh-cw" style="width: 12px; height: 12px; display: inline; vertical-align: middle; margin-right: 4px; color:#818cf8;"></i>
+              <div class="afip-sample-pill" id="btn-simulate-ticket" style="border-color: rgba(31, 92, 67, 0.25);">
+                <i data-lucide="refresh-cw" style="width: 12px; height: 12px; display: inline; vertical-align: middle; margin-right: 4px; color:var(--color-accent-light);"></i>
                 Digitalizar Gasto de Combustible
               </div>
-              <div class="afip-sample-pill" id="btn-simulate-asset" style="border-color: rgba(99, 102, 241, 0.4); color: #818cf8; font-weight: 600;">
-                <i data-lucide="refresh-cw" style="width: 12px; height: 12px; display: inline; vertical-align: middle; margin-right: 4px; color:#818cf8;"></i>
+              <div class="afip-sample-pill" id="btn-simulate-asset" style="border-color: rgba(31, 92, 67, 0.4); color: var(--color-accent-light); font-weight: 600;">
+                <i data-lucide="refresh-cw" style="width: 12px; height: 12px; display: inline; vertical-align: middle; margin-right: 4px; color:var(--color-accent-light);"></i>
                 Digitalizar Compra de Notebook
               </div>
             </div>
 
             <!-- Quota meter/status -->
-            <div id="ocr-quota-container" style="margin-top: 24px; width: 100%; max-width: 320px; margin-left: auto; margin-right: auto; padding: 12px; border-radius: 8px; background: rgba(99, 102, 241, 0.03); border: 1px solid rgba(99, 102, 241, 0.1);">
+            <div id="ocr-quota-container" style="margin-top: 24px; width: 100%; max-width: 320px; margin-left: auto; margin-right: auto; padding: 12px; border-radius: 8px; background: rgba(31, 92, 67, 0.03); border: 1px solid rgba(31, 92, 67, 0.1);">
               <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11.5px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px;">
-                <span style="display: flex; align-items: center; gap: 4px;"><i data-lucide="sparkles" style="width: 12px; height: 12px; color: #818cf8;"></i> Cupo Gemini OCR mensual:</span>
+                <span style="display: flex; align-items: center; gap: 4px;"><i data-lucide="sparkles" style="width: 12px; height: 12px; color: var(--color-accent-light);"></i> Cupo Gemini OCR mensual:</span>
                 <span id="ocr-quota-text" style="color: var(--color-primary);">${ocrScans} / ${ocrLimit}</span>
               </div>
               <div style="width: 100%; height: 8px; background: rgba(0,0,0,0.06); border-radius: 4px; overflow: hidden; border: 1px solid var(--border-color); margin-bottom: 6px;">
-                <div id="ocr-quota-bar" style="width: ${quotaPercent}%; height: 100%; background: ${ocrScans >= ocrLimit ? '#ef4444' : 'linear-gradient(90deg, #6366f1 0%, #a855f7 100%)'}; border-radius: 4px; transition: width 0.3s ease;"></div>
+                <div id="ocr-quota-bar" style="width: ${quotaPercent}%; height: 100%; background: ${ocrScans >= ocrLimit ? '#ef4444' : 'linear-gradient(90deg, var(--color-accent) 0%, #a855f7 100%)'}; border-radius: 4px; transition: width 0.3s ease;"></div>
               </div>
               <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
                 <span id="ocr-quota-warning" style="font-size: 10px; color: ${ocrScans >= ocrLimit ? '#ef4444' : '#f59e0b'}; font-weight: 700;">
@@ -205,7 +205,7 @@ export function renderPortalCliente() {
                   <button type="button" id="btn-portal-manual-entry" class="btn btn-outline btn-xs" style="font-size: 9.5px; padding: 2px 8px; height: auto; border-color: rgba(245, 158, 11, 0.3); color: #fbbf24; font-weight: 700;">
                     Carga Manual
                   </button>
-                  <button type="button" id="btn-increase-ocr-quota" class="btn btn-outline btn-xs" style="font-size: 9.5px; padding: 2px 8px; height: auto; border-color: rgba(99, 102, 241, 0.3); color: #818cf8; font-weight: 700;">
+                  <button type="button" id="btn-increase-ocr-quota" class="btn btn-outline btn-xs" style="font-size: 9.5px; padding: 2px 8px; height: auto; border-color: rgba(31, 92, 67, 0.3); color: var(--color-accent-light); font-weight: 700;">
                     Aumentar Límite
                   </button>
                 </div>
@@ -215,7 +215,7 @@ export function renderPortalCliente() {
 
           <!-- Progress animation -->
           <div id="ticket-progress" style="display: none; text-align: center; padding: 16px;">
-            <div class="spinner" style="margin: 0 auto 12px; border-left-color: #818cf8;"></div>
+            <div class="spinner" style="margin: 0 auto 12px; border-left-color: var(--color-accent-light);"></div>
             <p style="font-size: 13px; font-weight: 600;" id="ticket-progress-txt">Subiendo y extrayendo datos con IA...</p>
           </div>
         </div>
@@ -228,7 +228,7 @@ export function renderPortalCliente() {
             <i data-lucide="zap" style="color: var(--color-accent);"></i> 
             <h3 style="margin: 0;">Emitir Factura Electrónica ARCA</h3>
           </div>
-          <span class="badge" style="margin: 0; font-size: 10px; background: rgba(16, 185, 129, 0.08); color: #10b981; border-color: rgba(16, 185, 129, 0.2);">WSFE v1.3 Directo</span>
+          <span class="badge" style="margin: 0; font-size: 10px; background: rgba(47, 122, 89, 0.08); color: var(--color-accent-light); border-color: rgba(47, 122, 89, 0.2);">WSFE v1.3 Directo</span>
         </div>
         <div class="card-body">
           <form id="billing-form" style="display: flex; flex-direction: column; gap: 18px;">
@@ -318,8 +318,8 @@ export function renderPortalCliente() {
             </div>
 
             <!-- Tax breakdowns & Perception Engine -->
-            <div style="background: rgba(99, 102, 241, 0.02); border: 1px solid rgba(99, 102, 241, 0.15); border-radius: var(--radius-sm); padding: 14px; display: flex; flex-direction: column; gap: 8px;">
-              <div style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 10px; align-items: center; border-bottom: 1px dashed rgba(99, 102, 241, 0.15); padding-bottom: 10px; margin-bottom: 6px;">
+            <div style="background: rgba(31, 92, 67, 0.02); border: 1px solid rgba(31, 92, 67, 0.15); border-radius: var(--radius-sm); padding: 14px; display: flex; flex-direction: column; gap: 8px;">
+              <div style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 10px; align-items: center; border-bottom: 1px dashed rgba(31, 92, 67, 0.15); padding-bottom: 10px; margin-bottom: 6px;">
                 <label style="font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 6px; cursor: pointer; color: var(--color-primary); margin:0;">
                   <input type="checkbox" id="chk-apply-iibb" style="width:14px; height:14px; cursor:pointer;">
                   Liquidar Percepción IIBB
@@ -339,13 +339,13 @@ export function renderPortalCliente() {
               </div>
               <div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--text-secondary);" id="invoice-vat-row">
                 <span>IVA Discriminado:</span>
-                <span class="font-mono" style="font-weight: 700; color: #818cf8;" id="invoice-calc-iva">$ 0,00</span>
+                <span class="font-mono" style="font-weight: 700; color: var(--color-accent-light);" id="invoice-calc-iva">$ 0,00</span>
               </div>
               <div style="display: none; justify-content: space-between; font-size: 12px; color: var(--text-secondary);" id="invoice-iibb-row">
                 <span>Percepción IIBB:</span>
                 <span class="font-mono" style="font-weight: 700; color: #e11d48;" id="invoice-calc-iibb">$ 0,00</span>
               </div>
-              <div style="display: flex; justify-content: space-between; font-size: 14.5px; font-weight: 800; border-top: 1px solid rgba(99, 102, 241, 0.15); padding-top: 8px;">
+              <div style="display: flex; justify-content: space-between; font-size: 14.5px; font-weight: 800; border-top: 1px solid rgba(31, 92, 67, 0.15); padding-top: 8px;">
                 <span style="color: var(--color-primary);">TOTAL FACTURADO:</span>
                 <span class="font-mono" style="color: var(--color-accent);" id="invoice-calc-total">$ 0,00</span>
               </div>
@@ -370,7 +370,7 @@ export function renderPortalCliente() {
             </div>
 
             <!-- Actions -->
-            <button type="button" id="btn-emitir-factura" class="btn btn-primary w-full" style="background: linear-gradient(135deg, #10b981 0%, #6366f1 100%); border: none; font-size: 13.5px; font-weight: 800; height: 44px; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: var(--shadow-sm);">
+            <button type="button" id="btn-emitir-factura" class="btn btn-primary w-full" style="background: linear-gradient(135deg, var(--color-accent-light) 0%, var(--color-accent) 100%); border: none; font-size: 13.5px; font-weight: 800; height: 44px; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: var(--shadow-sm);">
               <i data-lucide="zap"></i> Solicitar CAE & Emitir Comprobante
             </button>
 
@@ -386,7 +386,7 @@ export function renderPortalCliente() {
             <div style="text-align: left; background: #0f172a; border: 1px solid #1e293b; border-radius: var(--radius-sm); padding: 12px; margin: 0 auto 16px; max-width: 480px; box-shadow: var(--shadow-sm);">
               <div style="display:flex; justify-content:space-between; font-size:10px; font-weight:700; color:#64748b; font-family:var(--font-mono); border-bottom:1px solid #1e293b; padding-bottom:6px; margin-bottom:8px;">
                 <span>TERMINAL LOG PROTOCOLO XML SOAP</span>
-                <span style="color:#10b981;">● CONECTADO</span>
+                <span style="color:var(--color-accent-light);">● CONECTADO</span>
               </div>
               <div id="soap-xml-terminal" style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; color: #94a3b8; height: 160px; overflow-y: auto; white-space: pre-wrap; word-break: break-all; line-height: 1.3;">
                 <!-- Changing real SOAP envelopes injected here -->
@@ -395,7 +395,7 @@ export function renderPortalCliente() {
 
             <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 10px; text-align: left; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: var(--text-muted); max-width: 480px; margin: 0 auto;">
               <div id="log-seq-1" style="margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
-                <span class="seq-dot" style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #6366f1;"></span>
+                <span class="seq-dot" style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--color-accent);"></span>
                 <span>Enlace a Pasarela de Autenticación WSAA...</span>
               </div>
               <div id="log-seq-2" style="margin-bottom: 4px; display: flex; align-items: center; gap: 6px; opacity: 0.4;">
@@ -412,7 +412,7 @@ export function renderPortalCliente() {
           <!-- SUCCESS INVOICE RECEIPT -->
           <div id="invoice-success-receipt" style="display: none; flex-direction: column; gap: 20px;">
             <div style="text-align: center; padding: 10px 0 0 0;">
-              <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.2); width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #10b981; margin: 0 auto 10px;">
+              <div style="background: rgba(47, 122, 89, 0.08); border: 1px solid rgba(47, 122, 89, 0.2); width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--color-accent-light); margin: 0 auto 10px;">
                 <i data-lucide="check-circle-2" style="width: 22px; height: 22px;"></i>
               </div>
               <h4 style="font-size: 15px; font-weight: 800; color: var(--color-primary); margin-bottom: 4px;">¡Comprobante Autorizado por ARCA!</h4>
@@ -430,7 +430,7 @@ export function renderPortalCliente() {
             </div>
 
             <div style="display: flex; gap: 8px;">
-              <button class="btn btn-outline" id="btn-export-reginfo" style="flex: 1; border-color: rgba(99, 102, 241, 0.3); color: #6366f1; font-weight:700; font-size: 11.5px; padding: 8px; display: flex; align-items: center; justify-content: center; gap: 4px;">
+              <button class="btn btn-outline" id="btn-export-reginfo" style="flex: 1; border-color: rgba(31, 92, 67, 0.3); color: var(--color-accent); font-weight:700; font-size: 11.5px; padding: 8px; display: flex; align-items: center; justify-content: center; gap: 4px;">
                 <i data-lucide="file-text"></i> Libro IVA Digital AFIP (.txt)
               </button>
               <button class="btn btn-primary" id="btn-emit-another-invoice" style="flex: 1; background: var(--color-accent); border-color: var(--color-accent); font-weight: 700; padding: 8px; display: flex; align-items: center; justify-content: center; gap: 4px;">
@@ -451,7 +451,7 @@ export function renderPortalCliente() {
       <div id="portal-live-preview-card" class="card" style="display: none; border-color: var(--border-color); overflow: hidden;">
         <div class="card-header" style="background: var(--bg-secondary); border-bottom: 1px solid var(--border-color); padding: 10px 16px; display: flex; justify-content: space-between; align-items: center;">
           <h4 style="font-size: 11.5px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin: 0;">Previsualización en Tiempo Real</h4>
-          <span style="font-size: 10px; font-weight: 700; color: #6366f1; background: rgba(99, 102, 241, 0.08); padding: 2px 8px; border-radius: 4px;">Factura Electrónica</span>
+          <span style="font-size: 10px; font-weight: 700; color: var(--color-accent); background: rgba(31, 92, 67, 0.08); padding: 2px 8px; border-radius: 4px;">Factura Electrónica</span>
         </div>
         <div class="card-body" style="padding: 16px; background: var(--bg-secondary);">
           
@@ -467,7 +467,7 @@ export function renderPortalCliente() {
       <div class="card" style="margin-bottom: 0;">
         <div class="card-header" style="border-bottom: 1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center;">
           <h3 style="margin:0;"><i data-lucide="check-square"></i> Registro de Comprobantes</h3>
-          <span class="badge" style="margin: 0; font-size: 10px; color:#818cf8; border-color: rgba(99, 102, 241, 0.2); background: rgba(99, 102, 241, 0.05);">Control Mensual</span>
+          <span class="badge" style="margin: 0; font-size: 10px; color:var(--color-accent-light); border-color: rgba(31, 92, 67, 0.2); background: rgba(31, 92, 67, 0.05);">Control Mensual</span>
         </div>
         <div class="card-body p-0">
           <div class="table-responsive">
@@ -490,13 +490,13 @@ export function renderPortalCliente() {
                       <div style="font-size: 10px; color: var(--text-secondary); display: flex; align-items: center; gap: 4px; margin-top: 2px;">
                         <i data-lucide="file" style="width: 10px; height: 10px;"></i> ${t.archivo}
                         ${t.es_activo ? `
-                          <span style="font-size: 8px; font-weight: 700; color: #818cf8; background: rgba(99, 102, 241, 0.08); padding: 1px 4px; border-radius: 3px; border: 1px solid rgba(99, 102, 241, 0.2);">BIEN DE USO</span>
+                          <span style="font-size: 8px; font-weight: 700; color: var(--color-accent-light); background: rgba(31, 92, 67, 0.08); padding: 1px 4px; border-radius: 3px; border: 1px solid rgba(31, 92, 67, 0.2);">BIEN DE USO</span>
                         ` : `
                           <span style="font-size: 8px; font-weight: 600; color: var(--text-muted); background: var(--bg-secondary); padding: 1px 4px; border-radius: 3px; border: 1px solid var(--border-color);">${t.tipo === 'Venta' ? 'VENTA EMITIDA' : 'GASTO (' + (t.categoria || 'General') + ')'}</span>
                         `}
                       </div>
                     </td>
-                    <td class="font-mono text-right" style="font-weight: 700; color: ${t.tipo === 'Venta' ? '#10b981' : 'inherit'};">
+                    <td class="font-mono text-right" style="font-weight: 700; color: ${t.tipo === 'Venta' ? 'var(--color-accent-light)' : 'inherit'};">
                       ${t.tipo === 'Venta' ? '+' : '-'} $ ${t.monto.toLocaleString('es-AR')}
                     </td>
                     <td>
@@ -506,8 +506,8 @@ export function renderPortalCliente() {
                     </td>
                     <td class="text-center">
                       ${t.tipo !== 'Venta' ? `
-                        <button class="btn btn-outline btn-xs btn-reconstruct-ticket" data-id="${t.id}" title="Reconstruir comprobante térmico: Genera una réplica digital exacta del ticket en base a la información extraída por la IA, lista para descargar o imprimir." style="display:inline-flex; align-items:center; gap:2px; font-size:9.5px; padding: 2px 6px; border-color: rgba(99, 102, 241, 0.3); color:#818cf8;">
-                          <i data-lucide="sparkles" style="width:10px; height:10px; color:#818cf8;"></i> Reconstruir
+                        <button class="btn btn-outline btn-xs btn-reconstruct-ticket" data-id="${t.id}" title="Reconstruir comprobante térmico: Genera una réplica digital exacta del ticket en base a la información extraída por la IA, lista para descargar o imprimir." style="display:inline-flex; align-items:center; gap:2px; font-size:9.5px; padding: 2px 6px; border-color: rgba(31, 92, 67, 0.3); color:var(--color-accent-light);">
+                          <i data-lucide="sparkles" style="width:10px; height:10px; color:var(--color-accent-light);"></i> Reconstruir
                         </button>
                       ` : `
                         <span class="text-muted" style="font-size:9.5px;">Efectuada</span>
@@ -528,8 +528,8 @@ export function renderPortalCliente() {
   <!-- Modal Reconstrucción Térmica Vectorial [NEW FEATURE] -->
   <div id="reconstruct-modal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; padding: 20px; animation: fadeIn 0.25s ease;">
     <div class="card" style="width: 100%; max-width: 440px; border-color: var(--border-color); overflow: hidden; transform: scale(0.95); animation: zoomIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;">
-      <div class="card-header" style="background: rgba(99, 102, 241, 0.03); border-bottom-color: var(--border-color); display:flex; justify-content:space-between; align-items:center;">
-        <h3 style="color:#818cf8; display:flex; align-items:center; gap:6px;"><i data-lucide="sparkles"></i> Reconstrucción de Ticket OCR</h3>
+      <div class="card-header" style="background: rgba(31, 92, 67, 0.03); border-bottom-color: var(--border-color); display:flex; justify-content:space-between; align-items:center;">
+        <h3 style="color:var(--color-accent-light); display:flex; align-items:center; gap:6px;"><i data-lucide="sparkles"></i> Reconstrucción de Ticket OCR</h3>
         <button class="btn-icon-sm" id="btn-close-reconstruct-modal" title="Cerrar"><i data-lucide="x"></i></button>
       </div>
       <div class="card-body" style="background: var(--bg-secondary); padding: 20px; display:flex; flex-direction:column; gap:16px;">
@@ -622,7 +622,7 @@ export function renderPortalCliente() {
           Tu abono mensual actual incluye un límite de 300 digitalizaciones automáticas con IA. Para seguir procesando comprobantes sin interrupción, solicita una extensión de cupo.
         </p>
         <div style="display:flex; flex-direction:column; gap:8px; margin-top: 8px;">
-          <button class="btn btn-primary w-full" id="btn-upgrade-quota-modal" style="background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); border: none; font-size: 13px; font-weight: 800; height: 40px; display: flex; align-items: center; justify-content: center; gap: 6px;">
+          <button class="btn btn-primary w-full" id="btn-upgrade-quota-modal" style="background: linear-gradient(135deg, var(--color-accent) 0%, #a855f7 100%); border: none; font-size: 13px; font-weight: 800; height: 40px; display: flex; align-items: center; justify-content: center; gap: 6px;">
             <i data-lucide="sparkles"></i> Aumentar Cupo a 400 Escaneos
           </button>
           <button class="btn btn-outline w-full" id="btn-manual-entry-fallback" style="font-size:12.5px; height:40px; border-color:#fbbf24; color:#f59e0b; display:flex; align-items:center; justify-content:center; gap:6px;">
@@ -651,8 +651,8 @@ export function initPortalCliente(mainApp) {
     style.id = styleId;
     style.innerHTML = `
       .portal-tab-btn { background: transparent; border: 1px solid transparent; color: var(--text-secondary); cursor: pointer; transition: all 0.2s; }
-      .portal-tab-btn:hover { background: rgba(99, 102, 241, 0.04); color: var(--color-primary); }
-      .portal-tab-btn.active { background: #6366f1 !important; border-color: #6366f1 !important; color: white !important; box-shadow: var(--shadow-sm); }
+      .portal-tab-btn:hover { background: rgba(31, 92, 67, 0.04); color: var(--color-primary); }
+      .portal-tab-btn.active { background: var(--color-accent) !important; border-color: var(--color-accent) !important; color: white !important; box-shadow: var(--shadow-sm); }
       
       .afip-invoice-wrapper { background: #fff; border: 1.5px solid #0f172a; border-radius: var(--radius-sm); padding: 16px; color: #000; box-shadow: var(--shadow-sm); transition: all 0.2s; }
       
@@ -664,11 +664,11 @@ export function initPortalCliente(mainApp) {
       .invoice-theme-slate .accent-text-theme { color: #0f172a !important; }
 
       /* Theme Emerald */
-      .invoice-theme-emerald { border-color: #059669 !important; }
-      .invoice-theme-emerald .receipt-theme-bg { background-color: #ecfdf5 !important; border-color: #059669 !important; color: #064e3b !important; }
-      .invoice-theme-emerald .invoice-title-color { color: #047857 !important; }
-      .invoice-theme-emerald .table-border-custom { border-bottom: 2px solid #059669 !important; }
-      .invoice-theme-emerald .accent-text-theme { color: #059669 !important; }
+      .invoice-theme-emerald { border-color: var(--color-accent) !important; }
+      .invoice-theme-emerald .receipt-theme-bg { background-color: #ecfdf5 !important; border-color: var(--color-accent) !important; color: #064e3b !important; }
+      .invoice-theme-emerald .invoice-title-color { color: var(--color-accent) !important; }
+      .invoice-theme-emerald .table-border-custom { border-bottom: 2px solid var(--color-accent) !important; }
+      .invoice-theme-emerald .accent-text-theme { color: var(--color-accent) !important; }
 
       /* Theme Navy */
       .invoice-theme-navy { border-color: #1d4ed8 !important; }
@@ -678,7 +678,7 @@ export function initPortalCliente(mainApp) {
       .invoice-theme-navy .accent-text-theme { color: #1d4ed8 !important; }
 
       .afip-sample-pill { cursor: pointer; transition: all 0.2s; }
-      .afip-sample-pill:hover { border-color: #6366f1 !important; background: rgba(99, 102, 241, 0.02); }
+      .afip-sample-pill:hover { border-color: var(--color-accent) !important; background: rgba(31, 92, 67, 0.02); }
       
       .item-remove-btn { color: #ef4444; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 4px; border-radius: 4px; transition: background 0.2s; }
       .item-remove-btn:hover { background: rgba(239, 68, 68, 0.08); }
@@ -920,7 +920,7 @@ export function initPortalCliente(mainApp) {
           <td style="padding: 5px 0; color: #1e293b; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${item.desc || '(Detalle vacío)'}</td>
           <td style="text-align: center; padding: 5px 0; font-family: monospace;">${qty}</td>
           <td style="text-align: right; padding: 5px 0; font-family: monospace;">$${price.toLocaleString('es-AR')}</td>
-          ${!isMonotributo && compLetter === 'A' ? `<td style="text-align: right; padding: 5px 0; font-family: monospace; color:#6366f1;">${vatPct}%</td>` : ''}
+          ${!isMonotributo && compLetter === 'A' ? `<td style="text-align: right; padding: 5px 0; font-family: monospace; color:var(--color-accent);">${vatPct}%</td>` : ''}
           <td style="text-align: right; padding: 5px 0; font-family: monospace; font-weight: 700;">$${subtotal.toLocaleString('es-AR')}</td>
         </tr>
       `;
@@ -1022,7 +1022,7 @@ export function initPortalCliente(mainApp) {
                 <th style="padding-bottom: 3px;">Detalle / Concepto</th>
                 <th style="text-align: center; padding-bottom: 3px; width: 30px;">Cant</th>
                 <th style="text-align: right; padding-bottom: 3px; width: 60px;">Unitario</th>
-                ${isRIAndTypeA ? `<th style="text-align: right; padding-bottom: 3px; width: 40px; color:#6366f1;">IVA</th>` : ''}
+                ${isRIAndTypeA ? `<th style="text-align: right; padding-bottom: 3px; width: 40px; color:var(--color-accent);">IVA</th>` : ''}
                 <th style="text-align: right; padding-bottom: 3px; width: 70px;">Total</th>
               </tr>
             </thead>
@@ -1193,9 +1193,9 @@ export function initPortalCliente(mainApp) {
       const isValid = validarCUIT(rawVal);
       cuitBadge.style.display = 'block';
       if (isValid) {
-        cuitBadge.style.color = '#10b981';
+        cuitBadge.style.color = 'var(--color-accent-light)';
         cuitBadge.textContent = '✅ CUIT Válido (Padrón Módulo 11 OK)';
-        inputCuit.style.borderColor = '#10b981';
+        inputCuit.style.borderColor = 'var(--color-accent-light)';
       } else {
         cuitBadge.style.color = '#ef4444';
         cuitBadge.textContent = '❌ CUIT Matemáticamente Inválido';
@@ -1236,9 +1236,9 @@ export function initPortalCliente(mainApp) {
         
         // Render check digit green
         cuitBadge.style.display = 'block';
-        cuitBadge.style.color = '#10b981';
+        cuitBadge.style.color = 'var(--color-accent-light)';
         cuitBadge.textContent = '✅ CUIT Válido (Cliente en Padrón Activo)';
-        inputCuit.style.borderColor = '#10b981';
+        inputCuit.style.borderColor = 'var(--color-accent-light)';
 
         mainApp.showToast("¡Cliente encontrado y verificado en padrón ARCA!", "success");
         calculateTotalsAndPreview();
@@ -1248,9 +1248,9 @@ export function initPortalCliente(mainApp) {
         cuitBadge.style.display = 'block';
 
         if (validCheck) {
-          cuitBadge.style.color = '#10b981';
+          cuitBadge.style.color = 'var(--color-accent-light)';
           cuitBadge.textContent = '✅ CUIT Válido (Matemático)';
-          inputCuit.style.borderColor = '#10b981';
+          inputCuit.style.borderColor = 'var(--color-accent-light)';
         } else {
           cuitBadge.style.color = '#ef4444';
           cuitBadge.textContent = '⚠️ CUIT no registrado en Padrón local';
@@ -1305,7 +1305,7 @@ export function initPortalCliente(mainApp) {
     logSeq3.style.opacity = '0.4';
 
     // Inyect XML terminal step 1: WSAA TRA Request
-    soapXmlTerminal.innerHTML = `<span style="color:#6366f1;">&gt; Generando TRA (Ticket de Requerimiento de Acceso) XML...</span>\n`;
+    soapXmlTerminal.innerHTML = `<span style="color:var(--color-accent);">&gt; Generando TRA (Ticket de Requerimiento de Acceso) XML...</span>\n`;
     
     setTimeout(() => {
       soapXmlTerminal.innerHTML += `<span style="color:#a5b4fc;">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
@@ -1323,15 +1323,15 @@ export function initPortalCliente(mainApp) {
 
     // Step 2: WSAA signing soap request
     setTimeout(() => {
-      logSeq1.querySelector('.seq-dot').style.background = '#10b981';
-      logSeq1.innerHTML += ' <span style="color:#10b981; font-weight:700;">[OK]</span>';
+      logSeq1.querySelector('.seq-dot').style.background = 'var(--color-accent-light)';
+      logSeq1.innerHTML += ' <span style="color:var(--color-accent-light); font-weight:700;">[OK]</span>';
       
       invoiceLoadingStatus.textContent = "Firmando digitalmente token XML con certificado (.key) del estudio...";
       logSeq2.style.opacity = '1';
       logSeq2.querySelector('.seq-dot').style.background = '#fbbf24';
 
-      soapXmlTerminal.innerHTML += `\n<span style="color:#6366f1;">&gt; Invocando WSAA mediante SOAP con firma PKCS#7 CMS...</span>\n`;
-      soapXmlTerminal.innerHTML += `<span style="color:#34d399;">&lt;soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"&gt;
+      soapXmlTerminal.innerHTML += `\n<span style="color:var(--color-accent);">&gt; Invocando WSAA mediante SOAP con firma PKCS#7 CMS...</span>\n`;
+      soapXmlTerminal.innerHTML += `<span style="color:var(--color-accent-light);">&lt;soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"&gt;
   &lt;soapenv:Body&gt;
     &lt;loginCms xmlns="http://wsaa.view.afip.gov.ar/ws/"&gt;
       &lt;in0&gt;MIIHDgYJKoZIhvcNAQcCoIIH9zCCB/MCAQExCzAJBgUrDgMC... [CMS ENVELOPE]&lt;/in0&gt;
@@ -1342,7 +1342,7 @@ export function initPortalCliente(mainApp) {
       soapXmlTerminal.scrollTop = soapXmlTerminal.scrollHeight;
 
       setTimeout(() => {
-        soapXmlTerminal.innerHTML += `\n<span style="color:#34d399;">&lt; WSAA Response: Token de Autorización recibido exitosamente:</span>\n`;
+        soapXmlTerminal.innerHTML += `\n<span style="color:var(--color-accent-light);">&lt; WSAA Response: Token de Autorización recibido exitosamente:</span>\n`;
         soapXmlTerminal.innerHTML += `<span style="color:#94a3b8;">&lt;loginCmsResponse&gt;
   &lt;loginCmsReturn&gt;
     &lt;header&gt;CN=wsaa, O=AFIP, C=AR&lt;/header&gt;
@@ -1360,14 +1360,14 @@ export function initPortalCliente(mainApp) {
 
     // Step 3: WSFE request for CAE
     setTimeout(() => {
-      logSeq2.querySelector('.seq-dot').style.background = '#10b981';
-      logSeq2.innerHTML += ' <span style="color:#10b981; font-weight:700;">[OK]</span>';
+      logSeq2.querySelector('.seq-dot').style.background = 'var(--color-accent-light)';
+      logSeq2.innerHTML += ' <span style="color:var(--color-accent-light); font-weight:700;">[OK]</span>';
       
       invoiceLoadingStatus.textContent = "Solicitando Código de Autorización Electrónico (CAE) en WSFE...";
       logSeq3.style.opacity = '1';
       logSeq3.querySelector('.seq-dot').style.background = '#fbbf24';
 
-      soapXmlTerminal.innerHTML += `\n<span style="color:#6366f1;">&gt; Enviando solicitud FECAESolicitar lote de venta a WSFE...</span>\n`;
+      soapXmlTerminal.innerHTML += `\n<span style="color:var(--color-accent);">&gt; Enviando solicitud FECAESolicitar lote de venta a WSFE...</span>\n`;
       soapXmlTerminal.innerHTML += `<span style="color:#f472b6;">&lt;soapenv:Envelope xmlns:ar="http://ar.gov.afip.dif.FEV1/"&gt;
   &lt;ar:FECAESolicitar&gt;
     &lt;ar:Auth&gt;
@@ -1399,7 +1399,7 @@ export function initPortalCliente(mainApp) {
 
       setTimeout(() => {
         soapXmlTerminal.innerHTML += `\n<span style="color:#f472b6;">&lt; WSFE Response: CAE Otorgado con éxito!</span>\n`;
-        soapXmlTerminal.innerHTML += `<span style="color:#34d399;">&lt;FECAESolicitarResponse xmlns="http://ar.gov.afip.dif.FEV1/"&gt;
+        soapXmlTerminal.innerHTML += `<span style="color:var(--color-accent-light);">&lt;FECAESolicitarResponse xmlns="http://ar.gov.afip.dif.FEV1/"&gt;
   &lt;FECAESolicitarResult&gt;
     &lt;FeCabResp&gt;
       &lt;Resultado&gt;A&lt;/Resultado&gt;
@@ -1421,8 +1421,8 @@ export function initPortalCliente(mainApp) {
 
     // Complete Handshake successfully!
     setTimeout(() => {
-      logSeq3.querySelector('.seq-dot').style.background = '#10b981';
-      logSeq3.innerHTML += ' <span style="color:#10b981; font-weight:700;">[OK]</span>';
+      logSeq3.querySelector('.seq-dot').style.background = 'var(--color-accent-light)';
+      logSeq3.innerHTML += ' <span style="color:var(--color-accent-light); font-weight:700;">[OK]</span>';
 
       const dateToday = new Date().toISOString().slice(0, 10);
       const compNum = Math.floor(1000 + Math.random() * 9000);
@@ -1524,7 +1524,7 @@ export function initPortalCliente(mainApp) {
 
     const themeColors = {
       slate: { border: '#0f172a', bg: '#f1f5f9', text: '#0f172a', title: '#000000' },
-      emerald: { border: '#059669', bg: '#ecfdf5', text: '#064e3b', title: '#047857' },
+      emerald: { border: 'var(--color-accent)', bg: '#ecfdf5', text: '#064e3b', title: 'var(--color-accent)' },
       navy: { border: '#1d4ed8', bg: '#eff6ff', text: '#1e3a8a', title: '#1d4ed8' }
     };
     const colors = themeColors[activeTheme] || themeColors.slate;
@@ -1679,13 +1679,13 @@ export function initPortalCliente(mainApp) {
           <div style="font-size: 10px; color: var(--text-secondary); display: flex; align-items: center; gap: 4px; margin-top: 2px;">
             <i data-lucide="file" style="width: 10px; height: 10px;"></i> ${t.archivo}
             ${t.es_activo ? `
-              <span style="font-size: 8px; font-weight: 700; color: #818cf8; background: rgba(99, 102, 241, 0.08); padding: 1px 4px; border-radius: 3px; border: 1px solid rgba(99, 102, 241, 0.2);">BIEN DE USO</span>
+              <span style="font-size: 8px; font-weight: 700; color: var(--color-accent-light); background: rgba(31, 92, 67, 0.08); padding: 1px 4px; border-radius: 3px; border: 1px solid rgba(31, 92, 67, 0.2);">BIEN DE USO</span>
             ` : `
               <span style="font-size: 8px; font-weight: 600; color: var(--text-muted); background: var(--bg-secondary); padding: 1px 4px; border-radius: 3px; border: 1px solid var(--border-color);">${t.tipo === 'Venta' ? 'VENTA EMITIDA' : 'GASTO (' + (t.categoria || 'General') + ')'}</span>
             `}
           </div>
         </td>
-        <td class="font-mono text-right" style="font-weight: 700; color: ${t.tipo === 'Venta' ? '#10b981' : 'inherit'};">
+        <td class="font-mono text-right" style="font-weight: 700; color: ${t.tipo === 'Venta' ? 'var(--color-accent-light)' : 'inherit'};">
           ${t.tipo === 'Venta' ? '+' : '-'} $ ${t.monto.toLocaleString('es-AR')}
         </td>
         <td>

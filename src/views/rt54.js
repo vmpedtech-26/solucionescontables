@@ -19,9 +19,9 @@ export function renderRT54() {
   const catConfig = {
     pequena: {
       label: 'Entidad Pequeña',
-      color: '#10b981',
-      bg: 'rgba(16,185,129,0.04)',
-      border: 'rgba(16,185,129,0.2)',
+      color: 'var(--color-accent-light)',
+      bg: 'rgba(47,122,89,0.04)',
+      border: 'rgba(47,122,89,0.2)',
       simplificaciones: [
         'No segregar Componentes Financieros Implícitos (CFI) en transacciones normales.',
         'Exención total de Impuesto Diferido — solo registrar impuesto corriente.',
@@ -226,7 +226,7 @@ export function renderRT54() {
       <h1 class="view-title">Panel Contable · RT 54 FACPCE</h1>
       <p class="view-subtitle">Categorización de entidades, valuación de inventarios y amortizaciones de Bienes de Uso.</p>
     </div>
-    <div style="background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.2);padding:7px 14px;border-radius:var(--radius-sm);font-size:12px;font-weight:600;color:#818cf8;">
+    <div style="background:rgba(31,92,67,0.08);border:1px solid rgba(31,92,67,0.2);padding:7px 14px;border-radius:var(--radius-sm);font-size:12px;font-weight:600;color:var(--color-accent-light);">
       Normativa Contable FACPCE 2026
     </div>
   </div>
@@ -236,7 +236,7 @@ export function renderRT54() {
     <!-- ── Categorizador ──────────────────────────────────────── -->
     <div class="card" style="${cat ? `border-color:${cat.border};background:${cat.bg};` : ''} margin-bottom: 0;">
       <div class="card-header">
-        <h3><i data-lucide="layers" style="color:#6366f1;"></i> Categorización RT 54 — Ejercicio Activo</h3>
+        <h3><i data-lucide="layers" style="color:var(--color-accent);"></i> Categorización RT 54 — Ejercicio Activo</h3>
       </div>
       <div class="card-body">
         <p class="text-secondary" style="font-size:12.5px;margin-bottom:16px;">
@@ -248,7 +248,7 @@ export function renderRT54() {
             <label style="font-size:12px;font-weight:600;display:block;margin-bottom:8px;">Ingresos anuales reexpresados ($)</label>
             <input type="number" id="inp-ingresos-rt54" class="form-input" placeholder="Ej: 12.000.000" style="width:100%;padding:10px 12px;" value="${ingresosGuardados || ''}">
           </div>
-          <button class="btn btn-primary" id="btn-categorizar" style="background:#6366f1;border-color:#6366f1;white-space:nowrap;">
+          <button class="btn btn-primary" id="btn-categorizar" style="background:var(--color-accent);border-color:var(--color-accent);white-space:nowrap;">
             <i data-lucide="calculator"></i> Categorizar
           </button>
         </div>
@@ -258,7 +258,7 @@ export function renderRT54() {
           <p style="font-size:11px;font-weight:700;color:var(--text-secondary);margin-bottom:8px;">UMBRALES 2026 (Base oct/22 × ${RT54_COEF}×)</p>
           <div style="display:flex;flex-direction:column;gap:6px;">
             <div style="display:flex;justify-content:space-between;font-size:11.5px;">
-              <span style="color:#10b981;font-weight:600;">Pequeña (hasta)</span>
+              <span style="color:var(--color-accent-light);font-weight:600;">Pequeña (hasta)</span>
               <span class="font-mono">$ ${fmt(umbralMediana)}</span>
             </div>
             <div style="display:flex;justify-content:space-between;font-size:11.5px;">
@@ -295,7 +295,7 @@ export function renderRT54() {
     <div class="card" style="margin-bottom: 0;">
       <div class="card-header">
         <h3><i data-lucide="package" style="color:var(--color-accent);"></i> Valuación de Bienes de Cambio</h3>
-        <span class="badge" style="margin:0;font-size:10px;color:#10b981;border-color:rgba(16,185,129,0.25);background:rgba(16,185,129,0.05);">Costo Última Compra</span>
+        <span class="badge" style="margin:0;font-size:10px;color:var(--color-accent-light);border-color:rgba(47,122,89,0.25);background:rgba(47,122,89,0.05);">Costo Última Compra</span>
       </div>
       <div class="card-body">
         <p class="text-secondary" style="font-size:12.5px;margin-bottom:16px;">
@@ -303,7 +303,7 @@ export function renderRT54() {
         </p>
 
         ${ultimaCompra ? `
-        <div style="background:rgba(16,185,129,0.03);border:1px solid rgba(16,185,129,0.15);border-radius:var(--radius-md);padding:14px;margin-bottom:16px;">
+        <div style="background:rgba(47,122,89,0.03);border:1px solid rgba(47,122,89,0.15);border-radius:var(--radius-md);padding:14px;margin-bottom:16px;">
           <p style="font-size:11px;font-weight:700;color:var(--text-secondary);margin-bottom:6px;">ÚLTIMA COMPRA REGISTRADA</p>
           <div style="font-size:13px;font-weight:700;">${ultimaCompra.proveedor}</div>
           <div class="font-mono" style="font-size:11.5px;color:var(--text-secondary);">${ultimaCompra.fecha.split('-').reverse().join('/')} · Factura ${ultimaCompra.numero}</div>
@@ -357,10 +357,10 @@ export function renderRT54() {
   </div>
 
   <!-- ── SUB-LIBRO DE BIENES DE USO Y AMORTIZACIONES RT 54 (NEW MODULE) ── -->
-  <div class="card" style="margin-bottom: 24px; border-color: rgba(99, 102, 241, 0.25);">
+  <div class="card" style="margin-bottom: 24px; border-color: rgba(31, 92, 67, 0.25);">
     <div class="card-header" style="border-bottom: 1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center;">
-      <h3><i data-lucide="calculator" style="color: #6366f1;"></i> Sub-Libro de Activos y Amortizaciones Automáticas (RT 54)</h3>
-      <span class="badge" style="margin: 0; background: rgba(99, 102, 241, 0.08); color: #818cf8; border-color: rgba(99, 102, 241, 0.25);">Bienes de Uso Sincronizados</span>
+      <h3><i data-lucide="calculator" style="color: var(--color-accent);"></i> Sub-Libro de Activos y Amortizaciones Automáticas (RT 54)</h3>
+      <span class="badge" style="margin: 0; background: rgba(31, 92, 67, 0.08); color: var(--color-accent-light); border-color: rgba(31, 92, 67, 0.25);">Bienes de Uso Sincronizados</span>
     </div>
     <div class="card-body">
       <p class="text-secondary" style="font-size: 13px; margin-bottom: 16px;">
@@ -399,7 +399,7 @@ export function renderRT54() {
                   <td class="text-center">${asset.vidaUtil} años</td>
                   <td class="font-mono text-emerald">$ ${annual.toLocaleString('es-AR')}</td>
                   <td class="font-mono" style="color: #fbbf24;">$ ${accum.toLocaleString('es-AR')}</td>
-                  <td class="font-mono" style="font-weight: 700; color: #6366f1;">$ ${residual.toLocaleString('es-AR')}</td>
+                  <td class="font-mono" style="font-weight: 700; color: var(--color-accent);">$ ${residual.toLocaleString('es-AR')}</td>
                   <td class="text-center">
                     ${asset.id.startsWith('cust-') ? `
                       <button class="item-remove-btn btn-delete-custom-asset" data-index="${index - dbAssets.length}" style="margin:0 auto; padding:2px;">
@@ -450,7 +450,7 @@ export function renderRT54() {
         <!-- Ledger Adjustment entry block -->
         <div>
           <h4 style="font-size: 13px; font-weight: 800; color: var(--color-primary); margin-bottom: 8px; display:flex; align-items:center; gap:4px;">
-            <i data-lucide="book-open" style="color: #10b981;"></i> Asiento de Amortizaciones de Cierre (RT 54)
+            <i data-lucide="book-open" style="color: var(--color-accent-light);"></i> Asiento de Amortizaciones de Cierre (RT 54)
           </h4>
           <p style="font-size: 11.5px; color: var(--text-secondary); margin-bottom: 12px; line-height:1.4;">
             Calcula la cuota anual acumulada y genera el asiento contable de ajuste en el Libro Diario formal.
@@ -464,11 +464,11 @@ export function renderRT54() {
               </div>
               <div>
                 ${isAsientoRegistrado ? `
-                  <span style="font-size: 10.5px; font-weight: 700; color: #10b981; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); padding: 3px 8px; border-radius: 4px; display:flex; align-items:center; gap:2px;">
+                  <span style="font-size: 10.5px; font-weight: 700; color: var(--color-accent-light); background: rgba(47, 122, 89, 0.08); border: 1px solid rgba(47, 122, 89, 0.25); padding: 3px 8px; border-radius: 4px; display:flex; align-items:center; gap:2px;">
                     <i data-lucide="check-circle-2" style="width:12px; height:12px;"></i> ASENTADO
                   </span>
                 ` : `
-                  <button type="button" id="btn-register-amort-entry" class="btn btn-primary btn-sm" style="background:#10b981; border-color:#10b981; font-weight:700; padding:6px 12px; font-size:11px;">
+                  <button type="button" id="btn-register-amort-entry" class="btn btn-primary btn-sm" style="background:var(--color-accent-light); border-color:var(--color-accent-light); font-weight:700; padding:6px 12px; font-size:11px;">
                     ⚡ Asentar Cierre
                   </button>
                 `}
@@ -480,7 +480,7 @@ export function renderRT54() {
               <div style="border-bottom:1px solid #1e293b; padding-bottom:4px; margin-bottom:6px; font-size:9px; color:#64748b; font-weight:700;">ASIENTO N° 0928 - AJUSTE AMORTIZACIONES RT 54</div>
               <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
                 <span>6.1.04.01 - Deprec. Bienes de Uso (Debe)</span>
-                <span style="color:#10b981;">$ ${totalAnnualAmortization.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</span>
+                <span style="color:var(--color-accent-light);">$ ${totalAnnualAmortization.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</span>
               </div>
               <div style="display:flex; justify-content:space-between; margin-bottom:4px; padding-left:14px;">
                 <span>a 1.1.05.02 - Deprec. Acum. Equipamiento (Haber)</span>
@@ -496,7 +496,7 @@ export function renderRT54() {
   </div>
 
   <!-- ── SIMULADOR DE AJUSTE POR INFLACIÓN CONTABLE (AxI - RT 54) [NEW MODULE] ── -->
-  <div class="card" style="margin-bottom: 24px; border-color: rgba(99, 102, 241, 0.25);">
+  <div class="card" style="margin-bottom: 24px; border-color: rgba(31, 92, 67, 0.25);">
     <style>
       @keyframes spin {
         from { transform: rotate(0deg); }
@@ -507,12 +507,12 @@ export function renderRT54() {
       }
     </style>
     <div class="card-header" style="border-bottom: 1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center; flex-wrap: wrap; gap: 10px;">
-      <h3><i data-lucide="trending-up" style="color: #6366f1;"></i> Simulador de Ajuste por Inflación Contable (AxI — RT 54)</h3>
+      <h3><i data-lucide="trending-up" style="color: var(--color-accent);"></i> Simulador de Ajuste por Inflación Contable (AxI — RT 54)</h3>
       <div style="display:flex; align-items:center; gap:8px;">
-        <button id="btn-sync-ipc" class="btn btn-outline btn-sm" style="font-size:11px; padding: 5px 10px; display:flex; align-items:center; gap:6px; margin:0; height:auto; border-color:rgba(99, 102, 241, 0.3); color:#818cf8; font-weight:600;">
+        <button id="btn-sync-ipc" class="btn btn-outline btn-sm" style="font-size:11px; padding: 5px 10px; display:flex; align-items:center; gap:6px; margin:0; height:auto; border-color:rgba(31, 92, 67, 0.3); color:var(--color-accent-light); font-weight:600;">
           <i data-lucide="refresh-cw" style="width:12px; height:12px;" id="icon-sync-ipc"></i> Sincronizar Índices IPC
         </button>
-        <span class="badge" style="margin: 0; background: rgba(99, 102, 241, 0.08); color: #818cf8; border-color: rgba(99, 102, 241, 0.25);">Índice IPC Cierre: ${latestValue.toFixed(2)} (${latestPeriod})</span>
+        <span class="badge" style="margin: 0; background: rgba(31, 92, 67, 0.08); color: var(--color-accent-light); border-color: rgba(31, 92, 67, 0.25);">Índice IPC Cierre: ${latestValue.toFixed(2)} (${latestPeriod})</span>
       </div>
     </div>
     <div class="card-body">
@@ -548,7 +548,7 @@ export function renderRT54() {
               <label style="font-size: 10px; color: var(--text-secondary); display:block; margin-bottom:4px;">Monto Histórico ($)</label>
               <input type="number" id="axi-value" class="form-input font-mono text-right" style="padding: 6px 10px; font-size:12px; width:100%; background:#fff;" placeholder="Valor ($)" required>
             </div>
-            <button type="button" id="btn-add-axi-submit" class="btn btn-primary" style="height:32px; font-size:12px; padding: 0 12px; background: #6366f1; border-color:#6366f1; font-weight:700;">
+            <button type="button" id="btn-add-axi-submit" class="btn btn-primary" style="height:32px; font-size:12px; padding: 0 12px; background: var(--color-accent); border-color:var(--color-accent); font-weight:700;">
               Ajustar
             </button>
           </div>
@@ -617,8 +617,8 @@ export function renderRT54() {
         </div>
 
         <!-- Adjusted (Homogeneous) Balance Sheet -->
-        <div style="background: rgba(99, 102, 241, 0.02); border: 1px solid rgba(99, 102, 241, 0.2); border-radius: var(--radius-sm); padding: 14px;">
-          <h5 style="font-size:11.5px; font-weight:700; color:#818cf8; text-transform:uppercase; border-bottom:1px solid rgba(99,102,241,0.15); padding-bottom:6px; margin-bottom:8px;">Balance Reexpresado (RT 54) a ${formatPeriodName(latestPeriod)}</h5>
+        <div style="background: rgba(31, 92, 67, 0.02); border: 1px solid rgba(31, 92, 67, 0.2); border-radius: var(--radius-sm); padding: 14px;">
+          <h5 style="font-size:11.5px; font-weight:700; color:var(--color-accent-light); text-transform:uppercase; border-bottom:1px solid rgba(31,92,67,0.15); padding-bottom:6px; margin-bottom:8px;">Balance Reexpresado (RT 54) a ${formatPeriodName(latestPeriod)}</h5>
           <div style="display:flex; flex-direction:column; gap:6px; font-size:11.5px;">
             <div style="display:flex; justify-content:space-between;">
               <span class="text-secondary">Caja y Bancos (Monetario):</span>
@@ -635,11 +635,11 @@ export function renderRT54() {
               </div>
               `;
             }).join('')}
-            <div style="display:flex; justify-content:space-between; font-weight:800; border-top:1px solid rgba(99,102,241,0.15); padding-top:4px; color: #818cf8;">
+            <div style="display:flex; justify-content:space-between; font-weight:800; border-top:1px solid rgba(31,92,67,0.15); padding-top:4px; color: var(--color-accent-light);">
               <span>TOTAL ACTIVO AJUSTADO:</span>
               <span class="font-mono">$ ${Math.round(totalAdjustedAssets).toLocaleString('es-AR')}</span>
             </div>
-            <div style="margin-top:8px; border-top: 1px dashed rgba(99,102,241,0.15); padding-top:8px;"></div>
+            <div style="margin-top:8px; border-top: 1px dashed rgba(31,92,67,0.15); padding-top:8px;"></div>
             ${axiItems.filter(i => i.tipo === 'patrimonio').map(i => {
               const ipcOrig = IPC_INDICES[i.origen] || 1500.0;
               const coef = latestValue / ipcOrig;
@@ -658,7 +658,7 @@ export function renderRT54() {
               <span class="font-mono">$ ${Math.round(recpam).toLocaleString('es-AR')}</span>
             </div>
 
-            <div style="display:flex; justify-content:space-between; font-weight:800; border-top:1px solid rgba(99,102,241,0.15); padding-top:4px; color: #818cf8;">
+            <div style="display:flex; justify-content:space-between; font-weight:800; border-top:1px solid rgba(31,92,67,0.15); padding-top:4px; color: var(--color-accent-light);">
               <span>TOTAL PASIVO + PN + RECPAM:</span>
               <span class="font-mono">$ ${Math.round(totalAdjustedLiabEquity).toLocaleString('es-AR')}</span>
             </div>
@@ -799,10 +799,10 @@ export function renderRT54() {
   </div>
 
   <!-- RG 5824/2026 -->
-  <div class="card" style="margin-top:24px;border-color:rgba(16,185,129,0.2);background:rgba(16,185,129,0.01); margin-bottom: 0;">
+  <div class="card" style="margin-top:24px;border-color:rgba(47,122,89,0.2);background:rgba(47,122,89,0.01); margin-bottom: 0;">
     <div class="card-header">
       <h3><i data-lucide="layers-2" style="color:var(--color-accent);"></i> RG 5824/2026 — Facturación Consolidada Mensual</h3>
-      <span style="font-size:10px;font-weight:700;color:var(--color-accent);background:rgba(16,185,129,0.08);padding:3px 10px;border-radius:20px;border:1px solid rgba(16,185,129,0.25);">Vigente desde 1° Julio 2026</span>
+      <span style="font-size:10px;font-weight:700;color:var(--color-accent);background:rgba(47,122,89,0.08);padding:3px 10px;border-radius:20px;border:1px solid rgba(47,122,89,0.25);">Vigente desde 1° Julio 2026</span>
     </div>
     <div class="card-body">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">

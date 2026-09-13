@@ -152,7 +152,7 @@ class Application {
             </p>
             <div style="background: #ffffff; border: 1px solid #e2e8f0; padding: 16px; border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #64748b; max-width: 600px; overflow-x: auto; margin-bottom: 24px; border-left: 4px solid #dc2626; text-align: left; white-space: pre-wrap;"><strong>Error técnico:</strong> ${err.message}</div>
             <div style="display: flex; gap: 16px; justify-content: center;">
-              <button onclick="window.location.reload()" style="background: #6366f1; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 600; cursor: pointer; transition: background 0.2s;">
+              <button onclick="window.location.reload()" style="background: var(--color-accent); color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 600; cursor: pointer; transition: background 0.2s;">
                 Recargar Sistema
               </button>
               <button onclick="localStorage.clear(); window.location.hash='#/'; window.location.reload();" style="background: transparent; color: #475569; border: 1px solid #cbd5e1; padding: 10px 20px; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.2s;">
@@ -214,7 +214,7 @@ class Application {
           <h3 style="color: #1e293b; font-size: 16px; font-weight: 700; margin-bottom: 8px;">Error al cargar la sección</h3>
           <p style="color: #64748b; font-size: 13px; margin-bottom: 16px;">Ocurrió un problema al procesar los datos de esta pantalla. Esto puede deberse a la interferencia de extensiones externas del navegador o problemas de consistencia local.</p>
           <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #475569; text-align: left; overflow-x: auto; margin-bottom: 16px; border-left: 3px solid #ef4444; white-space: pre-wrap;">${err.stack || err.message || err}</div>
-          <button class="btn btn-primary" onclick="window.location.reload()" style="background: #6366f1; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer;">Recargar Sección</button>
+          <button class="btn btn-primary" onclick="window.location.reload()" style="background: var(--color-accent); color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer;">Recargar Sección</button>
         </div>
       `;
     }
@@ -243,7 +243,7 @@ class Application {
               ${domErr.stack || domErr.message || domErr}
             </div>
             <p style="font-size: 12px; color: #94a3b8; line-height: 1.5; margin-bottom: 16px;">Sugerencia: Intente desactivar temporalmente extensiones impositivas de AFIP/ARCA o firmas digitales en este navegador para esta URL.</p>
-            <button class="btn btn-primary" onclick="window.location.reload()" style="background: #6366f1; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer;">Recargar</button>
+            <button class="btn btn-primary" onclick="window.location.reload()" style="background: var(--color-accent); color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer;">Recargar</button>
           </div>
         `, activeRouteKey);
       } catch (fatalErr) {
@@ -280,7 +280,7 @@ class Application {
               <h3 style="color: #1e293b; font-size: 16px; font-weight: 700; margin-bottom: 8px;">Error de Inicialización</h3>
               <p style="color: #64748b; font-size: 13px; margin-bottom: 16px;">La sección se cargó visualmente pero falló al inicializar sus controles interactivos.</p>
               <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #475569; text-align: left; overflow-x: auto; margin-bottom: 16px; border-left: 3px solid #ef4444; white-space: pre-wrap;">${viewInitErr.stack || viewInitErr.message || viewInitErr}</div>
-              <button class="btn btn-primary" onclick="window.location.reload()" style="background: #6366f1; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer;">Recargar Sección</button>
+              <button class="btn btn-primary" onclick="window.location.reload()" style="background: var(--color-accent); color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer;">Recargar Sección</button>
             </div>
           `;
         }

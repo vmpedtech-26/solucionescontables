@@ -131,10 +131,10 @@ export function renderVentas() {
             <label class="form-label" style="margin:0;">Clasificación RT 54 (Compras)</label>
             <div style="display:flex; gap:10px;">
               <label style="display:flex; align-items:center; gap:6px; font-size:13px; cursor:pointer; padding:8px 12px; border:1px solid var(--border-color); border-radius:var(--radius-sm); flex:1; justify-content:center;" id="lbl-gasto">
-                <input type="radio" name="tx-es-activo" value="false" checked style="accent-color:#6366f1;"> Gasto
+                <input type="radio" name="tx-es-activo" value="false" checked style="accent-color:var(--color-accent);"> Gasto
               </label>
-              <label style="display:flex; align-items:center; gap:6px; font-size:13px; cursor:pointer; padding:8px 12px; border:1px solid rgba(99,102,241,0.3); border-radius:var(--radius-sm); flex:1; justify-content:center; background:rgba(99,102,241,0.02);" id="lbl-activo">
-                <input type="radio" name="tx-es-activo" value="true" style="accent-color:#6366f1;"> Bien de Uso
+              <label style="display:flex; align-items:center; gap:6px; font-size:13px; cursor:pointer; padding:8px 12px; border:1px solid rgba(31,92,67,0.3); border-radius:var(--radius-sm); flex:1; justify-content:center; background:rgba(31,92,67,0.02);" id="lbl-activo">
+                <input type="radio" name="tx-es-activo" value="true" style="accent-color:var(--color-accent);"> Bien de Uso
               </label>
             </div>
           </div>
@@ -288,7 +288,7 @@ function renderTransactionsTable(transactions, type) {
             <td style="font-weight: 600; font-size: 13.5px;">
               <div>${t.cliente || t.proveedor}</div>
               ${type === 'compras' ? (t.es_activo ? `
-                <div style="font-size: 10px; font-weight: 700; color: #818cf8; display: flex; align-items: center; gap: 4px; margin-top: 2px;">
+                <div style="font-size: 10px; font-weight: 700; color: var(--color-accent-light); display: flex; align-items: center; gap: 4px; margin-top: 2px;">
                   <i data-lucide="building" style="width: 10px; height: 10px;"></i> Bien de Uso / Activo
                 </div>
               ` : `
@@ -522,7 +522,7 @@ export function initVentas(mainApp) {
       `;
     } else {
       cuitFeedback.innerHTML = `
-        <span style="color: #10b981; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
+        <span style="color: var(--color-accent-light); font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
           <i data-lucide="check-circle" style="width: 12px; height: 12px;"></i> 
           ✓ CUIT en estado activo / regular
         </span>

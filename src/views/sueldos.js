@@ -15,7 +15,7 @@ export function renderSueldos() {
       <p class="view-subtitle">Liquidación de sueldos, cálculo de aportes y exportación en formato oficial ARCA/AFIP.</p>
     </div>
     <div style="display: flex; align-items: center; gap: 10px;">
-      <span class="badge" style="background: rgba(99, 102, 241, 0.08); color: var(--color-primary); border-color: rgba(99, 102, 241, 0.2); margin: 0; padding: 6px 12px; font-weight: 700;">
+      <span class="badge" style="background: rgba(31, 92, 67, 0.08); color: var(--color-primary); border-color: rgba(31, 92, 67, 0.2); margin: 0; padding: 6px 12px; font-weight: 700;">
         🏢 ${activeCo.razon_social}
       </span>
     </div>
@@ -74,7 +74,7 @@ export function renderSueldos() {
     </div>
 
     <!-- Resultados Dinámicos del Cálculo -->
-    <div class="card" style="background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(99, 102, 241, 0.03) 100%); backdrop-filter: blur(10px);">
+    <div class="card" style="background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(31, 92, 67, 0.03) 100%); backdrop-filter: blur(10px);">
       <div class="card-header" style="border-bottom: 1px solid rgba(15, 23, 42, 0.08); padding-bottom: 12px;">
         <h3 style="font-weight: 800; font-size: 16px; display: flex; align-items: center; gap: 8px; color: #0f172a; margin: 0;">
           <i data-lucide="receipt" style="color: var(--color-primary); width: 20px; height: 20px;"></i>
@@ -89,7 +89,7 @@ export function renderSueldos() {
             <div style="font-size: 11px; color: #64748b; font-weight: 700; text-transform: uppercase;">Sueldo Bruto</div>
             <div id="sim-bruto" style="font-size: 20px; font-weight: 800; color: #0f172a; margin-top: 4px;">$0,00</div>
           </div>
-          <div style="background: #ffffff; border: 1px solid rgba(99, 102, 241, 0.15); padding: 12px; border-radius: 8px; border-left: 4px solid var(--color-primary);">
+          <div style="background: #ffffff; border: 1px solid rgba(31, 92, 67, 0.15); padding: 12px; border-radius: 8px; border-left: 4px solid var(--color-primary);">
             <div style="font-size: 11px; color: var(--color-primary); font-weight: 700; text-transform: uppercase;">Neto a Liquidar</div>
             <div id="sim-neto" style="font-size: 20px; font-weight: 800; color: var(--color-primary); margin-top: 4px;">$0,00</div>
           </div>

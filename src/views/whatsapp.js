@@ -20,8 +20,8 @@ export function renderWhatsApp() {
   // Mock chats list
   const chats = [
     { id: 'co-1', name: 'Transportes Patagónicos S.A.', lastMsg: 'Te paso el ticket del camión...', time: '11:42', avatar: '#0d9488', count: unreadCounts['co-1'] },
-    { id: 'co-2', name: 'TecnoDesarrollos Sur', lastMsg: 'Matias, ¿viste la recategorización?', time: 'Ayer', avatar: '#6366f1', count: unreadCounts['co-2'] },
-    { id: 'co-3', name: 'Alimentos del Valle S.R.L.', lastMsg: 'Factura de luz cargada.', time: 'Ayer', avatar: '#10b981', count: unreadCounts['co-3'] }
+    { id: 'co-2', name: 'TecnoDesarrollos Sur', lastMsg: 'Matias, ¿viste la recategorización?', time: 'Ayer', avatar: 'var(--color-accent)', count: unreadCounts['co-2'] },
+    { id: 'co-3', name: 'Alimentos del Valle S.R.L.', lastMsg: 'Factura de luz cargada.', time: 'Ayer', avatar: 'var(--color-accent-light)', count: unreadCounts['co-3'] }
   ];
 
   const activeChat = chats.find(c => c.id === activeChatId) || chats[0];
@@ -140,7 +140,7 @@ export function renderWhatsApp() {
           </div>
         </div>
         <div style="display: flex; gap: 12px;">
-          <button class="btn btn-outline btn-sm" onclick="alert('Historial impositivo sincronizado con ARCA')" style="font-size: 11px; padding: 6px 12px; display: flex; align-items: center; gap: 4px; border-color: rgba(99,102,241,0.25);">
+          <button class="btn btn-outline btn-sm" onclick="alert('Historial impositivo sincronizado con ARCA')" style="font-size: 11px; padding: 6px 12px; display: flex; align-items: center; gap: 4px; border-color: rgba(31,92,67,0.25);">
             <i data-lucide="history" style="width: 13px; height: 13px;"></i> Auditoría
           </button>
         </div>
@@ -169,9 +169,9 @@ export function renderWhatsApp() {
 function renderOCRScannerPanel() {
   if (scanState === 'idle') {
     return `
-      <div style="margin-top: 12px; border: 1px dashed rgba(99, 102, 241, 0.3); border-radius: 6px; background: rgba(99, 102, 241, 0.02); padding: 12px; text-align: center;">
+      <div style="margin-top: 12px; border: 1px dashed rgba(31, 92, 67, 0.3); border-radius: 6px; background: rgba(31, 92, 67, 0.02); padding: 12px; text-align: center;">
         <p style="font-size: 11px; color: var(--text-secondary); margin: 0 0 8px 0;">📎 Se ha detectado un comprobante de compras en este chat.</p>
-        <button class="btn btn-primary btn-sm" id="btn-start-ocr" style="background: #6366f1; border-color: #6366f1; font-weight: 700; width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 11px; padding: 8px;">
+        <button class="btn btn-primary btn-sm" id="btn-start-ocr" style="background: var(--color-accent); border-color: var(--color-accent); font-weight: 700; width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 11px; padding: 8px;">
           <i data-lucide="scan"></i> Procesar con AI-OCR (Gemini)
         </button>
       </div>
@@ -180,11 +180,11 @@ function renderOCRScannerPanel() {
 
   if (scanState === 'scanning') {
     return `
-      <div style="margin-top: 12px; border: 1px solid rgba(99, 102, 241, 0.2); border-radius: 6px; background: rgba(99, 102, 241, 0.04); padding: 16px; text-align: center; position: relative; overflow: hidden;">
+      <div style="margin-top: 12px; border: 1px solid rgba(31, 92, 67, 0.2); border-radius: 6px; background: rgba(31, 92, 67, 0.04); padding: 16px; text-align: center; position: relative; overflow: hidden;">
         <!-- Laser Scanning Bar Animation -->
-        <div class="ocr-scanner-laser" style="position: absolute; left: 0; right: 0; top: 0; height: 3px; background: #6366f1; box-shadow: 0 0 8px #6366f1; animation: scanLaser 1.5s ease-in-out infinite;"></div>
+        <div class="ocr-scanner-laser" style="position: absolute; left: 0; right: 0; top: 0; height: 3px; background: var(--color-accent); box-shadow: 0 0 8px var(--color-accent); animation: scanLaser 1.5s ease-in-out infinite;"></div>
         
-        <i data-lucide="loader" class="spin" style="width: 24px; height: 24px; color: #6366f1; margin: 0 auto 10px auto; display: block; animation: spin 1s linear infinite;"></i>
+        <i data-lucide="loader" class="spin" style="width: 24px; height: 24px; color: var(--color-accent); margin: 0 auto 10px auto; display: block; animation: spin 1s linear infinite;"></i>
         <h5 style="font-size: 12.5px; color: var(--color-primary); font-weight: 750; margin: 0 0 4px 0;">Escaneando documento impositivo</h5>
         <p style="font-size: 11px; color: var(--text-secondary); margin: 0;">Extrayendo CUIT, fecha, montos y alícuotas con Gemini Pro Vision...</p>
       </div>
@@ -193,8 +193,8 @@ function renderOCRScannerPanel() {
 
   if (scanState === 'scanned') {
     return `
-      <div style="margin-top: 12px; border: 1px solid #10b981; border-radius: 6px; background: rgba(16, 185, 129, 0.02); padding: 16px;">
-        <div style="display: flex; align-items: center; gap: 6px; color: #10b981; font-size: 12.5px; font-weight: 750; margin-bottom: 12px;">
+      <div style="margin-top: 12px; border: 1px solid var(--color-accent-light); border-radius: 6px; background: rgba(47, 122, 89, 0.02); padding: 16px;">
+        <div style="display: flex; align-items: center; gap: 6px; color: var(--color-accent-light); font-size: 12.5px; font-weight: 750; margin-bottom: 12px;">
           <i data-lucide="check-circle" style="width: 16px; height: 16px;"></i> Datos Extraídos con Éxito (Confianza 98.4%)
         </div>
         
@@ -230,14 +230,14 @@ function renderOCRScannerPanel() {
             </div>
             <div style="text-align: right;">
               <span style="color: var(--text-muted); font-weight: 600; display: block;">TOTAL:</span>
-              <span style="font-weight: 800; color: #10b981; font-size: 13px;">$ 1.815.000,00</span>
+              <span style="font-weight: 800; color: var(--color-accent-light); font-size: 13px;">$ 1.815.000,00</span>
             </div>
           </div>
         </div>
 
         <div style="display: flex; gap: 8px;">
           <button class="btn btn-outline btn-sm" id="btn-cancel-ocr" style="flex: 1; font-size: 11px; padding: 8px;">Descartar</button>
-          <button class="btn btn-primary btn-sm" id="btn-confirm-ocr" style="flex: 2; background: #10b981; border-color: #10b981; font-weight: 700; font-size: 11px; padding: 8px; display: flex; align-items: center; justify-content: center; gap: 4px;">
+          <button class="btn btn-primary btn-sm" id="btn-confirm-ocr" style="flex: 2; background: var(--color-accent-light); border-color: var(--color-accent-light); font-weight: 700; font-size: 11px; padding: 8px; display: flex; align-items: center; justify-content: center; gap: 4px;">
             <i data-lucide="check-check"></i> Registrar en Ledger
           </button>
         </div>
@@ -247,8 +247,8 @@ function renderOCRScannerPanel() {
 
   if (scanState === 'registered') {
     return `
-      <div style="margin-top: 12px; border: 1px solid #10b981; border-radius: 6px; background: rgba(16, 185, 129, 0.06); padding: 14px;">
-        <div style="display: flex; align-items: center; gap: 6px; color: #10b981; font-size: 12.5px; font-weight: 800;">
+      <div style="margin-top: 12px; border: 1px solid var(--color-accent-light); border-radius: 6px; background: rgba(47, 122, 89, 0.06); padding: 14px;">
+        <div style="display: flex; align-items: center; gap: 6px; color: var(--color-accent-light); font-size: 12.5px; font-weight: 800;">
           <i data-lucide="shield-check" style="width: 16px; height: 16px;"></i> ¡Comprobante en Ledger!
         </div>
         <p style="font-size: 11.5px; color: var(--text-secondary); margin: 6px 0 0 0; line-height: 1.4;">
@@ -291,7 +291,7 @@ export function initWhatsApp(mainApp) {
       }
       .client .msg-bubble { background: #fff; align-self: flex-start; border-top-left-radius: 0; color: #1e293b; }
       .agent .msg-bubble { background: #d9fdd3; align-self: flex-end; border-top-right-radius: 0; color: #1e293b; }
-      .system .msg-bubble { background: rgba(99,102,241,0.06); border: 1px solid rgba(99,102,241,0.15); color: #4f46e5; text-align: center; font-size: 11px; max-width: 80%; border-radius: 12px; }
+      .system .msg-bubble { background: rgba(31,92,67,0.06); border: 1px solid rgba(31,92,67,0.15); color: #4f46e5; text-align: center; font-size: 11px; max-width: 80%; border-radius: 12px; }
       .attachment-bubble { width: 340px; max-width: 100%; }
       .msg-time { display: block; font-size: 9.5px; color: var(--text-muted); text-align: right; margin-top: 4px; }
       .file-attachment-card {
@@ -307,7 +307,7 @@ export function initWhatsApp(mainApp) {
       .fa-details { display: flex; flex-direction: column; overflow: hidden; }
       .fa-name { font-size: 11px; font-weight: 700; color: var(--color-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
       .fa-size { font-size: 9px; color: var(--text-secondary); }
-      .wa-chat-item.active { background: rgba(99, 102, 241, 0.06); border-left: 3px solid #6366f1; }
+      .wa-chat-item.active { background: rgba(31, 92, 67, 0.06); border-left: 3px solid var(--color-accent); }
       .wa-chat-item:hover { background: #f8fafc; }
     `;
     document.head.appendChild(style);

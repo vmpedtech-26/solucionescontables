@@ -29,14 +29,14 @@ export function renderMigrador() {
     <!-- Left Panel: Legacy selector -->
     <div class="card" style="background: #fff; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 20px;">
       <h3 style="font-size: 14.5px; font-weight: 800; color: var(--color-primary); margin: 0 0 16px 0; display: flex; align-items: center; gap: 8px;">
-        <i data-lucide="upload-cloud" style="color:#6366f1;"></i> 1. Origen de Datos
+        <i data-lucide="upload-cloud" style="color:var(--color-accent);"></i> 1. Origen de Datos
       </h3>
       
       <div style="display: flex; flex-direction: column; gap: 12px;">
         ${systems.map(sys => `
-          <div class="sys-option ${selectedSystem === sys.id ? 'active' : ''}" data-sys="${sys.id}" style="border: 1px solid ${selectedSystem === sys.id ? '#6366f1' : 'var(--border-color)'}; background: ${selectedSystem === sys.id ? 'rgba(99,102,241,0.02)' : '#fff'}; border-radius: 6px; padding: 12px 14px; cursor: pointer; transition: all 0.2s;">
+          <div class="sys-option ${selectedSystem === sys.id ? 'active' : ''}" data-sys="${sys.id}" style="border: 1px solid ${selectedSystem === sys.id ? 'var(--color-accent)' : 'var(--border-color)'}; background: ${selectedSystem === sys.id ? 'rgba(31,92,67,0.02)' : '#fff'}; border-radius: 6px; padding: 12px 14px; cursor: pointer; transition: all 0.2s;">
             <div style="display: flex; align-items: center; gap: 10px;">
-              <div style="background: ${selectedSystem === sys.id ? '#6366f1' : 'var(--bg-secondary)'}; color: ${selectedSystem === sys.id ? '#fff' : 'var(--text-secondary)'}; width: 32px; height: 32px; border-radius: 4px; display: flex; align-items: center; justify-content: center; flex-shrink:0;">
+              <div style="background: ${selectedSystem === sys.id ? 'var(--color-accent)' : 'var(--bg-secondary)'}; color: ${selectedSystem === sys.id ? '#fff' : 'var(--text-secondary)'}; width: 32px; height: 32px; border-radius: 4px; display: flex; align-items: center; justify-content: center; flex-shrink:0;">
                 <i data-lucide="${sys.icon}" style="width: 16px; height: 16px;"></i>
               </div>
               <div style="overflow: hidden;">
@@ -48,7 +48,7 @@ export function renderMigrador() {
         `).join('')}
       </div>
       
-      <div style="background: rgba(99, 102, 241, 0.03); border: 1px solid rgba(99, 102, 241, 0.12); padding: 12px; border-radius: 6px; font-size: 11px; color: var(--text-secondary); margin-top: 20px; line-height: 1.4;">
+      <div style="background: rgba(31, 92, 67, 0.03); border: 1px solid rgba(31, 92, 67, 0.12); padding: 12px; border-radius: 6px; font-size: 11px; color: var(--text-secondary); margin-top: 20px; line-height: 1.4;">
         💡 <strong>Mapeo Inteligente:</strong> El motor de IA analizará de forma heurística la primera fila del archivo cargado para asociar las cabeceras a la base de datos impositiva.
       </div>
     </div>
@@ -65,13 +65,13 @@ export function renderMigrador() {
 function renderMigrationFlowPanel() {
   if (migrationState === 'idle') {
     return `
-      <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; border: 2px dashed rgba(99, 102, 241, 0.25); border-radius: 8px; padding: 48px 24px; text-align: center; background: rgba(99,102,241,0.01); min-height: 350px;">
-        <i data-lucide="file-up" style="width: 48px; height: 48px; color: #6366f1; margin-bottom: 16px;"></i>
+      <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; border: 2px dashed rgba(31, 92, 67, 0.25); border-radius: 8px; padding: 48px 24px; text-align: center; background: rgba(31,92,67,0.01); min-height: 350px;">
+        <i data-lucide="file-up" style="width: 48px; height: 48px; color: var(--color-accent); margin-bottom: 16px;"></i>
         <h4 style="font-size: 15px; font-weight: 800; color: var(--color-primary); margin-bottom: 6px;">Cargar Planilla del Sistema Anterior</h4>
         <p style="font-size: 12px; color: var(--text-secondary); max-width: 420px; line-height: 1.5; margin-bottom: 20px;">
           Arrastra tu archivo Excel, CSV o de Texto exportado desde Tango o Bejerman, o haz clic para simular la importación.
         </p>
-        <button class="btn btn-primary" id="btn-simulate-upload" style="background: #6366f1; border-color: #6366f1; font-weight: 700; padding: 10px 24px; display: flex; align-items: center; gap: 8px;">
+        <button class="btn btn-primary" id="btn-simulate-upload" style="background: var(--color-accent); border-color: var(--color-accent); font-weight: 700; padding: 10px 24px; display: flex; align-items: center; gap: 8px;">
           <i data-lucide="plus-circle"></i> Seleccionar Archivo
         </button>
       </div>
@@ -83,7 +83,7 @@ function renderMigrationFlowPanel() {
       <div>
         <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; margin-bottom: 20px;">
           <div style="display: flex; align-items: center; gap: 10px;">
-            <div style="background: rgba(16, 185, 129, 0.08); color: #10b981; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+            <div style="background: rgba(47, 122, 89, 0.08); color: var(--color-accent-light); width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
               <i data-lucide="file-check"></i>
             </div>
             <div>
@@ -95,7 +95,7 @@ function renderMigrationFlowPanel() {
         </div>
 
         <h4 style="font-size: 13px; font-weight: 850; color: var(--color-primary); margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
-          <i data-lucide="cpu" style="color: #6366f1;"></i> 2. Mapeador Inteligente de Columnas (AI-Mapping)
+          <i data-lucide="cpu" style="color: var(--color-accent);"></i> 2. Mapeador Inteligente de Columnas (AI-Mapping)
         </h4>
 
         <!-- AI Match Columns Table -->
@@ -112,38 +112,38 @@ function renderMigrationFlowPanel() {
               <tr>
                 <td style="font-family: monospace; font-weight: 700; padding: 10px 12px;">FECHA_CBTE</td>
                 <td style="padding: 10px 12px; color: var(--color-primary); font-weight: 600;">➔ Fecha Comprobante</td>
-                <td style="padding: 10px 12px;" class="text-right"><span style="background: rgba(16, 185, 129, 0.08); color: #10b981; font-size: 9.5px; padding: 2px 6px; border-radius: 10px; font-weight: 700;">100% Match</span></td>
+                <td style="padding: 10px 12px;" class="text-right"><span style="background: rgba(47, 122, 89, 0.08); color: var(--color-accent-light); font-size: 9.5px; padding: 2px 6px; border-radius: 10px; font-weight: 700;">100% Match</span></td>
               </tr>
               <tr>
                 <td style="font-family: monospace; font-weight: 700; padding: 10px 12px;">RAZON_SOCIAL</td>
                 <td style="padding: 10px 12px; color: var(--color-primary); font-weight: 600;">➔ Cliente / Proveedor</td>
-                <td style="padding: 10px 12px;" class="text-right"><span style="background: rgba(16, 185, 129, 0.08); color: #10b981; font-size: 9.5px; padding: 2px 6px; border-radius: 10px; font-weight: 700;">100% Match</span></td>
+                <td style="padding: 10px 12px;" class="text-right"><span style="background: rgba(47, 122, 89, 0.08); color: var(--color-accent-light); font-size: 9.5px; padding: 2px 6px; border-radius: 10px; font-weight: 700;">100% Match</span></td>
               </tr>
               <tr>
                 <td style="font-family: monospace; font-weight: 700; padding: 10px 12px;">NRO_CUIT</td>
                 <td style="padding: 10px 12px; color: var(--color-primary); font-weight: 600;">➔ CUIT Entidad</td>
-                <td style="padding: 10px 12px;" class="text-right"><span style="background: rgba(16, 185, 129, 0.08); color: #10b981; font-size: 9.5px; padding: 2px 6px; border-radius: 10px; font-weight: 700;">100% Match</span></td>
+                <td style="padding: 10px 12px;" class="text-right"><span style="background: rgba(47, 122, 89, 0.08); color: var(--color-accent-light); font-size: 9.5px; padding: 2px 6px; border-radius: 10px; font-weight: 700;">100% Match</span></td>
               </tr>
               <tr>
                 <td style="font-family: monospace; font-weight: 700; padding: 10px 12px;">SUBTOTAL_NETO</td>
                 <td style="padding: 10px 12px; color: var(--color-primary); font-weight: 600;">➔ Neto Imponible</td>
-                <td style="padding: 10px 12px;" class="text-right"><span style="background: rgba(16, 185, 129, 0.08); color: #10b981; font-size: 9.5px; padding: 2px 6px; border-radius: 10px; font-weight: 700;">99.2% Match</span></td>
+                <td style="padding: 10px 12px;" class="text-right"><span style="background: rgba(47, 122, 89, 0.08); color: var(--color-accent-light); font-size: 9.5px; padding: 2px 6px; border-radius: 10px; font-weight: 700;">99.2% Match</span></td>
               </tr>
               <tr>
                 <td style="font-family: monospace; font-weight: 700; padding: 10px 12px;">IVA_ALIC_21</td>
                 <td style="padding: 10px 12px; color: var(--color-primary); font-weight: 600;">➔ Alícuota IVA (21%)</td>
-                <td style="padding: 10px 12px;" class="text-right"><span style="background: rgba(16, 185, 129, 0.08); color: #10b981; font-size: 9.5px; padding: 2px 6px; border-radius: 10px; font-weight: 700;">98.8% Match</span></td>
+                <td style="padding: 10px 12px;" class="text-right"><span style="background: rgba(47, 122, 89, 0.08); color: var(--color-accent-light); font-size: 9.5px; padding: 2px 6px; border-radius: 10px; font-weight: 700;">98.8% Match</span></td>
               </tr>
               <tr>
                 <td style="font-family: monospace; font-weight: 700; padding: 10px 12px;">TOTAL_CBTE</td>
                 <td style="padding: 10px 12px; color: var(--color-primary); font-weight: 600;">➔ Importe Total</td>
-                <td style="padding: 10px 12px;" class="text-right"><span style="background: rgba(16, 185, 129, 0.08); color: #10b981; font-size: 9.5px; padding: 2px 6px; border-radius: 10px; font-weight: 700;">100% Match</span></td>
+                <td style="padding: 10px 12px;" class="text-right"><span style="background: rgba(47, 122, 89, 0.08); color: var(--color-accent-light); font-size: 9.5px; padding: 2px 6px; border-radius: 10px; font-weight: 700;">100% Match</span></td>
               </tr>
             </tbody>
           </table>
         </div>
 
-        <button class="btn btn-primary" id="btn-run-migration" style="background: #6366f1; border-color: #6366f1; font-weight: 700; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px;">
+        <button class="btn btn-primary" id="btn-run-migration" style="background: var(--color-accent); border-color: var(--color-accent); font-weight: 700; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px;">
           <i data-lucide="play-circle"></i> 3. Ejecutar Migración Completa a Base de Datos
         </button>
       </div>
@@ -155,13 +155,13 @@ function renderMigrationFlowPanel() {
       <div style="min-height: 350px; display: flex; flex-direction: column; justify-content: space-between;">
         <div>
           <h4 style="font-size: 13.5px; font-weight: 800; color: var(--color-primary); margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
-            <i data-lucide="loader" class="spin" style="animation: spin 1s linear infinite; color: #6366f1;"></i> Migrando Registros Históricos...
+            <i data-lucide="loader" class="spin" style="animation: spin 1s linear infinite; color: var(--color-accent);"></i> Migrando Registros Históricos...
           </h4>
           <p style="font-size: 11px; color: var(--text-secondary); margin-bottom: 16px;">Por favor, no cierres esta pestaña. Parseando asientos de balance y partidas.</p>
           
           <!-- Progress Bar -->
           <div style="background: var(--border-color); height: 6px; border-radius: 3px; overflow: hidden; margin-bottom: 20px;">
-            <div class="migration-progress-bar" style="width: 10%; height: 100%; background: #6366f1; border-radius: 3px; transition: width 0.3s ease;"></div>
+            <div class="migration-progress-bar" style="width: 10%; height: 100%; background: var(--color-accent); border-radius: 3px; transition: width 0.3s ease;"></div>
           </div>
         </div>
 
@@ -176,7 +176,7 @@ function renderMigrationFlowPanel() {
   if (migrationState === 'success') {
     return `
       <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px 16px; text-align: center; min-height: 350px;">
-        <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.2); width: 56px; height: 56px; border-radius: 50%; color: #10b981; display: flex; align-items: center; justify-content: center; font-size: 28px; margin-bottom: 20px;">
+        <div style="background: rgba(47, 122, 89, 0.08); border: 1px solid rgba(47, 122, 89, 0.2); width: 56px; height: 56px; border-radius: 50%; color: var(--color-accent-light); display: flex; align-items: center; justify-content: center; font-size: 28px; margin-bottom: 20px;">
           ✓
         </div>
         <h4 style="font-size: 16px; font-weight: 800; color: var(--color-primary); margin-bottom: 8px;">¡Migración Completada con Éxito!</h4>
@@ -186,7 +186,7 @@ function renderMigrationFlowPanel() {
         
         <div style="display: flex; gap: 12px; width: 100%; max-width: 380px;">
           <button class="btn btn-outline" id="btn-migrator-restart" style="flex: 1; padding: 10px;">Migrar Otro Cliente</button>
-          <button class="btn btn-primary" id="btn-select-new-co" style="flex: 1; background: #6366f1; border-color: #6366f1; font-weight: 700; padding: 10px;">Seleccionar Empresa</button>
+          <button class="btn btn-primary" id="btn-select-new-co" style="flex: 1; background: var(--color-accent); border-color: var(--color-accent); font-weight: 700; padding: 10px;">Seleccionar Empresa</button>
         </div>
       </div>
     `;

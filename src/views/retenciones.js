@@ -37,7 +37,7 @@ export function renderRetenciones() {
   const totalPuente = rets.filter(r => !r.conciliado).reduce((s, r) => s + r.monto, 0);
   const totalSinCert = rets.filter(r => !r.certDisponible).reduce((s, r) => s + r.monto, 0);
 
-  const fuenteColor = { factura: '#6366f1', banco: '#06b6d4', manual: '#f59e0b' };
+  const fuenteColor = { factura: 'var(--color-accent)', banco: '#06b6d4', manual: '#f59e0b' };
   const fuenteLabel = { factura: 'Libro Compras', banco: 'Extracto Bancario', manual: 'Manual' };
 
   return renderPremiumTeaser(`
@@ -50,7 +50,7 @@ export function renderRetenciones() {
       <button class="btn btn-outline" id="btn-export-csv-sire">
         <i data-lucide="download"></i> Exportar CSV SIRE
       </button>
-      <button class="btn btn-primary" id="btn-add-ret" style="background:#6366f1;border-color:#6366f1;">
+      <button class="btn btn-primary" id="btn-add-ret" style="background:var(--color-accent);border-color:var(--color-accent);">
         <i data-lucide="plus"></i> Agregar Manual
       </button>
     </div>
@@ -59,7 +59,7 @@ export function renderRetenciones() {
   <!-- Resumen de 3 Fuentes -->
   <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;">
     ${[
-      { label:'Total Período', val: totalRet, icon:'sigma', color:'#6366f1' },
+      { label:'Total Período', val: totalRet, icon:'sigma', color:'var(--color-accent)' },
       { label:'Conciliadas', val: totalConc, icon:'check-circle-2', color:'var(--color-accent)' },
       { label:'Cuenta Puente', val: totalPuente, icon:'clock', color:'#f59e0b' },
       { label:'Sin Certificado', val: totalSinCert, icon:'alert-triangle', color:'#f87171' },
@@ -93,7 +93,7 @@ export function renderRetenciones() {
     <!-- Tabla principal de conciliación -->
     <div class="card">
       <div class="card-header">
-        <h3><i data-lucide="git-merge" style="color:#6366f1;"></i> Conciliación de 3 Fuentes</h3>
+        <h3><i data-lucide="git-merge" style="color:var(--color-accent);"></i> Conciliación de 3 Fuentes</h3>
         <div style="display:flex;gap:8px;align-items:center;">
           ${isSircrebFiltered ? `
             <span style="font-size:10px;padding:2px 8px;border-radius:20px;background:rgba(245,158,11,0.08);color:#fbbf24;border:1px solid rgba(245,158,11,0.2);display:inline-flex;align-items:center;gap:4px;">
@@ -101,7 +101,7 @@ export function renderRetenciones() {
               <a href="#/studio/retenciones" style="color:#f87171;text-decoration:none;font-weight:800;margin-left:4px;cursor:pointer;">[Quitar]</a>
             </span>
           ` : `
-            <span style="font-size:10px;padding:2px 8px;border-radius:20px;background:rgba(99,102,241,0.08);color:#818cf8;border:1px solid rgba(99,102,241,0.2);">Libro Compras</span>
+            <span style="font-size:10px;padding:2px 8px;border-radius:20px;background:rgba(31,92,67,0.08);color:var(--color-accent-light);border:1px solid rgba(31,92,67,0.2);">Libro Compras</span>
             <span style="font-size:10px;padding:2px 8px;border-radius:20px;background:rgba(6,182,212,0.08);color:#22d3ee;border:1px solid rgba(6,182,212,0.2);">Extracto Bancario</span>
           `}
         </div>
@@ -152,7 +152,7 @@ export function renderRetenciones() {
                       ✓ Listo
                     </button>
                   ` : `
-                    <button class="btn btn-primary btn-xs btn-conciliar" data-id="${r.id}" style="padding:2px 8px;font-size:10px;background:#6366f1;border-color:#6366f1;">
+                    <button class="btn btn-primary btn-xs btn-conciliar" data-id="${r.id}" style="padding:2px 8px;font-size:10px;background:var(--color-accent);border-color:var(--color-accent);">
                       Conciliar
                     </button>
                   `}
@@ -167,13 +167,13 @@ export function renderRetenciones() {
 
     <!-- Panel lateral: instrucciones CSV -->
     <div style="display:flex;flex-direction:column;gap:20px;">
-      <div class="card" style="border-color:rgba(99,102,241,0.15);background:rgba(99,102,241,0.01);">
-        <div class="card-header" style="background:rgba(99,102,241,0.02);">
-          <h3 style="font-size:13px;color:#818cf8;"><i data-lucide="file-code-2"></i> Formato CSV para ARCA</h3>
+      <div class="card" style="border-color:rgba(31,92,67,0.15);background:rgba(31,92,67,0.01);">
+        <div class="card-header" style="background:rgba(31,92,67,0.02);">
+          <h3 style="font-size:13px;color:var(--color-accent-light);"><i data-lucide="file-code-2"></i> Formato CSV para ARCA</h3>
         </div>
         <div class="card-body" style="display:flex;flex-direction:column;gap:12px;">
           ${[
-            { label: 'Orden de Pago', chars: 'Exactamente 16', color: '#6366f1' },
+            { label: 'Orden de Pago', chars: 'Exactamente 16', color: 'var(--color-accent)' },
             { label: 'Factura de Compra', chars: 'Entre 5 y 8', color: 'var(--color-accent)' },
             { label: 'Otro Comprobante', chars: 'Exactamente 16', color: '#f59e0b' }
           ].map(i => `
@@ -266,7 +266,7 @@ export function initRetenciones(mainApp) {
         </p>
         <div style="display:flex; gap:12px;">
           <button id="btn-cancel-csv-dl" style="flex:1; padding:10px 16px; border:1px solid var(--border-color); border-radius:8px; background:#fff; color:#475569; font-weight:600; cursor:pointer; font-size:13px; transition:background 0.2s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#fff'">Cancelar</button>
-          <button id="btn-confirm-csv-dl" style="flex:1; padding:10px 16px; border:none; border-radius:8px; background:linear-gradient(135deg, #6366f1, #4f46e5); color:#fff; font-weight:600; cursor:pointer; font-size:13px; box-shadow:0 4px 12px rgba(99,102,241,0.25);" onmouseover="this.style.opacity='0.95'" onmouseout="this.style.opacity='1'">Descargar CSV</button>
+          <button id="btn-confirm-csv-dl" style="flex:1; padding:10px 16px; border:none; border-radius:8px; background:linear-gradient(135deg, var(--color-accent), #4f46e5); color:#fff; font-weight:600; cursor:pointer; font-size:13px; box-shadow:0 4px 12px rgba(31,92,67,0.25);" onmouseover="this.style.opacity='0.95'" onmouseout="this.style.opacity='1'">Descargar CSV</button>
         </div>
       </div>
     `;

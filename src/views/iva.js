@@ -43,7 +43,7 @@ export function renderIVA() {
       <p class="view-subtitle">Liquidación mensual de IVA, débitos y créditos fiscales.</p>
     </div>
     <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-      <button class="btn btn-outline" id="btn-export-excel-iva" style="border-color: #10b981; color: #10b981; display: flex; align-items: center; gap: 6px;">
+      <button class="btn btn-outline" id="btn-export-excel-iva" style="border-color: var(--color-accent-light); color: var(--color-accent-light); display: flex; align-items: center; gap: 6px;">
         <i data-lucide="file-spreadsheet"></i> Exportar Excel (CSV)
       </button>
       <button class="btn btn-outline" id="btn-print-iva" style="display: flex; align-items: center; gap: 6px;">
@@ -57,8 +57,8 @@ export function renderIVA() {
 
   <!-- Exports Panel (Collapsible/Hidden by default) -->
   <div class="card" id="arca-exports-panel" style="display: none; margin-bottom: 32px; border-color: var(--color-indigo);">
-    <div class="card-header" style="background: rgba(99,102,241,0.02)">
-      <h3 style="color:#818cf8"><i data-lucide="share-2"></i> Generación de Archivos de Importación ARCA (Libro IVA Digital)</h3>
+    <div class="card-header" style="background: rgba(31,92,67,0.02)">
+      <h3 style="color:var(--color-accent-light)"><i data-lucide="share-2"></i> Generación de Archivos de Importación ARCA (Libro IVA Digital)</h3>
       <button class="btn-icon-sm" id="btn-close-exports" title="Cerrar"><i data-lucide="x"></i></button>
     </div>
     <div class="card-body">
@@ -104,7 +104,7 @@ export function renderIVA() {
 
         <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 20px; border-radius: var(--radius-md); text-align: center; display: flex; flex-direction: column; justify-content: space-between;">
           <div>
-            <i data-lucide="file-check-2" style="width: 32px; height: 32px; color: #818cf8; margin-bottom: 12px; margin-inline: auto;"></i>
+            <i data-lucide="file-check-2" style="width: 32px; height: 32px; color: var(--color-accent-light); margin-bottom: 12px; margin-inline: auto;"></i>
             <h4 style="font-size: 13.5px; margin-bottom: 6px;">F. 2051 Borrador (PDF)</h4>
             <p style="font-size: 11px; color: var(--text-secondary); margin-bottom: 16px;">Pre-declaración consolidada borrador de actividad.</p>
           </div>
@@ -230,7 +230,7 @@ export function renderIVA() {
                 <td style="font-weight: 600; font-size: 12.5px;">
                   <div>${item.cliente || item.proveedor}</div>
                   ${item.es_activo ? `
-                    <span style="font-size: 8px; font-weight: 700; color: #818cf8; background: rgba(99, 102, 241, 0.08); padding: 1px 4px; border-radius: 3px; border: 1px solid rgba(99, 102, 241, 0.2); display: inline-flex; align-items: center; gap: 2px; margin-top: 2px;">
+                    <span style="font-size: 8px; font-weight: 700; color: var(--color-accent-light); background: rgba(31, 92, 67, 0.08); padding: 1px 4px; border-radius: 3px; border: 1px solid rgba(31, 92, 67, 0.2); display: inline-flex; align-items: center; gap: 2px; margin-top: 2px;">
                       <i data-lucide="building" style="width: 8px; height: 8px;"></i> BIEN DE USO
                     </span>
                   ` : ''}
