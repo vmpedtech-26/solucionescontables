@@ -208,7 +208,7 @@ export function renderLanding() {
           <div class="prestige-image-container" style="position: relative; border-radius: var(--radius-lg); overflow: hidden; box-shadow: 0 30px 60px -15px rgba(15, 23, 42, 0.12); border: 1px solid rgba(15, 23, 42, 0.08); transition: var(--transition-normal);">
             <img src="/accounting_firm.png" alt="Escritorio de un contador profesional con libros contables y calculadora" width="600" height="450" loading="lazy" style="width: 100%; height: auto; display: block; object-fit: cover;">
             <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0) 100%); padding: 32px 24px; color: #ffffff;">
-              <span style="font-family: var(--font-heading); font-size: 11px; font-weight: 750; color: #34d399; text-transform: uppercase; letter-spacing: 0.1em; display: block; margin-bottom: 6px;">Socio Tecnológico Impositivo</span>
+              <span style="font-family: var(--font-heading); font-size: 11px; font-weight: 750; color: var(--color-accent-light); text-transform: uppercase; letter-spacing: 0.1em; display: block; margin-bottom: 6px;">Socio Tecnológico Impositivo</span>
               <h4 style="font-size: 18px; font-weight: 700; color: #ffffff; margin: 0;">Estudio Contable Comahue</h4>
               <p style="font-size: 12px; color: #94a3b8; margin: 4px 0 0 0;">Neuquén, Argentina — Infraestructura en la Nube</p>
             </div>
@@ -216,7 +216,7 @@ export function renderLanding() {
           
           <!-- Right side: Elite Corporate Copy -->
           <div class="prestige-info" style="background: rgba(255, 255, 255, 0.95); border: 1px solid rgba(15, 23, 42, 0.08); border-radius: var(--radius-lg); padding: 44px; box-shadow: 0 12px 32px -10px rgba(15, 23, 42, 0.07); transform: translate3d(0,0,0); backface-visibility: hidden;">
-            <span class="badge" style="background: rgba(5, 150, 105, 0.06); color: #047857; border-color: rgba(5, 150, 105, 0.15); font-weight: 700;">COLABORADOR DIGITAL DE ÉLITE</span>
+            <span class="badge" style="background: rgba(31, 92, 67, 0.06); color: var(--color-accent); border-color: rgba(31, 92, 67, 0.15); font-weight: 700;">COLABORADOR DIGITAL DE ÉLITE</span>
             <h2 style="font-size: 34px; font-weight: 800; margin-top: 10px; margin-bottom: 16px; line-height: 1.15; color: var(--color-primary);">Mucho más que un sistema. Un socio operativo para tu firma.</h2>
             <p style="color: var(--text-secondary); margin-bottom: 32px; font-size: 14.5px; line-height: 1.6;">
               Soluciones Contables funciona como un colaborador de élite: asume las tareas más repetitivas del día a día fiscal, resguarda tus credenciales con estándares bancarios y te permite concentrarte en lo que realmente vale — el asesoramiento estratégico de tus clientes.
@@ -224,21 +224,21 @@ export function renderLanding() {
             
             <div style="display: flex; flex-direction: column; gap: 20px;">
               <div style="display: flex; gap: 16px;">
-                <div class="prestige-icon-bullet" style="background: rgba(5, 150, 105, 0.08); color: var(--color-accent); width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;"><i data-lucide="shield-check" style="width: 20px; height: 20px;"></i></div>
+                <div class="prestige-icon-bullet" style="background: rgba(31, 92, 67, 0.08); color: var(--color-accent); width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;"><i data-lucide="shield-check" style="width: 20px; height: 20px;"></i></div>
                 <div>
                   <h4 style="font-size: 15px; font-weight: 700; color: var(--color-primary); margin-bottom: 4px;">Cifrado de Credenciales y Delegación Segura</h4>
                   <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.4; margin: 0;">Las claves fiscales y certificados de delegación ARCA (ex-AFIP) se resguardan bajo estrictas normas de encriptación para resguardo confidencial.</p>
                 </div>
               </div>
               <div style="display: flex; gap: 16px;">
-                <div class="prestige-icon-bullet" style="background: rgba(99, 102, 241, 0.08); color: #6366f1; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;"><i data-lucide="check-square" style="width: 20px; height: 20px;"></i></div>
+                <div class="prestige-icon-bullet" style="background: rgba(31, 92, 67, 0.08); color: var(--color-accent); width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;"><i data-lucide="check-square" style="width: 20px; height: 20px;"></i></div>
                 <div>
                   <h4 style="font-size: 15px; font-weight: 700; color: var(--color-primary); margin-bottom: 4px;">Auditoría Contra Facturación Apócrifa (APOC)</h4>
                   <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.4; margin: 0;">Validación cruzada de CUITs en bases de datos AFIP APOC, mitigando de forma preventiva riesgos tributarios en los libros de tus clientes.</p>
                 </div>
               </div>
               <div style="display: flex; gap: 16px;">
-                <div class="prestige-icon-bullet" style="background: rgba(5, 150, 105, 0.08); color: var(--color-accent); width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;"><i data-lucide="scale" style="width: 20px; height: 20px;"></i></div>
+                <div class="prestige-icon-bullet" style="background: rgba(31, 92, 67, 0.08); color: var(--color-accent); width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;"><i data-lucide="scale" style="width: 20px; height: 20px;"></i></div>
                 <div>
                   <h4 style="font-size: 15px; font-weight: 700; color: var(--color-primary); margin-bottom: 4px;">Cumplimiento Normativo FACPCE y RT 54</h4>
                   <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.4; margin: 0;">Toda la categorización de rubros, costos e IVA se procesa siguiendo estrictamente la normativa vigente para su fácil volcado en balances oficiales.</p>
@@ -270,7 +270,7 @@ export function renderLanding() {
 
               <div class="price-amount" style="margin: 20px 0 24px; min-height: 100px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
                 <div style="margin-bottom: 8px;">
-                  <span style="font-size: 11px; font-weight: 750; color: #6366f1; text-transform: uppercase; letter-spacing: 0.05em; background: rgba(99,102,241,0.06); padding: 4px 10px; border-radius: 12px; border: 1px solid rgba(99,102,241,0.12);">Setup Inicial</span>
+                  <span style="font-size: 11px; font-weight: 750; color: var(--color-accent); text-transform: uppercase; letter-spacing: 0.05em; background: rgba(31,92,67,0.06); padding: 4px 10px; border-radius: 12px; border: 1px solid rgba(31,92,67,0.12);">Setup Inicial</span>
                   <div style="font-size: 24px; font-weight: 850; color: var(--color-primary); font-family: var(--font-heading); margin-top: 4px;">$ 150.000 <span style="font-size: 12px; font-weight: 500; color: var(--text-secondary);">ARS</span></div>
                   <span style="font-size: 10.5px; color: var(--text-muted);">pago único de instalación</span>
                 </div>
@@ -294,7 +294,7 @@ export function renderLanding() {
           <!-- Plan Profesional (Featured) -->
           <div class="price-card featured" style="text-align: center; display: flex; flex-direction: column; justify-content: space-between;">
             <div>
-              <div class="featured-badge" style="background: linear-gradient(135deg, var(--color-accent) 0%, #047857 100%);">Estudio Recomendado</div>
+              <div class="featured-badge" style="background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent) 100%);">Estudio Recomendado</div>
               <div class="price-header" style="margin-top: 16px;">
                 <h3 style="font-size: 22px; color: var(--color-primary); font-weight: 800;">Plan Profesional</h3>
                 <p style="font-size: 13px; color: var(--text-secondary); margin-top: 6px;">Hasta 50 clientes (CUITs)</p>
@@ -302,7 +302,7 @@ export function renderLanding() {
 
               <div class="price-amount" style="margin: 20px 0 24px; min-height: 100px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
                 <div style="margin-bottom: 8px;">
-                  <span style="font-size: 11px; font-weight: 750; color: var(--color-accent); text-transform: uppercase; letter-spacing: 0.05em; background: rgba(5,150,105,0.06); padding: 4px 10px; border-radius: 12px; border: 1px solid rgba(5,150,105,0.12);">Setup Inicial</span>
+                  <span style="font-size: 11px; font-weight: 750; color: var(--color-accent); text-transform: uppercase; letter-spacing: 0.05em; background: rgba(31,92,67,0.06); padding: 4px 10px; border-radius: 12px; border: 1px solid rgba(31,92,67,0.12);">Setup Inicial</span>
                   <div style="font-size: 26px; font-weight: 850; color: var(--color-primary); font-family: var(--font-heading); margin-top: 4px;">$ 290.000 <span style="font-size: 12px; font-weight: 500; color: var(--text-secondary);">ARS</span></div>
                   <span style="font-size: 10.5px; color: var(--text-muted);">pago único de instalación</span>
                 </div>
@@ -333,7 +333,7 @@ export function renderLanding() {
 
               <div class="price-amount" style="margin: 20px 0 24px; min-height: 100px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
                 <div style="margin-bottom: 8px;">
-                  <span style="font-size: 11px; font-weight: 750; color: #6366f1; text-transform: uppercase; letter-spacing: 0.05em; background: rgba(99,102,241,0.06); padding: 4px 10px; border-radius: 12px; border: 1px solid rgba(99,102,241,0.12);">Setup Inicial</span>
+                  <span style="font-size: 11px; font-weight: 750; color: var(--color-accent); text-transform: uppercase; letter-spacing: 0.05em; background: rgba(31,92,67,0.06); padding: 4px 10px; border-radius: 12px; border: 1px solid rgba(31,92,67,0.12);">Setup Inicial</span>
                   <div style="font-size: 24px; font-weight: 850; color: var(--color-primary); font-family: var(--font-heading); margin-top: 4px;">$ 490.000 <span style="font-size: 12px; font-weight: 500; color: var(--text-secondary);">ARS</span></div>
                   <span style="font-size: 10.5px; color: var(--text-muted);">pago único de instalación</span>
                 </div>
@@ -360,7 +360,7 @@ export function renderLanding() {
         <div style="margin-top: 50px; background: #ffffff; border: 1px solid rgba(15, 23, 42, 0.08); border-radius: var(--radius-lg); padding: 32px; max-width: 760px; margin-inline: auto; text-align: left; box-shadow: var(--shadow-md);">
           <div style="border-bottom: 1px dashed var(--border-color); padding-bottom:18px; margin-bottom:20px;">
             <h4 style="font-size: 17px; font-weight: 800; color: var(--color-primary); display:flex; align-items:center; gap:8px; margin:0; font-family: var(--font-heading);">
-              <i data-lucide="trending-up" style="color: #059669; width: 20px; height: 20px;"></i>
+              <i data-lucide="trending-up" style="color: var(--color-accent); width: 20px; height: 20px;"></i>
               Simulador de Ahorro Operativo y ROI
             </h4>
             <p style="font-size: 12.5px; color: var(--text-secondary); margin-top:6px; margin-bottom:0; line-height: 1.5;">
@@ -368,13 +368,13 @@ export function renderLanding() {
             </p>
           </div>
           
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:32px; align-items:center;">
+          <div class="roi-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:32px; align-items:center;">
             <!-- Left inputs -->
             <div style="display:flex; flex-direction:column; gap:20px;">
               <div>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                   <span style="font-size: 13px; color: var(--text-secondary); font-weight: 700;">Empresas Clientes (CUITs):</span>
-                  <span id="roi-cuit-label" style="font-family: var(--font-heading); font-size: 14.5px; font-weight: 800; color: var(--color-accent); background: rgba(5,150,105,0.06); padding: 2px 10px; border-radius: 12px; border: 1px solid rgba(5,150,105,0.15);">30</span>
+                  <span id="roi-cuit-label" style="font-family: var(--font-heading); font-size: 14.5px; font-weight: 800; color: var(--color-accent); background: rgba(31,92,67,0.06); padding: 2px 10px; border-radius: 12px; border: 1px solid rgba(31,92,67,0.15);">30</span>
                 </div>
                 <input type="range" id="roi-cuit-slider" min="5" max="100" value="30" aria-label="Cantidad de empresas clientes" style="width: 100%; accent-color: var(--color-accent); cursor: pointer; height: 6px; border-radius: 3px; background: var(--border-color); -webkit-appearance: none; outline: none;">
               </div>
@@ -382,9 +382,9 @@ export function renderLanding() {
               <div>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                   <span style="font-size: 13px; color: var(--text-secondary); font-weight: 700;">Horas de carga manual al mes por CUIT:</span>
-                  <span id="roi-hours-label" style="font-family: var(--font-heading); font-size: 14.5px; font-weight: 800; color: #6366f1; background: rgba(99,102,241,0.06); padding: 2px 10px; border-radius: 12px; border: 1px solid rgba(99,102,241,0.15);">8 hs</span>
+                  <span id="roi-hours-label" style="font-family: var(--font-heading); font-size: 14.5px; font-weight: 800; color: var(--color-accent); background: rgba(31,92,67,0.06); padding: 2px 10px; border-radius: 12px; border: 1px solid rgba(31,92,67,0.15);">8 hs</span>
                 </div>
-                <input type="range" id="roi-hours-slider" min="2" max="24" value="8" aria-label="Horas mensuales de carga manual por empresa" style="width: 100%; accent-color: #6366f1; cursor: pointer; height: 6px; border-radius: 3px; background: var(--border-color); -webkit-appearance: none; outline: none;">
+                <input type="range" id="roi-hours-slider" min="2" max="24" value="8" aria-label="Horas mensuales de carga manual por empresa" style="width: 100%; accent-color: var(--color-accent); cursor: pointer; height: 6px; border-radius: 3px; background: var(--border-color); -webkit-appearance: none; outline: none;">
               </div>
             </div>
             
@@ -397,14 +397,14 @@ export function renderLanding() {
               
               <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 1px dashed var(--border-color); padding-bottom:12px;">
                 <span style="font-size:12.5px; color:var(--text-secondary); font-weight:600;">Tiempo con Soluciones Contables:</span>
-                <span id="roi-total-virtual" style="font-family: var(--font-mono); font-size:14px; font-weight:700; color:#10b981;">36 hs / mes</span>
+                <span id="roi-total-virtual" style="font-family: var(--font-mono); font-size:14px; font-weight:700; color:var(--color-accent-light);">36 hs / mes</span>
               </div>
               
               <div style="text-align:center; padding-top:4px;">
                 <span style="font-size:10.5px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px; display:block;">TIEMPO LIBERADO MENSUAL</span>
-                <div style="font-family: var(--font-heading); font-size: 30px; font-weight: 850; color:#10b981; margin-top:4px; display:flex; align-items:center; justify-content:center; gap:8px;" id="roi-saved-hours">
+                <div style="font-family: var(--font-heading); font-size: 30px; font-weight: 850; color:var(--color-accent-light); margin-top:4px; display:flex; align-items:center; justify-content:center; gap:8px;" id="roi-saved-hours">
                   204 horas
-                  <span style="font-size: 11px; font-weight: 800; color: #10b981; background: rgba(16,185,129,0.08); padding: 3px 8px; border-radius: 12px; border: 1px solid rgba(16,185,129,0.15); margin-left: 8px;">
+                  <span style="font-size: 11px; font-weight: 800; color: var(--color-accent-light); background: rgba(47,122,89,0.08); padding: 3px 8px; border-radius: 12px; border: 1px solid rgba(47,122,89,0.15); margin-left: 8px;">
                     ¡85% de ahorro!
                   </span>
                 </div>
@@ -422,14 +422,14 @@ export function renderLanding() {
     <!-- Partners / Affiliate Program Section -->
     <section id="partners" class="partners-section" style="padding: 80px 0; border-top: 1px solid rgba(226, 232, 240, 0.4); background: transparent;">
       <div class="container">
-        <div class="partners-card" style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.03) 0%, rgba(5, 150, 105, 0.03) 100%); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 48px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 32px; align-items: stretch;">
+        <div class="partners-card" style="background: linear-gradient(135deg, rgba(31, 92, 67, 0.03) 0%, rgba(31, 92, 67, 0.03) 100%); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 48px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 32px; align-items: stretch;">
           
           <!-- Column 1: Organic Partners Image -->
           <div class="feature-card" style="padding: 0; min-height: 280px; overflow: hidden; border: 1px solid rgba(15, 23, 42, 0.06); position: relative;">
             <div style="width: 100%; height: 100%; position: relative; overflow: hidden;">
               <img src="/partners_benefit.png" alt="Socios Comerciales de Soluciones Contables" style="width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.5s ease;" class="benefit-img">
               <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0) 100%); padding: 24px 20px; color: #ffffff; z-index: 10;">
-                <span class="badge" style="background: rgba(52, 211, 153, 0.15); color: #34d399; border-color: rgba(52, 211, 153, 0.3); font-weight: 700; font-size: 10px; text-transform: uppercase; margin-bottom: 8px; display: inline-block;">Socio Estratégico</span>
+                <span class="badge" style="background: rgba(47, 122, 89, 0.15); color: var(--color-accent-light); border-color: rgba(47, 122, 89, 0.3); font-weight: 700; font-size: 10px; text-transform: uppercase; margin-bottom: 8px; display: inline-block;">Socio Estratégico</span>
                 <h4 style="font-size: 16px; font-weight: 800; margin: 0; color: #ffffff; font-family: var(--font-heading);">Crecimiento en Red</h4>
                 <p style="font-size: 11px; color: #cbd5e1; margin: 4px 0 0 0; line-height: 1.4;">Unite a nuestra comunidad de contadores y recomendadores en Argentina.</p>
               </div>
@@ -439,7 +439,7 @@ export function renderLanding() {
           <!-- Column 2: Information & Calculator -->
           <div class="partners-info" style="display: flex; flex-direction: column; justify-content: space-between;">
             <div>
-              <span class="badge" style="background: rgba(99,102,241,0.08); color: #6366f1; border-color: rgba(99,102,241,0.15); font-weight: 700;">PLAN DE AFILIADOS / SOCIOS COMERCIALES</span>
+              <span class="badge" style="background: rgba(31,92,67,0.08); color: var(--color-accent); border-color: rgba(31,92,67,0.15); font-weight: 700;">PLAN DE AFILIADOS / SOCIOS COMERCIALES</span>
               <h2 style="font-size: 26px; font-weight: 700; margin-top: 10px; margin-bottom: 12px; line-height: 1.25;">Ganá <span class="gradient-text">USD 80</span> por recomendación</h2>
               <p style="color: var(--text-secondary); margin-bottom: 20px; font-size: 13px; line-height: 1.5;">
                 ¿Tenés contactos en el sector contable? ¿Sos contador o estudiante y querés generar un ingreso extra? Te invitamos a sumarte a nuestro **Programa de Partners Asociados**.
@@ -451,7 +451,7 @@ export function renderLanding() {
             <!-- Interactive Earnings Calculator -->
             <div style="background: #ffffff; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 16px; box-shadow: var(--shadow-sm);">
               <h4 style="font-size: 13px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; margin-top: 0;">
-                <i data-lucide="calculator" style="color: #6366f1; width: 16px; height: 16px;"></i>
+                <i data-lucide="calculator" style="color: var(--color-accent); width: 16px; height: 16px;"></i>
                 Calculador de Comisiones Proyectadas
               </h4>
               
@@ -460,13 +460,13 @@ export function renderLanding() {
                   <span style="font-size: 11.5px; color: var(--text-secondary); font-weight: 600;">Licencias al mes:</span>
                   <span id="partner-qty-label" style="font-family: var(--font-heading); font-size: 14px; font-weight: 800; color: var(--color-primary); background: var(--bg-secondary); padding: 2px 8px; border-radius: 12px; border: 1px solid var(--border-color);">5</span>
                 </div>
-                <input type="range" id="partner-slider" min="1" max="30" value="5" aria-label="Licencias vendidas por mes" style="width: 100%; accent-color: #6366f1; cursor: pointer; height: 6px; border-radius: 3px; background: var(--border-color); -webkit-appearance: none; outline: none;">
+                <input type="range" id="partner-slider" min="1" max="30" value="5" aria-label="Licencias vendidas por mes" style="width: 100%; accent-color: var(--color-accent); cursor: pointer; height: 6px; border-radius: 3px; background: var(--border-color); -webkit-appearance: none; outline: none;">
               </div>
               
               <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 10px; border-top: 1px dashed var(--border-color);">
                 <span style="font-size: 12px; font-weight: 700; color: var(--text-secondary);">Tu comisión estimada:</span>
                 <div style="text-align: right;">
-                  <span style="font-family: var(--font-heading); font-size: 22px; font-weight: 800; color: #10b981; display: block; line-height: 1;">
+                  <span style="font-family: var(--font-heading); font-size: 22px; font-weight: 800; color: var(--color-accent-light); display: block; line-height: 1;">
                     USD <span id="partner-commission-val">400</span>
                   </span>
                 </div>
@@ -490,7 +490,7 @@ export function renderLanding() {
                 <label class="form-label">Email de Contacto</label>
                 <input type="email" class="form-input" id="partner-email" placeholder="tuemail@correo.com" required>
               </div>
-              <button type="submit" class="btn btn-primary w-full" style="background: #6366f1; border-color: #6366f1; color: white;">
+              <button type="submit" class="btn btn-primary w-full" style="background: var(--color-accent); border-color: var(--color-accent); color: white;">
                 Postularme y Recibir Kit de Ventas
               </button>
             </form>
@@ -712,7 +712,7 @@ export function initLanding(mainApp) {
       totalVirtualLabel.textContent = `${virtualHours} hs / mes`;
       savedHoursLabel.innerHTML = `
         ${savedHours} horas
-        <span style="font-size: 11px; font-weight: 800; color: #10b981; background: rgba(16,185,129,0.08); padding: 3px 8px; border-radius: 12px; border: 1px solid rgba(16,185,129,0.15); margin-left: 8px;">
+        <span style="font-size: 11px; font-weight: 800; color: var(--color-accent-light); background: rgba(47,122,89,0.08); padding: 3px 8px; border-radius: 12px; border: 1px solid rgba(47,122,89,0.15); margin-left: 8px;">
           ¡85% de ahorro!
         </span>
       `;
@@ -800,7 +800,7 @@ export function initLanding(mainApp) {
       tipo: "SRL",
       actividad: "Servicios del Estudio Contable",
       inicio_actividades: new Date().toISOString().split('T')[0],
-      color: "#6366f1"
+      color: "var(--color-accent)"
     };
 
     const cos = getCompanies() || [];
