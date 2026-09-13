@@ -20,8 +20,8 @@ export function renderWhatsApp() {
   // Mock chats list
   const chats = [
     { id: 'co-1', name: 'Transportes Patagónicos S.A.', lastMsg: 'Te paso el ticket del camión...', time: '11:42', avatar: '#0d9488', count: unreadCounts['co-1'] },
-    { id: 'co-2', name: 'TecnoDesarrollos Sur', lastMsg: 'Matias, ¿viste la recategorización?', time: 'Ayer', avatar: 'var(--color-accent)', count: unreadCounts['co-2'] },
-    { id: 'co-3', name: 'Alimentos del Valle S.R.L.', lastMsg: 'Factura de luz cargada.', time: 'Ayer', avatar: 'var(--color-accent-light)', count: unreadCounts['co-3'] }
+    { id: 'co-2', name: 'TecnoDesarrollos Sur', lastMsg: 'Matias, ¿viste la recategorización?', time: 'Ayer', avatar: '#8A6D3B', count: unreadCounts['co-2'] },
+    { id: 'co-3', name: 'Alimentos del Valle S.R.L.', lastMsg: 'Factura de luz cargada.', time: 'Ayer', avatar: '#1F5C43', count: unreadCounts['co-3'] }
   ];
 
   const activeChat = chats.find(c => c.id === activeChatId) || chats[0];
@@ -303,7 +303,7 @@ export function initWhatsApp(mainApp) {
         align-items: center;
         gap: 12px;
       }
-      .fa-icon { background: #e2e8f0; color: #475569; width: 32px; height: 32px; border-radius: 4px; display: flex; align-items: center; justify-content: center; }
+      .fa-icon { background: #e2e8f0; color: var(--text-secondary); width: 32px; height: 32px; border-radius: 4px; display: flex; align-items: center; justify-content: center; }
       .fa-details { display: flex; flex-direction: column; overflow: hidden; }
       .fa-name { font-size: 11px; font-weight: 700; color: var(--color-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
       .fa-size { font-size: 9px; color: var(--text-secondary); }

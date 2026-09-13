@@ -25,7 +25,7 @@ export function renderSueldos() {
     <!-- Calculadora / Formulario de Carga -->
     <div class="card" style="backdrop-filter: blur(10px); background: rgba(255, 255, 255, 0.8);">
       <div class="card-header" style="border-bottom: 1px solid rgba(15, 23, 42, 0.08); padding-bottom: 12px;">
-        <h3 style="font-weight: 800; font-size: 16px; display: flex; align-items: center; gap: 8px; color: #0f172a; margin: 0;">
+        <h3 style="font-weight: 800; font-size: 16px; display: flex; align-items: center; gap: 8px; color: var(--text-primary); margin: 0;">
           <i data-lucide="calculator" style="color: var(--color-primary); width: 20px; height: 20px;"></i>
           Nueva Liquidación de Haberes
         </h3>
@@ -34,33 +34,33 @@ export function renderSueldos() {
         <form id="sueldo-calc-form" style="display: flex; flex-direction: column; gap: 16px;">
           <div style="display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 12px;">
             <div class="form-group">
-              <label class="form-label" style="font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 4px;">Empleado (Nombre y Apellido)</label>
+              <label class="form-label" style="font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px;">Empleado (Nombre y Apellido)</label>
               <input type="text" id="emp-name" class="form-input" placeholder="Ej: Juan Pérez" required style="font-size: 13px; padding: 10px 12px;">
             </div>
             <div class="form-group">
-              <label class="form-label" style="font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 4px;">CUIL</label>
+              <label class="form-label" style="font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px;">CUIL</label>
               <input type="text" id="emp-cuil" class="form-input" placeholder="20-35849201-4" required style="font-size: 13px; padding: 10px 12px; font-family: monospace;">
             </div>
           </div>
 
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
             <div class="form-group">
-              <label class="form-label" style="font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 4px;">Sueldo Bruto *</label>
+              <label class="form-label" style="font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px;">Sueldo Bruto *</label>
               <div style="position: relative; display: flex; align-items: center;">
-                <span style="position: absolute; left: 12px; font-size: 13px; font-weight: 600; color: #64748b;">$</span>
+                <span style="position: absolute; left: 12px; font-size: 13px; font-weight: 600; color: var(--text-secondary);">$</span>
                 <input type="number" id="emp-bruto" class="form-input" placeholder="0.00" required min="1" step="0.01" style="font-size: 13px; padding: 10px 12px 10px 24px; font-weight: 700;">
               </div>
             </div>
             <div class="form-group">
-              <label class="form-label" style="font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 4px;">Periodo Liquidado</label>
+              <label class="form-label" style="font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px;">Periodo Liquidado</label>
               <input type="month" id="emp-period" class="form-input" required style="font-size: 13px; padding: 8px 12px;">
             </div>
           </div>
 
           <div class="form-group" style="background: rgba(15, 23, 42, 0.02); border: 1px solid rgba(15, 23, 42, 0.05); padding: 12px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between;">
             <div style="display: flex; flex-direction: column;">
-              <span style="font-size: 12.5px; font-weight: 700; color: #0f172a;">Afilación Sindicato SEC</span>
-              <span style="font-size: 11px; color: #64748b;">Aplica deducción adicional del 2.0% (Comercio).</span>
+              <span style="font-size: 12.5px; font-weight: 700; color: var(--text-primary);">Afilación Sindicato SEC</span>
+              <span style="font-size: 11px; color: var(--text-secondary);">Aplica deducción adicional del 2.0% (Comercio).</span>
             </div>
             <input type="checkbox" id="emp-sec" style="width: 18px; height: 18px; cursor: pointer; accent-color: var(--color-primary);">
           </div>
@@ -76,7 +76,7 @@ export function renderSueldos() {
     <!-- Resultados Dinámicos del Cálculo -->
     <div class="card" style="background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(31, 92, 67, 0.03) 100%); backdrop-filter: blur(10px);">
       <div class="card-header" style="border-bottom: 1px solid rgba(15, 23, 42, 0.08); padding-bottom: 12px;">
-        <h3 style="font-weight: 800; font-size: 16px; display: flex; align-items: center; gap: 8px; color: #0f172a; margin: 0;">
+        <h3 style="font-weight: 800; font-size: 16px; display: flex; align-items: center; gap: 8px; color: var(--text-primary); margin: 0;">
           <i data-lucide="receipt" style="color: var(--color-primary); width: 20px; height: 20px;"></i>
           Simulación en Tiempo Real
         </h3>
@@ -85,9 +85,9 @@ export function renderSueldos() {
         
         <!-- Totales Destacados -->
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-          <div style="background: #ffffff; border: 1px solid rgba(15, 23, 42, 0.06); padding: 12px; border-radius: 8px; border-left: 4px solid #64748b;">
-            <div style="font-size: 11px; color: #64748b; font-weight: 700; text-transform: uppercase;">Sueldo Bruto</div>
-            <div id="sim-bruto" style="font-size: 20px; font-weight: 800; color: #0f172a; margin-top: 4px;">$0,00</div>
+          <div style="background: #ffffff; border: 1px solid rgba(15, 23, 42, 0.06); padding: 12px; border-radius: 8px; border-left: 4px solid var(--text-secondary);">
+            <div style="font-size: 11px; color: var(--text-secondary); font-weight: 700; text-transform: uppercase;">Sueldo Bruto</div>
+            <div id="sim-bruto" style="font-size: 20px; font-weight: 800; color: var(--text-primary); margin-top: 4px;">$0,00</div>
           </div>
           <div style="background: #ffffff; border: 1px solid rgba(31, 92, 67, 0.15); padding: 12px; border-radius: 8px; border-left: 4px solid var(--color-primary);">
             <div style="font-size: 11px; color: var(--color-primary); font-weight: 700; text-transform: uppercase;">Neto a Liquidar</div>
@@ -97,11 +97,11 @@ export function renderSueldos() {
 
         <!-- Detalle de Deducciones del Empleado -->
         <div style="background: #ffffff; border: 1px solid rgba(15, 23, 42, 0.06); border-radius: 8px; padding: 12px;">
-          <div style="font-size: 12px; font-weight: 800; color: #0f172a; border-bottom: 1px solid rgba(15, 23, 42, 0.06); padding-bottom: 8px; margin-bottom: 8px; display: flex; justify-content: space-between;">
+          <div style="font-size: 12px; font-weight: 800; color: var(--text-primary); border-bottom: 1px solid rgba(15, 23, 42, 0.06); padding-bottom: 8px; margin-bottom: 8px; display: flex; justify-content: space-between;">
             <span>Aportes del Empleado (Deducciones)</span>
             <span id="sim-deduc-total" style="color: #ef4444; font-weight: 700;">-$0,00</span>
           </div>
-          <div style="display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: #475569;">
+          <div style="display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--text-secondary);">
             <div style="display: flex; justify-content: space-between;">
               <span>Jubilación (11.0%)</span>
               <span id="sim-deduc-jub" style="font-weight: 600;">$0,00</span>
@@ -123,11 +123,11 @@ export function renderSueldos() {
 
         <!-- Detalle de Contribuciones Patronales -->
         <div style="background: rgba(15, 23, 42, 0.01); border: 1px dashed rgba(15, 23, 42, 0.12); border-radius: 8px; padding: 12px;">
-          <div style="font-size: 11.5px; font-weight: 800; color: #475569; border-bottom: 1px solid rgba(15, 23, 42, 0.06); padding-bottom: 6px; margin-bottom: 6px; display: flex; justify-content: space-between;">
+          <div style="font-size: 11.5px; font-weight: 800; color: var(--text-secondary); border-bottom: 1px solid rgba(15, 23, 42, 0.06); padding-bottom: 6px; margin-bottom: 6px; display: flex; justify-content: space-between;">
             <span>Carga Social Patronal (Información de Costo)</span>
-            <span id="sim-patr-total" style="color: #64748b; font-weight: 700;">+$0,00</span>
+            <span id="sim-patr-total" style="color: var(--text-secondary); font-weight: 700;">+$0,00</span>
           </div>
-          <div style="display: flex; flex-direction: column; gap: 4px; font-size: 11px; color: #64748b;">
+          <div style="display: flex; flex-direction: column; gap: 4px; font-size: 11px; color: var(--text-secondary);">
             <div style="display: flex; justify-content: space-between;">
               <span>Jubilación Patronal (10.17%)</span>
               <span id="sim-patr-jub">$0,00</span>
@@ -150,7 +150,7 @@ export function renderSueldos() {
   <!-- Historial de Liquidaciones -->
   <div class="card" style="margin-bottom: 32px;">
     <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(15, 23, 42, 0.08); padding: 16px 20px;">
-      <h3 style="font-weight: 800; font-size: 16px; color: #0f172a; margin: 0; display: flex; align-items: center; gap: 8px;">
+      <h3 style="font-weight: 800; font-size: 16px; color: var(--text-primary); margin: 0; display: flex; align-items: center; gap: 8px;">
         <i data-lucide="table" style="color: var(--color-primary); width: 20px; height: 20px;"></i>
         Historial de Liquidaciones del Período
       </h3>
@@ -163,13 +163,13 @@ export function renderSueldos() {
         <table class="table" style="width: 100%;">
           <thead>
             <tr>
-              <th style="padding: 12px 20px; font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 700;">Empleado</th>
-              <th style="padding: 12px 20px; font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 700;">CUIL</th>
-              <th style="padding: 12px 20px; font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 700; text-align: center;">Periodo</th>
-              <th style="padding: 12px 20px; font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 700; text-align: right;">Sueldo Bruto</th>
-              <th style="padding: 12px 20px; font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 700; text-align: right;">Deducciones</th>
-              <th style="padding: 12px 20px; font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 700; text-align: right;">Sueldo Neto</th>
-              <th style="padding: 12px 20px; font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 700; text-align: center; width: 80px;">Acción</th>
+              <th style="padding: 12px 20px; font-size: 11px; text-transform: uppercase; color: var(--text-secondary); font-weight: 700;">Empleado</th>
+              <th style="padding: 12px 20px; font-size: 11px; text-transform: uppercase; color: var(--text-secondary); font-weight: 700;">CUIL</th>
+              <th style="padding: 12px 20px; font-size: 11px; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; text-align: center;">Periodo</th>
+              <th style="padding: 12px 20px; font-size: 11px; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; text-align: right;">Sueldo Bruto</th>
+              <th style="padding: 12px 20px; font-size: 11px; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; text-align: right;">Deducciones</th>
+              <th style="padding: 12px 20px; font-size: 11px; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; text-align: right;">Sueldo Neto</th>
+              <th style="padding: 12px 20px; font-size: 11px; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; text-align: center; width: 80px;">Acción</th>
             </tr>
           </thead>
           <tbody id="liquidaciones-list">
@@ -319,7 +319,7 @@ export function initSueldos(mainApp) {
     if (filtered.length === 0) {
       listContainer.innerHTML = `
         <tr>
-          <td colspan="7" style="padding: 32px; text-align: center; color: #64748b;">
+          <td colspan="7" style="padding: 32px; text-align: center; color: var(--text-secondary);">
             <i data-lucide="inbox" style="width: 32px; height: 32px; color: #cbd5e1; margin-bottom: 8px; display: block; margin-left: auto; margin-right: auto;"></i>
             No hay liquidaciones registradas en este período para la empresa activa.
           </td>
@@ -331,10 +331,10 @@ export function initSueldos(mainApp) {
 
     listContainer.innerHTML = filtered.map(l => `
       <tr style="border-bottom: 1px solid rgba(15, 23, 42, 0.04);">
-        <td style="padding: 12px 20px; font-weight: 700; color: #0f172a; font-size: 13px;">${l.name}</td>
-        <td style="padding: 12px 20px; font-family: monospace; font-size: 12.5px; color: #475569;">${l.cuil}</td>
-        <td style="padding: 12px 20px; text-align: center; font-size: 12.5px; font-weight: 600; color: #475569;">${l.periodo.split('-').reverse().join('/')}</td>
-        <td style="padding: 12px 20px; text-align: right; font-weight: 700; color: #0f172a; font-size: 13px;">$${fmt(l.bruto)}</td>
+        <td style="padding: 12px 20px; font-weight: 700; color: var(--text-primary); font-size: 13px;">${l.name}</td>
+        <td style="padding: 12px 20px; font-family: monospace; font-size: 12.5px; color: var(--text-secondary);">${l.cuil}</td>
+        <td style="padding: 12px 20px; text-align: center; font-size: 12.5px; font-weight: 600; color: var(--text-secondary);">${l.periodo.split('-').reverse().join('/')}</td>
+        <td style="padding: 12px 20px; text-align: right; font-weight: 700; color: var(--text-primary); font-size: 13px;">$${fmt(l.bruto)}</td>
         <td style="padding: 12px 20px; text-align: right; font-weight: 600; color: #ef4444; font-size: 13px;">-$${fmt(l.totalDeduc)}</td>
         <td style="padding: 12px 20px; text-align: right; font-weight: 800; color: var(--color-primary); font-size: 13px;">$${fmt(l.neto)}</td>
         <td style="padding: 12px 20px; text-align: center;">

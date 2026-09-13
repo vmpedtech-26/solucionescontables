@@ -383,12 +383,12 @@ export function renderPortalCliente() {
             <p id="invoice-loading-status" style="font-size: 13px; color: var(--text-secondary); max-width: 320px; margin: 0 auto 16px; line-height: 1.5;">Iniciando canal seguro TLS 1.3 con servidores impositivos...</p>
             
             <!-- Immersive SOAP XML terminal block -->
-            <div style="text-align: left; background: #0f172a; border: 1px solid #1e293b; border-radius: var(--radius-sm); padding: 12px; margin: 0 auto 16px; max-width: 480px; box-shadow: var(--shadow-sm);">
-              <div style="display:flex; justify-content:space-between; font-size:10px; font-weight:700; color:#64748b; font-family:var(--font-mono); border-bottom:1px solid #1e293b; padding-bottom:6px; margin-bottom:8px;">
+            <div style="text-align: left; background: var(--text-primary); border: 1px solid #1e293b; border-radius: var(--radius-sm); padding: 12px; margin: 0 auto 16px; max-width: 480px; box-shadow: var(--shadow-sm);">
+              <div style="display:flex; justify-content:space-between; font-size:10px; font-weight:700; color:var(--text-secondary); font-family:var(--font-mono); border-bottom:1px solid #1e293b; padding-bottom:6px; margin-bottom:8px;">
                 <span>TERMINAL LOG PROTOCOLO XML SOAP</span>
                 <span style="color:var(--color-accent-light);">● CONECTADO</span>
               </div>
-              <div id="soap-xml-terminal" style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; color: #94a3b8; height: 160px; overflow-y: auto; white-space: pre-wrap; word-break: break-all; line-height: 1.3;">
+              <div id="soap-xml-terminal" style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; color: var(--text-muted); height: 160px; overflow-y: auto; white-space: pre-wrap; word-break: break-all; line-height: 1.3;">
                 <!-- Changing real SOAP envelopes injected here -->
               </div>
             </div>
@@ -456,7 +456,7 @@ export function renderPortalCliente() {
         <div class="card-body" style="padding: 16px; background: var(--bg-secondary);">
           
           <!-- AFIP Official Looking Invoice Panel -->
-          <div id="live-invoice-pdf-replica" class="afip-invoice-wrapper" style="background: #fff; border: 1.5px solid #0f172a; border-radius: var(--radius-sm); padding: 16px; font-family: 'Inter', system-ui, sans-serif; color: #000; box-shadow: var(--shadow-sm); transition: all 0.2s;">
+          <div id="live-invoice-pdf-replica" class="afip-invoice-wrapper" style="background: #fff; border: 1.5px solid var(--text-primary); border-radius: var(--radius-sm); padding: 16px; font-family: 'Inter', system-ui, sans-serif; color: #000; box-shadow: var(--shadow-sm); transition: all 0.2s;">
             <!-- Rendered Reactively in JS -->
           </div>
 
@@ -654,14 +654,14 @@ export function initPortalCliente(mainApp) {
       .portal-tab-btn:hover { background: rgba(31, 92, 67, 0.04); color: var(--color-primary); }
       .portal-tab-btn.active { background: var(--color-accent) !important; border-color: var(--color-accent) !important; color: white !important; box-shadow: var(--shadow-sm); }
       
-      .afip-invoice-wrapper { background: #fff; border: 1.5px solid #0f172a; border-radius: var(--radius-sm); padding: 16px; color: #000; box-shadow: var(--shadow-sm); transition: all 0.2s; }
+      .afip-invoice-wrapper { background: #fff; border: 1.5px solid var(--text-primary); border-radius: var(--radius-sm); padding: 16px; color: #000; box-shadow: var(--shadow-sm); transition: all 0.2s; }
       
       /* Theme Slate */
-      .invoice-theme-slate { border-color: #0f172a !important; }
-      .invoice-theme-slate .receipt-theme-bg { background-color: #f1f5f9 !important; border-color: #0f172a !important; color: #0f172a !important; }
+      .invoice-theme-slate { border-color: var(--text-primary) !important; }
+      .invoice-theme-slate .receipt-theme-bg { background-color: #f1f5f9 !important; border-color: var(--text-primary) !important; color: var(--text-primary) !important; }
       .invoice-theme-slate .invoice-title-color { color: #000000 !important; }
       .invoice-theme-slate .table-border-custom { border-bottom: 2px solid #000 !important; }
-      .invoice-theme-slate .accent-text-theme { color: #0f172a !important; }
+      .invoice-theme-slate .accent-text-theme { color: var(--text-primary) !important; }
 
       /* Theme Emerald */
       .invoice-theme-emerald { border-color: var(--color-accent) !important; }
@@ -900,7 +900,7 @@ export function initPortalCliente(mainApp) {
 
     const isConceptServices = selectConcept.value !== '1';
     const datesLegend = isConceptServices ? `
-      <div style="grid-column: span 3; border-top: 1px dashed #e2e8f0; margin-top: 4px; padding-top: 4px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; font-size: 8.5px; color: #475569;">
+      <div style="grid-column: span 3; border-top: 1px dashed #e2e8f0; margin-top: 4px; padding-top: 4px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; font-size: 8.5px; color: var(--text-secondary);">
         <span><strong>Servicio Desde:</strong> ${serviceFrom.value.split('-').reverse().join('/')}</span>
         <span><strong>Servicio Hasta:</strong> ${serviceTo.value.split('-').reverse().join('/')}</span>
         <span><strong>Vencimiento Pago:</strong> ${serviceDue.value.split('-').reverse().join('/')}</span>
@@ -975,7 +975,7 @@ export function initPortalCliente(mainApp) {
               ${companyLogoHtml}
               <div style="font-size: 11px; font-weight: 900; letter-spacing: -0.2px;" class="invoice-title-color">${activeCompany.razon_social}</div>
             </div>
-            <div style="font-size: 8px; color: #475569; line-height: 1.2; margin-top: 4px;">
+            <div style="font-size: 8px; color: var(--text-secondary); line-height: 1.2; margin-top: 4px;">
               CUIT: <strong>${activeCompany.cuit}</strong><br>
               Condición: ${activeCompany.condicion_iva}<br>
               Actividad: ${activeCompany.actividad}
@@ -990,7 +990,7 @@ export function initPortalCliente(mainApp) {
 
           <div style="display: flex; flex-direction: column; gap: 2px; text-align: right; justify-content: space-between; flex: 1;">
             <div style="font-size: 11px; font-weight: 800; text-transform: uppercase;" class="invoice-title-color">${typeLabel}</div>
-            <div style="font-size: 8px; color: #475569; line-height: 1.2;">
+            <div style="font-size: 8px; color: var(--text-secondary); line-height: 1.2;">
               Punto de Venta: 0001<br>
               Comp. N°: <span class="font-mono" style="font-weight: 700;">${lastEmittedCompNum}</span><br>
               Fecha: <span>${dateToday}</span>
@@ -1053,7 +1053,7 @@ export function initPortalCliente(mainApp) {
                 <path fill="#000" d="M0 0h7v7H0zm1 1v5h5V1zm8 0h3v1H9zm4 0h1v1h-1zm2 0h2v1h-2zm4 0h1v1h-1zm2 0h7v7h-7zm1 1v5h5V1zm-13 1h1v1h-1zm1 0h2v1h-2zm2 0h1v1h-1zm3 0h1v3h-1zm1 0h1v1h-1zm1 0h1v2h-1zm-6 2h1v1h-1zm3 0h1v1h-1zm-5 1h1v1h-1zm1 0h1v2h-1zm5 0h1v2h-1zm-7 1v1h7V7zm8 0h1v1h-1zm1 0h1v2h-1zm3 0h1v1h-1zm4-7v3h1V1zm1 0h2v1h-2zm2 0h1v2h-1zm-3 2h1v1h-1zm1 0h1v1h-1zm-2 1h1v2h-1zm3 0h1v1h-1zm-5 1h2v1h-2zm4 0h1v2h-1zm-3 1h2v1h-2zm-3 1h1v2h-1zm2 0h2v1h-2zm3 0h2v1h-2zm-8 2h1v1h-1zm2 0h1v1h-1zm4 0h1v1h-1zm3 0h1v1h-1zm-9 1h3v1H9zm4 0h2v1h-2zm5 0h2v1h-2zm2 0h2v1h-2zm-12 1h1v1H9zm2 0h1v2h-1zm3 0h1v1h-1zm3 0h2v1h-2zm-7 1h2v1h-2zm3 0h1v1h-1zm3 0h2v1h-2zm-8 1h1v1H8zm2 0h2v1h-2zm3 0h2v1h-2zm1 0h1v1h-1zm-12 5h7v7H0zm1 1v5h5v-5zm16-7v2h1v-2zm1 0h3v1h-3zm-14 3h1v1h-1zm1 0h2v1h-2zm3 0h1v1h-1zm4 0h2v1h-2zm1 0h1v2h-1zm3 0h2v1h-2zm-11 1h1v1h-1zm1 0h1v2h-1zm2 0h1v1h-1zm3 0h1v1h-1zm4 0h2v1h-2zm-11 1h1v2H7zm8 0h1v1h-1zm2 0h2v1h-2zm3 0h1v1h-1zm-13 1v1h7v-7zm8 0h2v1h-2zm4 0h3v1h-3z"/>
               </svg>
             </div>
-            <div style="font-size: 6.5px; color: #475569; line-height: 1.2;">
+            <div style="font-size: 6.5px; color: var(--text-secondary); line-height: 1.2;">
               <strong>Comprobante Autorizado por ARCA</strong><br>
               Live-Validation Fiscal Gateway<br>
               <span style="font-family: monospace;">https://arca.gob.ar/validador</span>
@@ -1343,7 +1343,7 @@ export function initPortalCliente(mainApp) {
 
       setTimeout(() => {
         soapXmlTerminal.innerHTML += `\n<span style="color:var(--color-accent-light);">&lt; WSAA Response: Token de Autorización recibido exitosamente:</span>\n`;
-        soapXmlTerminal.innerHTML += `<span style="color:#94a3b8;">&lt;loginCmsResponse&gt;
+        soapXmlTerminal.innerHTML += `<span style="color:var(--text-muted);">&lt;loginCmsResponse&gt;
   &lt;loginCmsReturn&gt;
     &lt;header&gt;CN=wsaa, O=AFIP, C=AR&lt;/header&gt;
     &lt;credentials&gt;
@@ -1523,7 +1523,7 @@ export function initPortalCliente(mainApp) {
     }
 
     const themeColors = {
-      slate: { border: '#0f172a', bg: '#f1f5f9', text: '#0f172a', title: '#000000' },
+      slate: { border: 'var(--text-primary)', bg: '#f1f5f9', text: 'var(--text-primary)', title: '#000000' },
       emerald: { border: 'var(--color-accent)', bg: '#ecfdf5', text: '#064e3b', title: 'var(--color-accent)' },
       navy: { border: '#1d4ed8', bg: '#eff6ff', text: '#1e3a8a', title: '#1d4ed8' }
     };
@@ -2208,26 +2208,26 @@ Sabor digital, VMP Studio.
 
     modal.innerHTML = `
       <div style="background:#ffffff; border:1px solid rgba(15,23,42,0.1); border-radius:16px; padding:28px; max-width:420px; width:90%; box-shadow:0 25px 50px -12px rgba(15,23,42,0.25); transform:scale(0.9); transition:transform 0.25s ease;" class="manual-entry-card">
-        <h3 style="font-family:var(--font-heading); font-size:18px; font-weight:800; color:#0f172a; margin-top:0; margin-bottom:18px; display:flex; align-items:center; gap:8px;">
+        <h3 style="font-family:var(--font-heading); font-size:18px; font-weight:800; color:var(--text-primary); margin-top:0; margin-bottom:18px; display:flex; align-items:center; gap:8px;">
           <i data-lucide="keyboard" style="color:#f59e0b;"></i> Carga Manual de Gasto
         </h3>
         <form id="portal-manual-form" style="display:flex; flex-direction:column; gap:14px;">
           <div>
-            <label style="display:block; font-size:11px; font-weight:700; color:#475569; margin-bottom:6px; text-transform:uppercase;">Proveedor / Emisor *</label>
-            <input type="text" id="m-vendor" placeholder="Ej: Distribuidora Comahue" required style="width:100%; border:1px solid var(--border-color); border-radius:6px; padding:10px 12px; font-size:13px; background:#fff; color:#0f172a;">
+            <label style="display:block; font-size:11px; font-weight:700; color:var(--text-secondary); margin-bottom:6px; text-transform:uppercase;">Proveedor / Emisor *</label>
+            <input type="text" id="m-vendor" placeholder="Ej: Distribuidora Comahue" required style="width:100%; border:1px solid var(--border-color); border-radius:6px; padding:10px 12px; font-size:13px; background:#fff; color:var(--text-primary);">
           </div>
           <div>
-            <label style="display:block; font-size:11px; font-weight:700; color:#475569; margin-bottom:6px; text-transform:uppercase;">CUIT Emisor *</label>
-            <input type="text" id="m-cuit" placeholder="30-12345678-9" required style="width:100%; border:1px solid var(--border-color); border-radius:6px; padding:10px 12px; font-size:13px; background:#fff; color:#0f172a;">
+            <label style="display:block; font-size:11px; font-weight:700; color:var(--text-secondary); margin-bottom:6px; text-transform:uppercase;">CUIT Emisor *</label>
+            <input type="text" id="m-cuit" placeholder="30-12345678-9" required style="width:100%; border:1px solid var(--border-color); border-radius:6px; padding:10px 12px; font-size:13px; background:#fff; color:var(--text-primary);">
           </div>
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
             <div>
-              <label style="display:block; font-size:11px; font-weight:700; color:#475569; margin-bottom:6px; text-transform:uppercase;">Monto Total ($) *</label>
-              <input type="number" id="m-total" placeholder="0.00" step="0.01" required style="width:100%; border:1px solid var(--border-color); border-radius:6px; padding:10px 12px; font-size:13px; background:#fff; color:#0f172a;">
+              <label style="display:block; font-size:11px; font-weight:700; color:var(--text-secondary); margin-bottom:6px; text-transform:uppercase;">Monto Total ($) *</label>
+              <input type="number" id="m-total" placeholder="0.00" step="0.01" required style="width:100%; border:1px solid var(--border-color); border-radius:6px; padding:10px 12px; font-size:13px; background:#fff; color:var(--text-primary);">
             </div>
             <div>
-              <label style="display:block; font-size:11px; font-weight:700; color:#475569; margin-bottom:6px; text-transform:uppercase;">Categoría</label>
-              <select id="m-category" style="width:100%; border:1px solid var(--border-color); border-radius:6px; padding:10px 12px; font-size:13px; background:#fff; color:#0f172a;">
+              <label style="display:block; font-size:11px; font-weight:700; color:var(--text-secondary); margin-bottom:6px; text-transform:uppercase;">Categoría</label>
+              <select id="m-category" style="width:100%; border:1px solid var(--border-color); border-radius:6px; padding:10px 12px; font-size:13px; background:#fff; color:var(--text-primary);">
                 <option value="Combustibles">Combustibles</option>
                 <option value="Servicios">Servicios</option>
                 <option value="Mantenimiento">Mantenimiento</option>
@@ -2239,10 +2239,10 @@ Sabor digital, VMP Studio.
           </div>
           <div style="display:flex; align-items:center; gap:8px; margin-top:4px;">
             <input type="checkbox" id="m-is-active" style="width:16px; height:16px; cursor:pointer;">
-            <label for="m-is-active" style="font-size:12px; color:#475569; cursor:pointer; font-weight:600;">Es Bien de Uso (Activo Fijo)</label>
+            <label for="m-is-active" style="font-size:12px; color:var(--text-secondary); cursor:pointer; font-weight:600;">Es Bien de Uso (Activo Fijo)</label>
           </div>
           <div style="display:flex; gap:12px; margin-top:10px;">
-            <button type="button" id="btn-cancel-manual" style="flex:1; padding:10px 16px; border:1px solid var(--border-color); border-radius:8px; background:#fff; color:#475569; font-weight:600; cursor:pointer; font-size:13px;">Cancelar</button>
+            <button type="button" id="btn-cancel-manual" style="flex:1; padding:10px 16px; border:1px solid var(--border-color); border-radius:8px; background:#fff; color:var(--text-secondary); font-weight:600; cursor:pointer; font-size:13px;">Cancelar</button>
             <button type="submit" style="flex:1; padding:10px 16px; border:none; border-radius:8px; background:linear-gradient(135deg, #f59e0b, #d97706); color:#fff; font-weight:600; cursor:pointer; font-size:13px; box-shadow:0 4px 12px rgba(245,158,11,0.25);">Guardar Gasto</button>
           </div>
         </form>

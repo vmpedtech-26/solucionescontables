@@ -293,12 +293,12 @@ export function renderConfiguracion() {
           </button>
 
           <!-- Immersive RPA Scraper Terminal Console -->
-          <div id="rpa-terminal-container" style="display: none; margin-top: 16px; background: #0f172a; border: 1px solid #1e293b; border-radius: var(--radius-sm); padding: 12px; box-shadow: var(--shadow-sm);">
-            <div style="display:flex; justify-content:space-between; font-size:9.5px; font-weight:700; color:#64748b; font-family:var(--font-mono); border-bottom:1px solid #1e293b; padding-bottom:6px; margin-bottom:8px;">
+          <div id="rpa-terminal-container" style="display: none; margin-top: 16px; background: var(--text-primary); border: 1px solid #1e293b; border-radius: var(--radius-sm); padding: 12px; box-shadow: var(--shadow-sm);">
+            <div style="display:flex; justify-content:space-between; font-size:9.5px; font-weight:700; color:var(--text-secondary); font-family:var(--font-mono); border-bottom:1px solid #1e293b; padding-bottom:6px; margin-bottom:8px;">
               <span>RPA SCRAPER CRAWLER LOGS</span>
               <span id="rpa-terminal-status" style="color:#fbbf24; animation: pulse 1s infinite;">● PROCESANDO</span>
             </div>
-            <div id="rpa-terminal" style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; color: #94a3b8; height: 160px; overflow-y: auto; white-space: pre-wrap; word-break: break-all; line-height: 1.4;">
+            <div id="rpa-terminal" style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; color: var(--text-muted); height: 160px; overflow-y: auto; white-space: pre-wrap; word-break: break-all; line-height: 1.4;">
               <!-- RPA Bot logs printed here -->
             </div>
           </div>
@@ -453,15 +453,15 @@ export function initConfiguracion(mainApp) {
 
     const logLines = [
       { t: 0, text: `[RPA BOT] Sincronizador de base tributaria RPA iniciado... v2.6.4-stable`, color: 'var(--color-accent)' },
-      { t: 600, text: `[RPA BOT] Configurando sandbox Chromium Headless seguro...`, color: '#94a3b8' },
+      { t: 600, text: `[RPA BOT] Configurando sandbox Chromium Headless seguro...`, color: 'var(--text-muted)' },
       { t: 1200, text: `[RPA BOT] Enrutando a pasarela de autenticación: https://auth.afip.gob.ar/`, color: '#38bdf8' },
       { t: 2000, text: `[RPA BOT] Ejecutando bypass CAPTCHA matemático de ARCA... [OK] (Score: 0.99)`, color: 'var(--color-accent-light)' },
       { t: 2800, text: `[RPA BOT] Autenticando con credenciales seguras de CUIT ${cuitEstudio}... Acceso Otorgado.`, color: 'var(--color-accent-light)' },
       { t: 3600, text: `[RPA BOT] Accediendo a servicio 'Domicilio Fiscal Electrónico (DFE)'...`, color: '#a78bfa' },
       { t: 4200, text: `[RPA BOT] DFE Check: 0 notificaciones nuevas / 0 alertas pendientes de lectura.`, color: '#f472b6' },
       { t: 5000, text: `[RPA BOT] Accediendo a 'Mis Comprobantes' (Ventas/Compras)...`, color: '#a78bfa' },
-      { t: 5700, text: `[RPA BOT] Sincronizando compras del período actual para ${activeCompany.razon_social}...`, color: '#94a3b8' },
-      { t: 6400, text: `[RPA BOT] Descargando y parseando archivo oficial .CSV desde ARCA...`, color: '#94a3b8' },
+      { t: 5700, text: `[RPA BOT] Sincronizando compras del período actual para ${activeCompany.razon_social}...`, color: 'var(--text-muted)' },
+      { t: 6400, text: `[RPA BOT] Descargando y parseando archivo oficial .CSV desde ARCA...`, color: 'var(--text-muted)' },
       { t: 7100, text: `[RPA BOT] Cruce contable finalizado: 12 compras coincidentes importadas en el ledger contable.`, color: 'var(--color-accent-light)' },
       { t: 7800, text: `[RPA BOT] Sincronización exitosa. Base de datos del estudio contable al día.`, color: 'var(--color-accent-light)' },
       { t: 8400, text: `[RPA BOT] Instancia Chromium cerrada. Proceso finalizado.`, color: 'var(--color-accent)' }

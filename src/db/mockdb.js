@@ -22,7 +22,7 @@ const DEFAULT_COMPANIES = [
     tipo: "Unipersonal",
     actividad: "Desarrollo de Software y Consultoría",
     inicio_actividades: "2021-06-01",
-    color: "#6366f1"
+    color: "#8A6D3B"
   },
   {
     id: "co-3",
@@ -32,7 +32,7 @@ const DEFAULT_COMPANIES = [
     tipo: "SRL",
     actividad: "Venta Mayorista de Alimentos",
     inicio_actividades: "2015-11-15",
-    color: "#10b981"
+    color: "#1F5C43"
   }
 ];
 

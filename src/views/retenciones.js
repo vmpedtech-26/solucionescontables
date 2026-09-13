@@ -259,13 +259,13 @@ export function initRetenciones(mainApp) {
         <div style="background:rgba(239,68,68,0.08); color:#ef4444; width:52px; height:52px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin-inline:auto; margin-bottom:20px;">
           <i data-lucide="alert-octagon" style="width:28px; height:28px;"></i>
         </div>
-        <h3 style="font-family:var(--font-heading); font-size:19px; font-weight:800; color:#0f172a; margin-top:0; margin-bottom:10px;">¡Advertencia Importante!</h3>
-        <p style="font-size:13.5px; color:#475569; line-height:1.6; margin-bottom:24px; text-align:left;">
+        <h3 style="font-family:var(--font-heading); font-size:19px; font-weight:800; color:var(--text-primary); margin-top:0; margin-bottom:10px;">¡Advertencia Importante!</h3>
+        <p style="font-size:13.5px; color:var(--text-secondary); line-height:1.6; margin-bottom:24px; text-align:left;">
           El archivo CSV para <strong>ARCA (SIRE)</strong> se generará en formato UTF-8 delimitado por punto y coma.<br><br>
           <strong style="color:#ef4444;">⚠ REGLA CRÍTICA:</strong> NO vuelvas a abrir el archivo exportado con <strong>Microsoft Excel</strong> en tu PC, ya que este programa reformatea y corrompe de manera silenciosa las fechas (convirtiéndolas a barras invertidas) y los CUITs (los convierte a notación científica).
         </p>
         <div style="display:flex; gap:12px;">
-          <button id="btn-cancel-csv-dl" style="flex:1; padding:10px 16px; border:1px solid var(--border-color); border-radius:8px; background:#fff; color:#475569; font-weight:600; cursor:pointer; font-size:13px; transition:background 0.2s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#fff'">Cancelar</button>
+          <button id="btn-cancel-csv-dl" style="flex:1; padding:10px 16px; border:1px solid var(--border-color); border-radius:8px; background:#fff; color:var(--text-secondary); font-weight:600; cursor:pointer; font-size:13px; transition:background 0.2s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#fff'">Cancelar</button>
           <button id="btn-confirm-csv-dl" style="flex:1; padding:10px 16px; border:none; border-radius:8px; background:linear-gradient(135deg, var(--color-accent), #4f46e5); color:#fff; font-weight:600; cursor:pointer; font-size:13px; box-shadow:0 4px 12px rgba(31,92,67,0.25);" onmouseover="this.style.opacity='0.95'" onmouseout="this.style.opacity='1'">Descargar CSV</button>
         </div>
       </div>

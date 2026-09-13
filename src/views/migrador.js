@@ -166,7 +166,7 @@ function renderMigrationFlowPanel() {
         </div>
 
         <!-- Terminal Logs -->
-        <div style="background: #0f172a; border-radius: 6px; padding: 14px; font-family: 'JetBrains Mono', monospace; font-size: 11px; line-height: 1.5; color: #38bdf8; height: 200px; overflow-y: auto; text-align: left;">
+        <div style="background: var(--text-primary); border-radius: 6px; padding: 14px; font-family: 'JetBrains Mono', monospace; font-size: 11px; line-height: 1.5; color: #38bdf8; height: 200px; overflow-y: auto; text-align: left;">
           ${migrationLogs.map(l => `<div>${l}</div>`).join('')}
         </div>
       </div>

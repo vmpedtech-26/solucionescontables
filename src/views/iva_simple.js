@@ -725,8 +725,8 @@ export function initIVASimple(mainApp) {
       <div style="background:#ffffff; border:1px solid rgba(15,23,42,0.1); border-radius:16px; padding:32px; max-width:460px; width:90%; box-shadow:0 25px 50px -12px rgba(15,23,42,0.25); text-align:center; transform:scale(0.9); transition:transform 0.25s ease;" class="arca-modal-card">
         <div id="arca-loading-state" style="display:flex; flex-direction:column; gap:16px; align-items:center;">
           <div class="spinner" style="border-left-color:var(--color-accent); width:44px; height:44px; margin-bottom:8px; border-radius:50%; animation: spin 1s linear infinite;"></div>
-          <h4 id="arca-progress-title" style="font-family:var(--font-heading); font-size:16px; font-weight:800; color:#0f172a; margin:0;">Iniciando conexión con ARCA Live...</h4>
-          <p id="arca-progress-txt" style="font-size:12.5px; color:#475569; line-height:1.5; margin:0; max-width:320px;">Estableciendo canal cifrado SSL con los servidores del fisco...</p>
+          <h4 id="arca-progress-title" style="font-family:var(--font-heading); font-size:16px; font-weight:800; color:var(--text-primary); margin:0;">Iniciando conexión con ARCA Live...</h4>
+          <p id="arca-progress-txt" style="font-size:12.5px; color:var(--text-secondary); line-height:1.5; margin:0; max-width:320px;">Estableciendo canal cifrado SSL con los servidores del fisco...</p>
         </div>
 
         <div id="arca-failure-state" style="display:none; flex-direction:column; gap:16px; align-items:center;">
@@ -734,12 +734,12 @@ export function initIVASimple(mainApp) {
             <i data-lucide="alert-triangle" style="width:28px; height:28px;"></i>
           </div>
           <h4 style="font-family:var(--font-heading); font-size:17px; font-weight:800; color:#ef4444; margin:0;">Error en la Presentación F.2051</h4>
-          <p style="font-size:13px; color:#475569; line-height:1.5; margin:0;">
+          <p style="font-size:13px; color:var(--text-secondary); line-height:1.5; margin:0;">
             El servidor de ARCA Live (ex-AFIP) no responde en el tiempo de espera legal.<br>
             <span style="font-family:monospace; background:#f1f5f9; padding:2px 6px; border-radius:4px; font-size:11.5px; color:#ef4444; margin-top:8px; display:inline-block;">HTTP/1.1 504 Gateway Timeout (ARCA-WS-12)</span>
           </p>
           <div style="display:flex; gap:12px; width:100%; margin-top:8px;">
-            <button id="btn-cancel-arca" style="flex:1; padding:10px 16px; border:1px solid var(--border-color); border-radius:8px; background:#fff; color:#475569; font-weight:600; cursor:pointer; font-size:13px;">Cancelar</button>
+            <button id="btn-cancel-arca" style="flex:1; padding:10px 16px; border:1px solid var(--border-color); border-radius:8px; background:#fff; color:var(--text-secondary); font-weight:600; cursor:pointer; font-size:13px;">Cancelar</button>
             <button id="btn-retry-arca" style="flex:1; padding:10px 16px; border:none; border-radius:8px; background:linear-gradient(135deg, var(--color-accent), #4f46e5); color:#fff; font-weight:600; cursor:pointer; font-size:13px; box-shadow:0 4px 12px rgba(31,92,67,0.25);">Reintentar Envío</button>
           </div>
         </div>
@@ -751,22 +751,22 @@ export function initIVASimple(mainApp) {
           <h4 style="font-family:var(--font-heading); font-size:18px; font-weight:800; color:var(--color-accent-light); margin:0;">DDJJ Presentada Exitosamente</h4>
           
           <div style="background:#f8fafc; border:1px solid var(--border-color); border-radius:10px; padding:16px; width:100%; text-align:left; font-size:12px; box-sizing:border-box;">
-            <div style="font-weight:700; color:#475569; border-bottom:1px dashed var(--border-color); padding-bottom:6px; margin-bottom:8px; font-size:13px;">ACUSE DE RECIBO OFICIAL (ARCA)</div>
+            <div style="font-weight:700; color:var(--text-secondary); border-bottom:1px dashed var(--border-color); padding-bottom:6px; margin-bottom:8px; font-size:13px;">ACUSE DE RECIBO OFICIAL (ARCA)</div>
             <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
               <span class="text-secondary">Trámite Nro:</span>
-              <strong class="font-mono" style="color:#0f172a;">ARCA-F2051-${Math.floor(100000000 + Math.random() * 900000000)}</strong>
+              <strong class="font-mono" style="color:var(--text-primary);">ARCA-F2051-${Math.floor(100000000 + Math.random() * 900000000)}</strong>
             </div>
             <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
               <span class="text-secondary">Fecha y Hora:</span>
-              <strong class="font-mono" style="color:#0f172a;">${new Date().toLocaleString('es-AR')}</strong>
+              <strong class="font-mono" style="color:var(--text-primary);">${new Date().toLocaleString('es-AR')}</strong>
             </div>
             <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
               <span class="text-secondary">Contribuyente:</span>
-              <strong style="color:#0f172a;">${company.razon_social}</strong>
+              <strong style="color:var(--text-primary);">${company.razon_social}</strong>
             </div>
             <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
               <span class="text-secondary">Período Fiscal:</span>
-              <strong class="font-mono" style="color:#0f172a;">Mayo 2026</strong>
+              <strong class="font-mono" style="color:var(--text-primary);">Mayo 2026</strong>
             </div>
             <div style="display:flex; justify-content:space-between; border-top:1px dashed var(--border-color); padding-top:6px; margin-top:8px;">
               <span class="text-secondary">Saldo a Pagar:</span>

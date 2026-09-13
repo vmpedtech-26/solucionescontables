@@ -476,8 +476,8 @@ export function renderRT54() {
             </div>
 
             <!-- Double-entry formal accounting layout display -->
-            <div id="double-entry-ledger-preview" style="display: ${isAsientoRegistrado ? 'block' : 'none'}; background: #0f172a; border: 1px solid #1e293b; border-radius: var(--radius-sm); padding: 12px; font-family: 'JetBrains Mono', monospace; font-size: 9.5px; color: #94a3b8; line-height: 1.4;">
-              <div style="border-bottom:1px solid #1e293b; padding-bottom:4px; margin-bottom:6px; font-size:9px; color:#64748b; font-weight:700;">ASIENTO N° 0928 - AJUSTE AMORTIZACIONES RT 54</div>
+            <div id="double-entry-ledger-preview" style="display: ${isAsientoRegistrado ? 'block' : 'none'}; background: var(--text-primary); border: 1px solid #1e293b; border-radius: var(--radius-sm); padding: 12px; font-family: 'JetBrains Mono', monospace; font-size: 9.5px; color: var(--text-muted); line-height: 1.4;">
+              <div style="border-bottom:1px solid #1e293b; padding-bottom:4px; margin-bottom:6px; font-size:9px; color:var(--text-secondary); font-weight:700;">ASIENTO N° 0928 - AJUSTE AMORTIZACIONES RT 54</div>
               <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
                 <span>6.1.04.01 - Deprec. Bienes de Uso (Debe)</span>
                 <span style="color:var(--color-accent-light);">$ ${totalAnnualAmortization.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</span>
@@ -486,7 +486,7 @@ export function renderRT54() {
                 <span>a 1.1.05.02 - Deprec. Acum. Equipamiento (Haber)</span>
                 <span style="color:#fbbf24;">$ ${totalAnnualAmortization.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</span>
               </div>
-              <div style="font-size:8.5px; color:#475569; border-top:1px dashed #1e293b; padding-top:4px; margin-top:4px;">Leyenda: Registración formal amortización Ejercicio 2026 bajo normas simplificadas RT 54.</div>
+              <div style="font-size:8.5px; color:var(--text-secondary); border-top:1px dashed #1e293b; padding-top:4px; margin-top:4px;">Leyenda: Registración formal amortización Ejercicio 2026 bajo normas simplificadas RT 54.</div>
             </div>
           </div>
         </div>

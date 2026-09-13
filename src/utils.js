@@ -152,14 +152,14 @@ export function renderPremiumTeaser(childHTML, title, description) {
         <div class="premium-lock-icon" onclick="let key = prompt('Ingrese la clave de administrador para desbloquear las funciones premium:'); if (key === 'vmp2026' || key === 'VMP2026') { localStorage.setItem('vmp_premium_unlocked', 'true'); window.location.reload(); } else if (key) { alert('Clave incorrecta'); }" style="cursor: pointer;" title="Acceso de Administración">
           <i data-lucide="lock" style="width: 24px; height: 24px;"></i>
         </div>
-        <h3 style="font-size: 17px; font-weight: 800; color: #0f172a; margin: 0;">${title}</h3>
-        <p style="font-size: 12.5px; color: #475569; line-height: 1.5; margin: 0; max-width: 360px;">
+        <h3 style="font-size: 17px; font-weight: 800; color: var(--text-primary); margin: 0;">${title}</h3>
+        <p style="font-size: 12.5px; color: var(--text-secondary); line-height: 1.5; margin: 0; max-width: 360px;">
           ${description}
         </p>
-        <div style="background: rgba(13, 148, 136, 0.03); border: 1px solid rgba(13, 148, 136, 0.12); padding: 12px; border-radius: 6px; width: 100%; text-align: left; font-size: 11px; line-height: 1.4; color: #475569;">
+        <div style="background: rgba(13, 148, 136, 0.03); border: 1px solid rgba(13, 148, 136, 0.12); padding: 12px; border-radius: 6px; width: 100%; text-align: left; font-size: 11px; line-height: 1.4; color: var(--text-secondary);">
           💡 <strong>Módulo Premium:</strong> Esta herramienta avanzada está disponible únicamente para clientes con licencia activa de **Soluciones Contables**.
         </div>
-        <button class="btn btn-primary" onclick="alert('Soluciones Contables\\n\\n📞 WhatsApp: +54 299 673-1487\\n✉️ Email: administracion@vmp-edtech.com')" style="width: 100%; background: #6366f1; border-color: #6366f1; font-weight: 700; margin-top: 4px; padding: 10px; border-radius: 6px; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+        <button class="btn btn-primary" onclick="alert('Soluciones Contables\\n\\n📞 WhatsApp: +54 299 673-1487\\n✉️ Email: administracion@vmp-edtech.com')" style="width: 100%; background: var(--color-accent); border-color: var(--color-accent); font-weight: 700; margin-top: 4px; padding: 10px; border-radius: 6px; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
           <i data-lucide="phone" style="width: 16px; height: 16px;"></i> Contactar para Activar Licencia
         </button>
       </div>

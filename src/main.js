@@ -146,16 +146,16 @@ class Application {
             <div style="background: #fee2e2; border: 1px solid #fecaca; color: #dc2626; padding: 16px; border-radius: 8px; width: 64px; height: 64px; display: flex; align-items: center; justify-content: center; margin-bottom: 24px; font-size: 32px; font-weight: 700;">
               ⚠️
             </div>
-            <h1 style="font-size: 24px; font-weight: 800; color: #0f172a; margin-bottom: 12px;">Se detectó una discrepancia de inicio</h1>
-            <p style="font-size: 14px; color: #475569; max-width: 500px; line-height: 1.6; margin-bottom: 24px;">
+            <h1 style="font-size: 24px; font-weight: 800; color: var(--text-primary); margin-bottom: 12px;">Se detectó una discrepancia de inicio</h1>
+            <p style="font-size: 14px; color: var(--text-secondary); max-width: 500px; line-height: 1.6; margin-bottom: 24px;">
               El sistema encontró una inconsistencia al procesar los datos locales. Esto puede suceder por una sesión anterior no finalizada.
             </p>
-            <div style="background: #ffffff; border: 1px solid #e2e8f0; padding: 16px; border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #64748b; max-width: 600px; overflow-x: auto; margin-bottom: 24px; border-left: 4px solid #dc2626; text-align: left; white-space: pre-wrap;"><strong>Error técnico:</strong> ${err.message}</div>
+            <div style="background: #ffffff; border: 1px solid #e2e8f0; padding: 16px; border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-secondary); max-width: 600px; overflow-x: auto; margin-bottom: 24px; border-left: 4px solid #dc2626; text-align: left; white-space: pre-wrap;"><strong>Error técnico:</strong> ${err.message}</div>
             <div style="display: flex; gap: 16px; justify-content: center;">
               <button onclick="window.location.reload()" style="background: var(--color-accent); color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 600; cursor: pointer; transition: background 0.2s;">
                 Recargar Sistema
               </button>
-              <button onclick="localStorage.clear(); window.location.hash='#/'; window.location.reload();" style="background: transparent; color: #475569; border: 1px solid #cbd5e1; padding: 10px 20px; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.2s;">
+              <button onclick="localStorage.clear(); window.location.hash='#/'; window.location.reload();" style="background: transparent; color: var(--text-secondary); border: 1px solid #cbd5e1; padding: 10px 20px; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.2s;">
                 Restablecer Sesión (Limpiar Caché)
               </button>
             </div>
@@ -212,8 +212,8 @@ class Application {
         <div class="card" style="padding: 24px; text-align: center; border-left: 4px solid #ef4444; background: #fff; border-radius: 8px; box-shadow: var(--shadow-sm); margin: 20px;">
           <div style="background: #fee2e2; color: #ef4444; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 20px;">⚠️</div>
           <h3 style="color: #1e293b; font-size: 16px; font-weight: 700; margin-bottom: 8px;">Error al cargar la sección</h3>
-          <p style="color: #64748b; font-size: 13px; margin-bottom: 16px;">Ocurrió un problema al procesar los datos de esta pantalla. Esto puede deberse a la interferencia de extensiones externas del navegador o problemas de consistencia local.</p>
-          <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #475569; text-align: left; overflow-x: auto; margin-bottom: 16px; border-left: 3px solid #ef4444; white-space: pre-wrap;">${err.stack || err.message || err}</div>
+          <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 16px;">Ocurrió un problema al procesar los datos de esta pantalla. Esto puede deberse a la interferencia de extensiones externas del navegador o problemas de consistencia local.</p>
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-secondary); text-align: left; overflow-x: auto; margin-bottom: 16px; border-left: 3px solid #ef4444; white-space: pre-wrap;">${err.stack || err.message || err}</div>
           <button class="btn btn-primary" onclick="window.location.reload()" style="background: var(--color-accent); color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer;">Recargar Sección</button>
         </div>
       `;
@@ -238,11 +238,11 @@ class Application {
           <div class="card" style="padding: 24px; text-align: center; border-left: 4px solid #ef4444; background: #fff; margin: 20px;">
             <div style="background: #fee2e2; color: #ef4444; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 20px;">⚠️</div>
             <h3 style="color: #ef4444; margin-bottom: 8px;">Interferencia de Extensión Detectada</h3>
-            <p style="color: #64748b; margin-bottom: 16px;">Una extensión de su navegador (como Autofirma, un gestor de contraseñas o un asistente impositivo) impidió cargar el contenido de forma normal.</p>
-            <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #475569; text-align: left; overflow-x: auto; margin-bottom: 16px; white-space: pre-wrap;">
+            <p style="color: var(--text-secondary); margin-bottom: 16px;">Una extensión de su navegador (como Autofirma, un gestor de contraseñas o un asistente impositivo) impidió cargar el contenido de forma normal.</p>
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-secondary); text-align: left; overflow-x: auto; margin-bottom: 16px; white-space: pre-wrap;">
               ${domErr.stack || domErr.message || domErr}
             </div>
-            <p style="font-size: 12px; color: #94a3b8; line-height: 1.5; margin-bottom: 16px;">Sugerencia: Intente desactivar temporalmente extensiones impositivas de AFIP/ARCA o firmas digitales en este navegador para esta URL.</p>
+            <p style="font-size: 12px; color: var(--text-muted); line-height: 1.5; margin-bottom: 16px;">Sugerencia: Intente desactivar temporalmente extensiones impositivas de AFIP/ARCA o firmas digitales en este navegador para esta URL.</p>
             <button class="btn btn-primary" onclick="window.location.reload()" style="background: var(--color-accent); color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer;">Recargar</button>
           </div>
         `, activeRouteKey);
@@ -278,8 +278,8 @@ class Application {
             <div class="card" style="padding: 24px; text-align: center; border-left: 4px solid #ef4444; background: #fff; border-radius: 8px; box-shadow: var(--shadow-sm); margin: 20px;">
               <div style="background: #fee2e2; color: #ef4444; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 20px;">⚠️</div>
               <h3 style="color: #1e293b; font-size: 16px; font-weight: 700; margin-bottom: 8px;">Error de Inicialización</h3>
-              <p style="color: #64748b; font-size: 13px; margin-bottom: 16px;">La sección se cargó visualmente pero falló al inicializar sus controles interactivos.</p>
-              <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #475569; text-align: left; overflow-x: auto; margin-bottom: 16px; border-left: 3px solid #ef4444; white-space: pre-wrap;">${viewInitErr.stack || viewInitErr.message || viewInitErr}</div>
+              <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 16px;">La sección se cargó visualmente pero falló al inicializar sus controles interactivos.</p>
+              <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-secondary); text-align: left; overflow-x: auto; margin-bottom: 16px; border-left: 3px solid #ef4444; white-space: pre-wrap;">${viewInitErr.stack || viewInitErr.message || viewInitErr}</div>
               <button class="btn btn-primary" onclick="window.location.reload()" style="background: var(--color-accent); color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer;">Recargar Sección</button>
             </div>
           `;

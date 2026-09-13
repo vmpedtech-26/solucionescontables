@@ -210,7 +210,7 @@ export function renderLanding() {
             <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0) 100%); padding: 32px 24px; color: #ffffff;">
               <span style="font-family: var(--font-heading); font-size: 11px; font-weight: 750; color: var(--color-accent-light); text-transform: uppercase; letter-spacing: 0.1em; display: block; margin-bottom: 6px;">Socio Tecnológico Impositivo</span>
               <h4 style="font-size: 18px; font-weight: 700; color: #ffffff; margin: 0;">Estudio Contable Comahue</h4>
-              <p style="font-size: 12px; color: #94a3b8; margin: 4px 0 0 0;">Neuquén, Argentina — Infraestructura en la Nube</p>
+              <p style="font-size: 12px; color: var(--text-muted); margin: 4px 0 0 0;">Neuquén, Argentina — Infraestructura en la Nube</p>
             </div>
           </div>
           
@@ -589,36 +589,36 @@ export function renderLanding() {
     <div id="login-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 2000; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease;">
       <div style="background: #ffffff; border: 1px solid rgba(15, 23, 42, 0.08); border-radius: 16px; padding: 36px; max-width: 400px; width: 100%; box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25); position: relative; transform: scale(0.95); transition: transform 0.3s ease;" id="login-modal-card">
         <!-- Close Button -->
-        <button id="close-login-btn" style="position: absolute; top: 16px; right: 16px; background: transparent; border: none; color: #64748b; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 4px; border-radius: 50%; transition: background 0.2s;" onmouseover="this.style.background='#f1f5f9'; this.style.color='#0f172a'" onmouseout="this.style.background='transparent'; this.style.color='#64748b'">
+        <button id="close-login-btn" style="position: absolute; top: 16px; right: 16px; background: transparent; border: none; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 4px; border-radius: 50%; transition: background 0.2s;" onmouseover="this.style.background='#f1f5f9'; this.style.color='var(--text-primary)'" onmouseout="this.style.background='transparent'; this.style.color='var(--text-secondary)'">
           <i data-lucide="x" style="width: 20px; height: 20px;"></i>
         </button>
         
         <!-- Header -->
         <div style="text-align: center; margin-bottom: 28px;">
           <img src="/SolucionesContables_Logo.png" alt="Logo" style="width: 50px; height: 50px; border-radius: 8px; margin-bottom: 12px; border: 1px solid rgba(15, 23, 42, 0.1);" />
-          <h2 style="font-family: var(--font-heading); font-size: 20px; font-weight: 800; color: #0f172a; margin: 0;">Ingreso al Studio</h2>
-          <p style="font-size: 13px; color: #64748b; margin-top: 6px; margin-bottom: 0;">Ingresá tus credenciales de acceso profesional</p>
+          <h2 style="font-family: var(--font-heading); font-size: 20px; font-weight: 800; color: var(--text-primary); margin: 0;">Ingreso al Studio</h2>
+          <p style="font-size: 13px; color: var(--text-secondary); margin-top: 6px; margin-bottom: 0;">Ingresá tus credenciales de acceso profesional</p>
         </div>
         
         <!-- Form -->
         <form id="login-form">
           <div style="margin-bottom: 18px;">
-            <label style="display: block; font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Usuario o CUIT</label>
-            <input type="text" id="login-username" placeholder="ej: admin@solucionescontables.site" required style="width: 100%; border: 1px solid rgba(15, 23, 42, 0.15); border-radius: 8px; padding: 12px 16px; font-size: 14px; font-family: var(--font-primary); color: #0f172a; outline: none; transition: border 0.2s;" onfocus="this.style.borderColor='#0f172a'" onblur="this.style.borderColor='rgba(15, 23, 42, 0.15)'">
+            <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Usuario o CUIT</label>
+            <input type="text" id="login-username" placeholder="ej: admin@solucionescontables.site" required style="width: 100%; border: 1px solid rgba(15, 23, 42, 0.15); border-radius: 8px; padding: 12px 16px; font-size: 14px; font-family: var(--font-primary); color: var(--text-primary); outline: none; transition: border 0.2s;" onfocus="this.style.borderColor='var(--text-primary)'" onblur="this.style.borderColor='rgba(15, 23, 42, 0.15)'">
           </div>
           
           <div style="margin-bottom: 24px;">
-            <label style="display: block; font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Contraseña</label>
-            <input type="password" id="login-password" placeholder="••••••••" required style="width: 100%; border: 1px solid rgba(15, 23, 42, 0.15); border-radius: 8px; padding: 12px 16px; font-size: 14px; font-family: var(--font-primary); color: #0f172a; outline: none; transition: border 0.2s;" onfocus="this.style.borderColor='#0f172a'" onblur="this.style.borderColor='rgba(15, 23, 42, 0.15)'">
+            <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Contraseña</label>
+            <input type="password" id="login-password" placeholder="••••••••" required style="width: 100%; border: 1px solid rgba(15, 23, 42, 0.15); border-radius: 8px; padding: 12px 16px; font-size: 14px; font-family: var(--font-primary); color: var(--text-primary); outline: none; transition: border 0.2s;" onfocus="this.style.borderColor='var(--text-primary)'" onblur="this.style.borderColor='rgba(15, 23, 42, 0.15)'">
           </div>
           
-          <button type="submit" style="width: 100%; background: linear-gradient(135deg, #0f172a, #1c2541); color: white; border: 1px solid #0f172a; border-radius: 8px; padding: 12px 24px; font-family: var(--font-heading); font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);" onmouseover="this.style.background='linear-gradient(135deg, #1e293b, #0f172a)'; this.style.transform='translateY(-1px)'" onmouseout="this.style.background='linear-gradient(135deg, #0f172a, #1c2541)'; this.style.transform='translateY(0)'">
+          <button type="submit" style="width: 100%; background: linear-gradient(135deg, var(--text-primary), #1c2541); color: white; border: 1px solid var(--text-primary); border-radius: 8px; padding: 12px 24px; font-family: var(--font-heading); font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);" onmouseover="this.style.background='linear-gradient(135deg, #1e293b, var(--text-primary))'; this.style.transform='translateY(-1px)'" onmouseout="this.style.background='linear-gradient(135deg, var(--text-primary), #1c2541)'; this.style.transform='translateY(0)'">
             Iniciar Sesión
           </button>
         </form>
         
         <!-- Footer info -->
-        <div style="text-align: center; margin-top: 20px; font-size: 11px; color: #94a3b8; line-height: 1.4;">
+        <div style="text-align: center; margin-top: 20px; font-size: 11px; color: var(--text-muted); line-height: 1.4;">
           Acceso restringido para estudios adheridos.<br>
           ¿No tenés cuenta? <a href="#contact" id="login-signup-link" style="color: var(--color-accent); font-weight: 700; text-decoration: none;">Solicitá una demo</a>
         </div>

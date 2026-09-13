@@ -148,7 +148,7 @@ export function renderDashboardHome() {
     `;
   } else {
     aiGuardHTML = `
-      <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid #64748b; padding: 10px 14px; border-radius: 4px; font-size: 12px; color: #334155; display: flex; align-items: center; gap: 8px; width:100%;">
+      <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid var(--text-secondary); padding: 10px 14px; border-radius: 4px; font-size: 12px; color: #334155; display: flex; align-items: center; gap: 8px; width:100%;">
         <i data-lucide="info" style="width:16px; height:16px; flex-shrink:0;"></i>
         <span>Sin anomalías impositivas activas para auditar en este cliente.</span>
       </div>
