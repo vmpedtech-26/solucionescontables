@@ -1072,4 +1072,70 @@ export function initLanding(mainApp) {
       }
     });
   }
+
+  // -------------------------------------------------------------
+  // MOTION — reveal en cascada estilo "asiento contable" + hero
+  // que se asienta al cargar + mockup del hero con datos vivos.
+  // Nada de esto corre si el usuario pidió reduced-motion.
+  // -------------------------------------------------------------
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (!prefersReducedMotion) {
+    const revealGroups = [
+      { selector: '.section-header', stagger: 0 },
+      { selector: '.feature-card', stagger: 70 },
+      { selector: '.price-card', stagger: 90 },
+      { selector: '.prestige-image-container, .prestige-info', stagger: 100 },
+      { selector: '.contact-info, .contact-form', stagger: 100 },
+      { selector: '.partners-card > div', stagger: 90 },
+    ];
+
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15, rootMargin: '0px 0px -8% 0px' });
+
+    revealGroups.forEach(({ selector, stagger }) => {
+      document.querySelectorAll(selector).forEach((el, i) => {
+        el.classList.add('reveal');
+        if (stagger) el.style.transitionDelay = `${Math.min(i, 5) * stagger}ms`;
+        revealObserver.observe(el);
+      });
+    });
+
+    // Hero: entrada suave al cargar (ya está en pantalla, se dispara enseguida)
+    const heroEls = document.querySelectorAll('.hero-content .badge, .hero-title, .hero-subtitle, .hero-actions, .stat-item, .hero-visual');
+    heroEls.forEach((el, i) => {
+      el.classList.add('reveal');
+      el.style.transitionDelay = `${i * 70}ms`;
+      requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('is-visible')));
+    });
+
+    // Mockup del hero "vivo": las barras y el valor de IVA fluctúan
+    // levemente, como un panel real, no una animación decorativa única.
+    const mockupBars = document.querySelectorAll('.mockup-bar');
+    const baseHeights = [40, 75, 55, 90];
+    if (mockupBars.length === baseHeights.length) {
+      setInterval(() => {
+        mockupBars.forEach((bar, i) => {
+          const jitter = (Math.random() - 0.5) * 12;
+          const h = Math.max(22, Math.min(96, baseHeights[i] + jitter));
+          bar.style.height = `${h}%`;
+        });
+      }, 2600);
+    }
+
+    const ivaValueEl = document.querySelector('.mockup-row .mockup-widget:nth-child(2) .mockup-w-val');
+    if (ivaValueEl) {
+      let ivaBase = 153300;
+      setInterval(() => {
+        ivaBase += Math.round((Math.random() - 0.35) * 900);
+        ivaValueEl.textContent = `$ ${ivaBase.toLocaleString('es-AR')}`;
+      }, 3200);
+    }
+  }
 }

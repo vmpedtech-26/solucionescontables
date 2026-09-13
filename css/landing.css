@@ -603,6 +603,61 @@ h1, h2, h3, h4, h5, h6 {
   text-shadow: 0 2px 24px rgba(255, 255, 255, 0.9), 0 0 40px rgba(255, 255, 255, 0.9);
 }
 
+/* -------------------------------------------------------------
+   MOTION — ledger-inspired reveal (draws like ruling a line in
+   an accounting book, then the heading settles in). Disabled
+   entirely for prefers-reduced-motion.
+   ------------------------------------------------------------- */
+.section-header h2::before,
+.prestige-info h2::before,
+.contact-info h2::before {
+  content: "";
+  display: block;
+  width: 44px;
+  height: 2px;
+  background: var(--color-accent);
+  margin-bottom: 16px;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.7s cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.section-header h2::before {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.section-header.is-visible h2::before,
+.prestige-info.is-visible h2::before,
+.contact-info.is-visible h2::before {
+  transform: scaleX(1);
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1), transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    transition: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+  .section-header h2::before,
+  .prestige-info h2::before,
+  .contact-info h2::before {
+    transition: none !important;
+    transform: none !important;
+  }
+}
+
 .section-header p {
   color: var(--text-secondary);
   font-size: 15.5px;
