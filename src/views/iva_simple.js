@@ -289,11 +289,18 @@ export function renderIVASimple() {
   // -------------------------------------------------------------
   const debFiscal    = txs.ventas.reduce((s, v) => s + v.iva, 0);
   // Exclude CUIT inactiva from computed credit fiscal
-  const credFiscal   = txs.compras.reduce((s, c) => {
+  const creditoHabilitado = txs.compras.reduce((s, c) => {
     const cleanCuit = c.cuit.replace(/[^0-9]/g, '');
     if (cleanCuit.endsWith('9')) return s;
     return s + c.iva;
   }, 0);
+  // Prorrateo del crédito fiscal de uso común (Art. 13 Ley de IVA) cuando el
+  // cliente tiene ventas exentas además de gravadas — debe ser el mismo
+  // criterio que en Libro IVA Digital para que el saldo a presentar coincida.
+  const totalVentasNetoRI = txs.ventas.reduce((s, v) => s + v.neto, 0);
+  const totalVentasExentoRI = txs.ventas.filter(v => v.exento).reduce((s, v) => s + v.neto, 0);
+  const prorrateoGravadoRI = totalVentasNetoRI > 0 ? (1 - totalVentasExentoRI / totalVentasNetoRI) : 1;
+  const credFiscal = Math.round(creditoHabilitado * prorrateoGravadoRI * 100) / 100;
 
   // Reconciled retenciones (excluye cuenta puente de $ 6.080,75)
   let retPercSaldo = 0;

@@ -49,7 +49,13 @@ const DEFAULT_TRANSACTIONS = {
     ventas: [
       { id: "v-1", fecha: "2026-05-20", cliente: "Cervecería Austral", cuit: "30-77443322-9", tipo_comprobante: "Factura A", numero: "0003-00000845", neto: 250000, iva: 52500, total: 302500 },
       { id: "v-2", fecha: "2026-05-18", cliente: "Distribuidora del Neuquén", cuit: "30-55998877-1", tipo_comprobante: "Factura A", numero: "0003-00000846", neto: 480000, iva: 100800, total: 580800 },
-      { id: "v-3", fecha: "2026-05-15", cliente: "Consumidor Final", cuit: "00-00000000-0", tipo_comprobante: "Factura B", numero: "0003-00000102", neto: 45000, iva: 9450, total: 54450 }
+      { id: "v-3", fecha: "2026-05-15", cliente: "Consumidor Final", cuit: "00-00000000-0", tipo_comprobante: "Factura B", numero: "0003-00000102", neto: 45000, iva: 9450, total: 54450 },
+      // Transporte de pasajeros de larga distancia (>100km): EXENTO de IVA por
+      // Art. 7, inc. h, apartado 13 de la Ley de IVA — no es una venta gravada
+      // a tasa 0, es una exención real que obliga a prorratear el crédito fiscal
+      // de los gastos de uso común (combustible, mantenimiento) entre esta
+      // actividad exenta y el transporte de cargas, que sí está gravado.
+      { id: "v-8", fecha: "2026-05-27", cliente: "Terminal de Ómnibus Neuquén", cuit: "30-63025874-1", tipo_comprobante: "Factura A", numero: "0003-00000847", neto: 325000, iva: 0, total: 325000, exento: true }
     ],
     compras: [
       { id: "c-1", fecha: "2026-05-22", proveedor: "Combustibles YPF", cuit: "30-50001234-9", tipo_comprobante: "Factura A", numero: "4820-00239481", neto: 180000, iva: 37800, total: 217800, es_activo: false, categoria: "Combustibles" },

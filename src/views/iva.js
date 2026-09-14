@@ -22,16 +22,24 @@ export function renderIVA() {
   const filteredCompras = txs.compras.filter(c => c.fecha.startsWith(activePeriod));
 
   // Calcular totales impositivos
-  const totalNetSales = filteredVentas.reduce((sum, v) => sum + v.neto, 0);
+  const totalNetSalesGravadas = filteredVentas.filter(v => !v.exento).reduce((sum, v) => sum + v.neto, 0);
+  const totalNetSalesExentas = filteredVentas.filter(v => v.exento).reduce((sum, v) => sum + v.neto, 0);
+  const totalNetSales = totalNetSalesGravadas + totalNetSalesExentas;
   const totalIvaSales = filteredVentas.reduce((sum, v) => sum + v.iva, 0);
   const totalSales = filteredVentas.reduce((sum, v) => sum + v.total, 0);
 
   const totalNetPurchases = filteredCompras.reduce((sum, c) => sum + c.neto, 0);
-  const totalIvaPurchases = filteredCompras.reduce((sum, c) => {
+  // 1) Se excluye el crédito de proveedores con CUIT no habilitado/inactivo en ARCA.
+  const creditoFiscalHabilitado = filteredCompras.reduce((sum, c) => {
     const cleanCuit = c.cuit.replace(/[^0-9]/g, '');
     if (cleanCuit.endsWith('9')) return sum;
     return sum + c.iva;
   }, 0);
+  // 2) Prorrateo del crédito fiscal de uso común (Art. 13 Ley de IVA): cuando hay
+  // ventas gravadas Y exentas, el crédito de gastos no atribuibles a una sola
+  // actividad se reconoce solo en la proporción de ventas gravadas sobre el total.
+  const prorrateoGravado = totalNetSales > 0 ? (totalNetSalesGravadas / totalNetSales) : 1;
+  const totalIvaPurchases = Math.round(creditoFiscalHabilitado * prorrateoGravado * 100) / 100;
   const totalPurchases = filteredCompras.reduce((sum, c) => sum + c.total, 0);
 
   const balance = totalIvaSales - totalIvaPurchases;
@@ -124,10 +132,16 @@ export function renderIVA() {
       <div class="card-body" style="display: flex; flex-direction: column; gap: 12px;">
         <div style="display: flex; justify-content: space-between; font-size: 14px;">
           <span class="text-secondary">Total Neto Gravado:</span>
-          <span class="font-mono" style="font-weight: 600;">$ ${totalNetSales.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</span>
+          <span class="font-mono" style="font-weight: 600;">$ ${totalNetSalesGravadas.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</span>
         </div>
+        ${totalNetSalesExentas > 0 ? `
         <div style="display: flex; justify-content: space-between; font-size: 14px;">
-          <span class="text-secondary">IVA Débito Fiscal (21%):</span>
+          <span class="text-secondary">Total Neto Exento (Art. 7 Ley IVA):</span>
+          <span class="font-mono" style="font-weight: 600; color: #94a3b8;">$ ${totalNetSalesExentas.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</span>
+        </div>
+        ` : ''}
+        <div style="display: flex; justify-content: space-between; font-size: 14px;">
+          <span class="text-secondary">IVA Débito Fiscal:</span>
           <span class="font-mono" style="font-weight: 600;">$ ${totalIvaSales.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</span>
         </div>
         <div style="border-top: 1px solid var(--border-color); padding-top: 12px; display: flex; justify-content: space-between; font-size: 16px; font-weight: 700;">
@@ -147,6 +161,16 @@ export function renderIVA() {
           <span class="text-secondary">Total Neto Gravado:</span>
           <span class="font-mono" style="font-weight: 600;">$ ${totalNetPurchases.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</span>
         </div>
+        ${totalNetSalesExentas > 0 ? `
+        <div style="display: flex; justify-content: space-between; font-size: 12px;">
+          <span class="text-secondary">Crédito habilitado (antes de prorratear):</span>
+          <span class="font-mono" style="color: #94a3b8;">$ ${creditoFiscalHabilitado.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 12px;">
+          <span class="text-secondary">Prorrateo por ventas exentas (Art. 13):</span>
+          <span class="font-mono" style="color: #94a3b8;">× ${(prorrateoGravado * 100).toFixed(1)}%</span>
+        </div>
+        ` : ''}
         <div style="display: flex; justify-content: space-between; font-size: 14px;">
           <span class="text-secondary">IVA Crédito Fiscal:</span>
           <span class="font-mono" style="font-weight: 600;">$ ${totalIvaPurchases.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</span>
