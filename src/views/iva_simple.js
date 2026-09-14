@@ -39,7 +39,10 @@ function getActividadesPorEmpresa(company) {
     ];
   }
   return [
-    { codigo: '464100', descripcion: 'Venta al por mayor de alimentos', pct: 0.70, alicuota: 21 },
+    // La venta mayorista de productos de la canasta básica (pan, carnes, frutas y
+    // verduras, leche fluida, etc.) tributa al 10,5% — no al 21% general — por lo
+    // que un distribuidor de alimentos real casi siempre factura a dos alícuotas.
+    { codigo: '464100', descripcion: 'Venta al por mayor de alimentos (canasta básica)', pct: 0.70, alicuota: 10.5 },
     { codigo: '479900', descripcion: 'Venta al por menor s/especificación', pct: 0.30, alicuota: 21 },
   ];
 }

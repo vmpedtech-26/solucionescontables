@@ -386,7 +386,13 @@ export function initIVA(mainApp) {
       const pv = v.numero.split('-')[0].padStart(5, '0');
       const num = v.numero.split('-')[1].padStart(8, '0');
       const netStr = Math.round(v.neto * 100).toString().padStart(15, '0');
-      const ivaCode = '0005'; // Alícuota 21%
+      // Código de alícuota real según la relación IVA/Neto de cada venta
+      // (RG 3685): 0003 exento/no gravado, 0004 10,5%, 0005 21%, 0006 27%.
+      let ivaCode = '0005';
+      const aliquotRatio = v.neto > 0 ? (v.iva / v.neto) : 0;
+      if (v.iva === 0) ivaCode = '0003';
+      else if (Math.abs(aliquotRatio - 0.105) < 0.02) ivaCode = '0004';
+      else if (Math.abs(aliquotRatio - 0.27) < 0.02) ivaCode = '0006';
       const ivaStr = Math.round(v.iva * 100).toString().padStart(15, '0');
       
       output += `${typeCode}${pv}${num}${netStr}${ivaCode}${ivaStr}\r\n`;

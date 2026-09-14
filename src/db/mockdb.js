@@ -59,8 +59,10 @@ const DEFAULT_TRANSACTIONS = {
   },
   "co-3": {
     ventas: [
-      { id: "v-6", fecha: "2026-05-25", cliente: "Supermercados Todo", cuit: "30-44556677-2", tipo_comprobante: "Factura A", numero: "0001-00004829", neto: 890000, iva: 186900, total: 1076900 },
-      { id: "v-7", fecha: "2026-05-22", cliente: "Despensa El Sol", cuit: "20-22119988-3", tipo_comprobante: "Factura B", numero: "0001-00002194", neto: 120000, iva: 25200, total: 145200 }
+      // Alícuota 10,5% (canasta básica, venta mayorista) vs 21% (mercadería general) —
+      // un distribuidor de alimentos real factura a ambas tasas, no a una sola.
+      { id: "v-6", fecha: "2026-05-25", cliente: "Supermercados Todo", cuit: "30-44556677-2", tipo_comprobante: "Factura A", numero: "0001-00004829", neto: 700000, iva: 73500, total: 773500 },
+      { id: "v-7", fecha: "2026-05-22", cliente: "Despensa El Sol", cuit: "20-22119988-3", tipo_comprobante: "Factura B", numero: "0001-00002194", neto: 300000, iva: 63000, total: 363000 }
     ],
     compras: [
       { id: "c-4", fecha: "2026-05-18", proveedor: "Molinos Rio de la Plata", cuit: "30-50000543-1", tipo_comprobante: "Factura A", numero: "0104-00092834", neto: 540000, iva: 113400, total: 653400, es_activo: false, categoria: "Materia Prima" }
