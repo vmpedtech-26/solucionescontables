@@ -1,16 +1,38 @@
 /* -------------------------------------------------------------
    VMP Studio Contable - Configuración ARCA View Component
    ------------------------------------------------------------- */
-import { getCompanies, getActiveCompany } from '../db/mockdb.js';
+import { getCompaniesAsync, getActiveCompanyAsync, getEstudioAsync, updateEstudioFieldsAsync, updateEmpresaFieldsAsync } from '../db/mockdb.js';
+import { isSupabaseConfigured, supabase } from '../db/supabase.js';
 
-export function renderConfiguracion() {
-  const activeCompany = getActiveCompany();
-  const companies = getCompanies();
+function getDelegationActive(company) {
+  if (isSupabaseConfigured && supabase) return !!company.delegation_active;
+  return localStorage.getItem(`vmp_delegation_active_${company.id}`) === 'true';
+}
 
-  // Load configuration settings from localStorage
-  const modelType = localStorage.getItem('vmp_arca_model_type') || 'hybrid';
-  const certUploaded = localStorage.getItem('vmp_arca_cert_uploaded') === 'true';
-  const certName = localStorage.getItem('vmp_arca_cert_name') || 'estudio_comahue_arca.crt';
+export async function renderConfiguracion() {
+  const activeCompany = await getActiveCompanyAsync();
+  const companies = await getCompaniesAsync();
+  const estudio = await getEstudioAsync();
+
+  // Configuración ARCA del estudio: real (Supabase) o sandbox (localStorage)
+  const modelType = estudio ? estudio.arca_model_type : (localStorage.getItem('vmp_arca_model_type') || 'hybrid');
+  const certUploaded = estudio ? estudio.arca_cert_uploaded : (localStorage.getItem('vmp_arca_cert_uploaded') === 'true');
+  const certName = estudio ? (estudio.arca_cert_name || 'estudio_comahue_arca.crt') : (localStorage.getItem('vmp_arca_cert_name') || 'estudio_comahue_arca.crt');
+
+  if (!activeCompany) {
+    return `
+    <div class="view-header">
+      <div>
+        <h1 class="view-title">Configuración ARCA</h1>
+        <p class="view-subtitle">Vinculación de firmas digitales y certificados para facturación y Libro de IVA.</p>
+      </div>
+    </div>
+    <div class="card" style="text-align: center; padding: 48px 24px;">
+      <p class="text-secondary" style="margin-bottom: 16px;">Todavía no cargaste ninguna empresa cliente.</p>
+      <a href="#/studio/empresas" class="btn btn-primary" style="display: inline-flex;">Cargar primera empresa</a>
+    </div>
+    `;
+  }
 
   return `
   <div class="view-header">
@@ -203,7 +225,7 @@ export function renderConfiguracion() {
               </thead>
               <tbody id="delegation-list-body">
                 ${companies.map(c => {
-                  const delegationActive = localStorage.getItem(`vmp_delegation_active_${c.id}`) === 'true';
+                  const delegationActive = getDelegationActive(c);
                   return `
                   <tr>
                     <td style="font-weight: 600; font-size: 12.5px;">${c.razon_social}</td>
@@ -331,17 +353,22 @@ export function renderConfiguracion() {
   `;
 }
 
-export function initConfiguracion(mainApp) {
+export async function initConfiguracion(mainApp) {
   if (window.lucide) window.lucide.createIcons();
 
-  const activeCompany = getActiveCompany();
+  const activeCompany = await getActiveCompanyAsync();
+  if (!activeCompany) return;
   const delegationBody = document.getElementById('delegation-list-body');
 
   // Handle Model Radio Toggle
   document.querySelectorAll('input[name="arca-model-type"]').forEach(radio => {
-    radio.addEventListener('change', (e) => {
+    radio.addEventListener('change', async (e) => {
       const selected = e.target.value;
-      localStorage.setItem('vmp_arca_model_type', selected);
+      if (isSupabaseConfigured && supabase) {
+        await updateEstudioFieldsAsync({ arca_model_type: selected });
+      } else {
+        localStorage.setItem('vmp_arca_model_type', selected);
+      }
       mainApp.showToast(`Modelo de vinculación cambiado a: ${selected === 'hybrid' ? 'Híbrido Delegado' : 'Certificados Individuales'}`, 'info');
       mainApp.router();
     });
@@ -360,9 +387,13 @@ export function initConfiguracion(mainApp) {
     setTimeout(() => {
       mainApp.showToast("Invocando WSAA.loginCms()... verificando cadena de confianza (AC ARCA)", "info");
 
-      setTimeout(() => {
-        localStorage.setItem('vmp_arca_cert_uploaded', 'true');
-        localStorage.setItem('vmp_arca_cert_name', 'estudio_comahue_arca_2026.crt');
+      setTimeout(async () => {
+        if (isSupabaseConfigured && supabase) {
+          await updateEstudioFieldsAsync({ arca_cert_uploaded: true, arca_cert_name: 'estudio_comahue_arca_2026.crt' });
+        } else {
+          localStorage.setItem('vmp_arca_cert_uploaded', 'true');
+          localStorage.setItem('vmp_arca_cert_name', 'estudio_comahue_arca_2026.crt');
+        }
         localStorage.setItem('vmp_wsaa_ta_timestamp', String(Date.now()));
         mainApp.showToast("¡Ticket de Acceso (TA) emitido! Válido por 12hs para los servicios delegados.", "success");
         mainApp.router();
@@ -372,10 +403,14 @@ export function initConfiguracion(mainApp) {
 
   // Delete Certificate
   const btnDeleteCert = document.getElementById('btn-delete-cert');
-  btnDeleteCert?.addEventListener('click', (e) => {
+  btnDeleteCert?.addEventListener('click', async (e) => {
     e.stopPropagation();
-    localStorage.removeItem('vmp_arca_cert_uploaded');
-    localStorage.removeItem('vmp_arca_cert_name');
+    if (isSupabaseConfigured && supabase) {
+      await updateEstudioFieldsAsync({ arca_cert_uploaded: false, arca_cert_name: null });
+    } else {
+      localStorage.removeItem('vmp_arca_cert_uploaded');
+      localStorage.removeItem('vmp_arca_cert_name');
+    }
     mainApp.showToast("Certificado eliminado del servidor contable.", "info");
     mainApp.router();
   });
@@ -386,12 +421,16 @@ export function initConfiguracion(mainApp) {
       e.stopPropagation();
       const coId = btn.dataset.id;
       const cell = document.getElementById(`cell-delegation-${coId}`);
-      
+
       btn.textContent = "Verificando...";
       btn.disabled = true;
 
-      setTimeout(() => {
-        localStorage.setItem(`vmp_delegation_active_${coId}`, 'true');
+      setTimeout(async () => {
+        if (isSupabaseConfigured && supabase) {
+          await updateEmpresaFieldsAsync(coId, { delegation_active: true });
+        } else {
+          localStorage.setItem(`vmp_delegation_active_${coId}`, 'true');
+        }
         cell.innerHTML = `
           <span style="font-size: 10px; font-weight: 700; color: var(--color-accent); display: flex; align-items: center; gap: 4px; animation: fadeIn 0.3s ease;">
             <i data-lucide="check-circle-2" style="width: 12px; height: 12px;"></i> Activa

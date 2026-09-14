@@ -2,8 +2,33 @@
    VMP Studio Contable — IVA Simple & Consola Monotributo
    Circuito completo de liquidación IVA (RI) y Control de Monotributo
    ------------------------------------------------------------- */
-import { getActiveCompany, getTransactions } from '../db/mockdb.js';
+import { getActiveCompanyAsync, getTransactionsAsync, updateEmpresaFieldsAsync } from '../db/mockdb.js';
+import { isSupabaseConfigured, supabase } from '../db/supabase.js';
+import { getRetencionesAsync } from './retenciones.js';
 import { fmt, fmtDate, getVencimientos, downloadFile } from '../utils.js';
+
+function getIvaConsistOk(company) {
+  if (isSupabaseConfigured && supabase) return !!company.iva_consist_ok;
+  return localStorage.getItem(`vmp_consist_ok_${company.id}`) === 'true';
+}
+function getIvaLibroImportado(company) {
+  if (isSupabaseConfigured && supabase) return !!company.libro_iva_importado;
+  return localStorage.getItem(`vmp_libro_importado_${company.id}`) === 'true';
+}
+// Override manual del saldo de retenciones/percepciones: null significa "no
+// hay override, calcular a partir de la lista de retenciones conciliadas".
+function getIvaRetPercManual(company) {
+  if (isSupabaseConfigured && supabase) {
+    return (company.ret_perc_saldo_manual === null || company.ret_perc_saldo_manual === undefined)
+      ? null : Number(company.ret_perc_saldo_manual);
+  }
+  const v = localStorage.getItem(`vmp_ret_perc_saldo_${company.id}`);
+  return v !== null ? parseFloat(v || '0') : null;
+}
+function getIvaSaldoFavor(company) {
+  if (isSupabaseConfigured && supabase) return Number(company.saldo_favor_iva) || 0;
+  return parseFloat(localStorage.getItem(`vmp_saldo_favor_${company.id}`) || '0');
+}
 
 // Tabla oficial ARCA vigente desde 1/08/2026 (topes y cuotas del Régimen Simplificado)
 // Categorías I, J y K están reservadas por ley a venta de cosas muebles: un
@@ -47,10 +72,24 @@ function getActividadesPorEmpresa(company) {
   ];
 }
 
-export function renderIVASimple() {
-  const company = getActiveCompany();
-  const txs = getTransactions(company.id);
-  
+export async function renderIVASimple() {
+  const company = await getActiveCompanyAsync();
+  if (!company) {
+    return `
+    <div class="view-header">
+      <div>
+        <h1 class="view-title">IVA Simple — F.2051</h1>
+        <p class="view-subtitle">Circuito de liquidación mensual de IVA.</p>
+      </div>
+    </div>
+    <div class="card" style="text-align: center; padding: 48px 24px;">
+      <p class="text-secondary" style="margin-bottom: 16px;">Todavía no cargaste ninguna empresa cliente.</p>
+      <a href="#/studio/empresas" class="btn btn-primary" style="display: inline-flex;">Cargar primera empresa</a>
+    </div>
+    `;
+  }
+  const txs = await getTransactionsAsync(company.id);
+
   const isMonotributo = company.condicion_iva.includes('Monotributo');
   const mesActual = new Date().toLocaleString('es-AR', { month: 'long', year: 'numeric' });
 
@@ -302,29 +341,19 @@ export function renderIVASimple() {
   const prorrateoGravadoRI = totalVentasNetoRI > 0 ? (1 - totalVentasExentoRI / totalVentasNetoRI) : 1;
   const credFiscal = Math.round(creditoHabilitado * prorrateoGravadoRI * 100) / 100;
 
-  // Reconciled retenciones (excluye cuenta puente de $ 6.080,75)
+  // Reconciled retenciones (excluye cuenta puente de $ 6.080,75). Si el usuario
+  // no fijó un override manual, se calcula a partir de la misma fuente que
+  // Retenciones y Percepciones (Supabase real o sandbox), no de una copia propia.
   let retPercSaldo = 0;
-  const userSetRet = localStorage.getItem(`vmp_ret_perc_saldo_${company.id}`);
+  const userSetRet = getIvaRetPercManual(company);
   if (userSetRet !== null) {
-    retPercSaldo = parseFloat(userSetRet || '0');
+    retPercSaldo = userSetRet;
   } else {
-    const storedRets = localStorage.getItem(`vmp_retenciones_${company.id}`);
-    if (storedRets) {
-      const list = JSON.parse(storedRets);
-      retPercSaldo = list.filter(r => r.conciliado).reduce((sum, r) => sum + r.monto, 0);
-    } else {
-      const defaultList = [
-        { id: 'r1', fecha: '2026-05-05', agente: 'Coto S.A.', cuit: '30-50790918-7', tipo: 'PERCEPCIÓN IVA', monto: 1850.20, fuente: 'factura', conciliado: true, certDisponible: true },
-        { id: 'r2', fecha: '2026-05-12', agente: 'Banco Nación Argentina', cuit: '30-55745039-6', tipo: 'RETENCIÓN SIRCREB', monto: 3200.00, fuente: 'banco', conciliado: false, certDisponible: false },
-        { id: 'r3', fecha: '2026-05-18', agente: 'La Rural S.A.', cuit: '30-67890123-5', tipo: 'PERCEPCIÓN IIBB', monto: 940.50, fuente: 'factura', conciliado: true, certDisponible: true },
-        { id: 'r4', fecha: '2026-05-20', agente: 'Carrefour Argentina', cuit: '30-60410619-5', tipo: 'PERCEPCIÓN IVA', monto: 2100.75, fuente: 'factura', conciliado: false, certDisponible: false },
-        { id: 'r5', fecha: '2026-05-22', agente: 'ARBA (Prov. Bs As)', cuit: '33-70523373-9', tipo: 'PERCEPCIÓN IIBB', monto: 780.00, fuente: 'banco', conciliado: false, certDisponible: false },
-      ];
-      retPercSaldo = defaultList.filter(r => r.conciliado).reduce((sum, r) => sum + r.monto, 0);
-    }
+    const list = await getRetencionesAsync(company.id);
+    retPercSaldo = list.filter(r => r.conciliado).reduce((sum, r) => sum + r.monto, 0);
   }
 
-  const saldoFavor   = parseFloat(localStorage.getItem(`vmp_saldo_favor_${company.id}`) || '0');
+  const saldoFavor   = getIvaSaldoFavor(company);
   const saldoNeto    = debFiscal - credFiscal - retPercSaldo - saldoFavor;
 
   const venc      = getVencimientos(company.cuit);
@@ -343,12 +372,17 @@ export function renderIVASimple() {
   const consistOkCalc = consistDiff < 1; // less than $1 difference = OK
 
   // Auto-validación si la diferencia es exactamente $ 0,00
-  if (consistDiff < 0.01 && localStorage.getItem(`vmp_consist_ok_${company.id}`) !== 'true') {
-    localStorage.setItem(`vmp_consist_ok_${company.id}`, 'true');
+  let consistenciaOk = getIvaConsistOk(company);
+  if (consistDiff < 0.01 && !consistenciaOk) {
+    if (isSupabaseConfigured && supabase) {
+      await updateEmpresaFieldsAsync(company.id, { iva_consist_ok: true });
+    } else {
+      localStorage.setItem(`vmp_consist_ok_${company.id}`, 'true');
+    }
+    consistenciaOk = true;
   }
 
-  const consistenciaOk = localStorage.getItem(`vmp_consist_ok_${company.id}`) === 'true';
-  const libroImportado = localStorage.getItem(`vmp_libro_importado_${company.id}`) === 'true';
+  const libroImportado = getIvaLibroImportado(company);
 
   const pasos = [
     { n:1, label:'Libros importados', icon:'upload',        done: libroImportado },
@@ -601,11 +635,12 @@ export function renderIVASimple() {
   `;
 }
 
-export function initIVASimple(mainApp) {
+export async function initIVASimple(mainApp) {
   if (window.lucide) window.lucide.createIcons();
 
-  const company = getActiveCompany();
-  const txs = getTransactions(company.id);
+  const company = await getActiveCompanyAsync();
+  if (!company) return;
+  const txs = await getTransactionsAsync(company.id);
   const isMonotributo = company.condicion_iva.includes('Monotributo');
 
   // -------------------------------------------------------------
@@ -692,26 +727,34 @@ export function initIVASimple(mainApp) {
   });
 
   // Validar consistencia
-  btnValidar?.addEventListener('click', (e) => {
+  btnValidar?.addEventListener('click', async (e) => {
     e.stopPropagation();
     const consistOkCalc = document.querySelector('[data-consist-ok-calc]')?.dataset.consistOkCalc === 'true';
     if (!consistOkCalc) {
       mainApp.showToast('No se puede validar. La diferencia entre el débito del libro y el calculado por actividad excede $ 1,00.', 'error');
       return;
     }
-    localStorage.setItem(`vmp_consist_ok_${company.id}`, 'true');
+    if (isSupabaseConfigured && supabase) {
+      await updateEmpresaFieldsAsync(company.id, { iva_consist_ok: true });
+    } else {
+      localStorage.setItem(`vmp_consist_ok_${company.id}`, 'true');
+    }
     mainApp.showToast('¡Consistencia validada y registrada en ARCA! Cuadrante en VERDE.', 'success');
     mainApp.router();
   });
 
   // Guardar Retenciones
-  btnGuardarRet?.addEventListener('click', (e) => {
+  btnGuardarRet?.addEventListener('click', async (e) => {
     e.stopPropagation();
     const retVal = parseFloat(inpRet.value) || 0;
     const favorVal = parseFloat(inpFavor.value) || 0;
 
-    localStorage.setItem(`vmp_ret_perc_saldo_${company.id}`, retVal.toString());
-    localStorage.setItem(`vmp_saldo_favor_${company.id}`, favorVal.toString());
+    if (isSupabaseConfigured && supabase) {
+      await updateEmpresaFieldsAsync(company.id, { ret_perc_saldo_manual: retVal, saldo_favor_iva: favorVal });
+    } else {
+      localStorage.setItem(`vmp_ret_perc_saldo_${company.id}`, retVal.toString());
+      localStorage.setItem(`vmp_saldo_favor_${company.id}`, favorVal.toString());
+    }
 
     mainApp.showToast('Retenciones y Saldos a Favor actualizados en el panel contable.', 'success');
     mainApp.router();
@@ -838,7 +881,7 @@ export function initIVASimple(mainApp) {
         title.textContent = "Transmitiendo datos XML a ARCA...";
         text.textContent = "Subiendo liquidación F.2051 con desglose de CLAE y débitos/créditos...";
 
-        setTimeout(() => {
+        setTimeout(async () => {
           if (!document.body.contains(modal)) return;
           if (simulateFailure) {
             document.getElementById('arca-loading-state').style.display = 'none';
@@ -846,10 +889,14 @@ export function initIVASimple(mainApp) {
           } else {
             document.getElementById('arca-loading-state').style.display = 'none';
             document.getElementById('arca-success-state').style.display = 'flex';
-            
-            localStorage.setItem(`vmp_f2051_presented_${company.id}`, 'true');
-            localStorage.removeItem(`vmp_consist_ok_${company.id}`);
-            localStorage.removeItem(`vmp_libro_importado_${company.id}`);
+
+            if (isSupabaseConfigured && supabase) {
+              await updateEmpresaFieldsAsync(company.id, { f2051_presentado: true, iva_consist_ok: false, libro_iva_importado: false });
+            } else {
+              localStorage.setItem(`vmp_f2051_presented_${company.id}`, 'true');
+              localStorage.removeItem(`vmp_consist_ok_${company.id}`);
+              localStorage.removeItem(`vmp_libro_importado_${company.id}`);
+            }
           }
         }, 1500);
 
@@ -889,16 +936,24 @@ export function initIVASimple(mainApp) {
   document.getElementById('btn-simular-import-libro')?.addEventListener('click', (e) => {
     e.stopPropagation();
     mainApp.showToast('Sincronizando libros con el portal de ARCA...', 'info');
-    setTimeout(() => {
-      localStorage.setItem(`vmp_libro_importado_${company.id}`, 'true');
+    setTimeout(async () => {
+      if (isSupabaseConfigured && supabase) {
+        await updateEmpresaFieldsAsync(company.id, { libro_iva_importado: true });
+      } else {
+        localStorage.setItem(`vmp_libro_importado_${company.id}`, 'true');
+      }
       mainApp.showToast('¡Libros sincronizados de forma exitosa!', 'success');
       mainApp.router();
     }, 1000);
   });
 
-  document.getElementById('btn-reset-libro')?.addEventListener('click', (e) => {
+  document.getElementById('btn-reset-libro')?.addEventListener('click', async (e) => {
     e.stopPropagation();
-    localStorage.removeItem(`vmp_libro_importado_${company.id}`);
+    if (isSupabaseConfigured && supabase) {
+      await updateEmpresaFieldsAsync(company.id, { libro_iva_importado: false });
+    } else {
+      localStorage.removeItem(`vmp_libro_importado_${company.id}`);
+    }
     mainApp.showToast('Libros contables restablecidos.', 'info');
     mainApp.router();
   });

@@ -467,6 +467,27 @@ export async function updateEmpresaFieldsAsync(companyId, fields) {
   }
 }
 
+// Lee la fila del estudio logueado (perfil ARCA, checklist de onboarding).
+// Devuelve null en modo sandbox o si todavía no hay sesión real.
+export async function getEstudioAsync() {
+  if (!isSupabaseConfigured || !supabase) return null;
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
+  const { data, error } = await supabase.from('estudios').select('*').eq('id', user.id).single();
+  if (error) return null;
+  return data;
+}
+
+// Actualiza columnas puntuales del estudio logueado (arca_model_type,
+// onboarding_*, etc.), análogo a updateEmpresaFieldsAsync pero a nivel estudio.
+export async function updateEstudioFieldsAsync(fields) {
+  if (!isSupabaseConfigured || !supabase) return;
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+  const { error } = await supabase.from('estudios').update(fields).eq('id', user.id);
+  if (error) throw error;
+}
+
 async function pushCompanyToSupabase(company, isNew) {
   if (!supabase) return;
   const { data: { user } } = await supabase.auth.getUser();

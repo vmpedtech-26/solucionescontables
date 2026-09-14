@@ -2,7 +2,7 @@
    VMP Studio Contable - Legacy System Migrator View
    Pilar 5: Migrador de Sistemas Legados (Tango, Bejerman, Excel)
    ------------------------------------------------------------- */
-import { getCompanies, saveCompany, addTransaction } from '../db/mockdb.js';
+import { getCompaniesAsync, saveCompanyAsync, addTransactionAsync } from '../db/mockdb.js';
 
 let migrationState = 'idle'; // 'idle' | 'uploaded' | 'migrating' | 'success'
 let selectedSystem = 'tango'; // 'tango' | 'bejerman' | 'excel'
@@ -234,49 +234,52 @@ export function initMigrador(mainApp) {
     ];
 
     let stepIdx = 0;
-    const interval = setInterval(() => {
+    const interval = setInterval(async () => {
       if (stepIdx < steps.length) {
         const step = steps[stepIdx];
         migrationLogs.push(step.log);
-        
+
         // Update progress bar width dynamically in the DOM
         const prgBar = document.querySelector('.migration-progress-bar');
         if (prgBar) prgBar.style.width = `${step.prg}%`;
 
-        // Render updated logs list
-        const terminal = document.querySelector('.wa-chat-window') || document.querySelector('.card');
         mainApp.router();
-        
+
         stepIdx++;
       } else {
         clearInterval(interval);
-        
-        // Inyectar Catedral Constructora S.A. en base de datos
-        const newCo = {
-          id: 'co-catedral',
-          razon_social: 'Catedral Constructora S.A.',
-          cuit: '30-99887766-5',
-          condicion_iva: 'Responsable Inscripto',
-          tipo: 'S.A.',
-          actividad: 'Construcción y Obras de Ingeniería',
-          inicio_actividades: '2019-04-01',
-          color: '#fb923c'
-        };
-        
-        // Evitar duplicados de Catedral Constructora en mockdb
-        const cos = getCompanies();
-        if (!cos.some(c => c.id === newCo.id)) {
-          saveCompany(newCo);
-          
-          // Cargar comprobantes históricos
-          addTransaction('co-catedral', 'ventas', { id: 'v-cat-1', fecha: '2026-05-18', cliente: 'Gobierno de la Pampa', cuit: '30-67890123-5', tipo_comprobante: 'Factura A', numero: '0001-00000392', neto: 12000000, iva: 2520000, total: 14520000 });
-          addTransaction('co-catedral', 'ventas', { id: 'v-cat-2', fecha: '2026-05-05', cliente: 'Inversiones Sur SRL', cuit: '30-44556677-2', tipo_comprobante: 'Factura A', numero: '0001-00000393', neto: 4500000, iva: 945000, total: 5445000 });
-          addTransaction('co-catedral', 'compras', { id: 'c-cat-1', fecha: '2026-05-12', proveedor: 'Hierros Patagónicos S.A.', cuit: '30-11223344-5', tipo_comprobante: 'Factura A', numero: '0012-00038294', neto: 6500000, iva: 1365000, total: 7865000, es_activo: false, categoria: 'Hierros' });
-          addTransaction('co-catedral', 'compras', { id: 'c-cat-2', fecha: '2026-05-20', proveedor: 'Excavaciones Neuquén', cuit: '30-55998877-1', tipo_comprobante: 'Factura A', numero: '0002-00000482', neto: 2300000, iva: 483000, total: 2783000, es_activo: false, categoria: 'Servicios de Terceros' });
-        }
 
-        migrationState = 'success';
-        mainApp.showToast("¡Empresa 'Catedral Constructora S.A.' migrada con éxito!", 'success');
+        try {
+          // Inyectar Catedral Constructora S.A. en base de datos
+          const newCo = {
+            id: 'co-catedral',
+            razon_social: 'Catedral Constructora S.A.',
+            cuit: '30-99887766-7',
+            condicion_iva: 'Responsable Inscripto',
+            tipo: 'SA',
+            actividad: 'Construcción y Obras de Ingeniería',
+            inicio_actividades: '2019-04-01',
+            color: '#fb923c'
+          };
+
+          // Evitar duplicados de Catedral Constructora
+          const cos = await getCompaniesAsync();
+          if (!cos.some(c => c.id === newCo.id)) {
+            await saveCompanyAsync(newCo);
+
+            // Cargar comprobantes históricos
+            await addTransactionAsync('co-catedral', 'ventas', { id: 'v-cat-1', fecha: '2026-05-18', cliente: 'Gobierno de la Pampa', cuit: '30-67890123-3', tipo_comprobante: 'Factura A', numero: '0001-00000392', neto: 12000000, iva: 2520000, total: 14520000 });
+            await addTransactionAsync('co-catedral', 'ventas', { id: 'v-cat-2', fecha: '2026-05-05', cliente: 'Inversiones Sur SRL', cuit: '30-44556677-9', tipo_comprobante: 'Factura A', numero: '0001-00000393', neto: 4500000, iva: 945000, total: 5445000 });
+            await addTransactionAsync('co-catedral', 'compras', { id: 'c-cat-1', fecha: '2026-05-12', proveedor: 'Hierros Patagónicos S.A.', cuit: '30-11223344-6', tipo_comprobante: 'Factura A', numero: '0012-00038294', neto: 6500000, iva: 1365000, total: 7865000, es_activo: false, categoria: 'Hierros' });
+            await addTransactionAsync('co-catedral', 'compras', { id: 'c-cat-2', fecha: '2026-05-20', proveedor: 'Excavaciones Neuquén', cuit: '30-55998877-0', tipo_comprobante: 'Factura A', numero: '0002-00000482', neto: 2300000, iva: 483000, total: 2783000, es_activo: false, categoria: 'Servicios de Terceros' });
+          }
+
+          migrationState = 'success';
+          mainApp.showToast("¡Empresa 'Catedral Constructora S.A.' migrada con éxito!", 'success');
+        } catch (err) {
+          migrationState = 'uploaded';
+          mainApp.showToast(err.message || 'Error al migrar la empresa.', 'error');
+        }
         mainApp.router();
       }
     }, 900);

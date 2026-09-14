@@ -2,18 +2,26 @@
    VMP Studio Contable — Centro de Ayuda e Instructivo de Onboarding
    Guía interactiva para la configuración y uso del sistema
    ------------------------------------------------------------- */
-import { getCompanies } from '../db/mockdb.js';
+import { getCompaniesAsync, getEstudioAsync, updateEstudioFieldsAsync } from '../db/mockdb.js';
+import { isSupabaseConfigured, supabase } from '../db/supabase.js';
 
-export function renderAyuda() {
-  const companies = getCompanies() || [];
+function getDelegationActive(company) {
+  if (isSupabaseConfigured && supabase) return !!company.delegation_active;
+  return localStorage.getItem(`vmp_delegation_active_${company.id}`) === 'true';
+}
 
-  // Onboarding Tasks Status from localStorage
-  const t1 = localStorage.getItem('vmp_task_estudio') === 'true';
-  const t2 = localStorage.getItem('vmp_arca_cert_uploaded') === 'true'; // Share with config
+export async function renderAyuda() {
+  const companies = (await getCompaniesAsync()) || [];
+  const estudio = await getEstudioAsync();
+
+  // Onboarding Tasks Status: real (Supabase, columna por columna en "estudios")
+  // o sandbox (localStorage), según corresponda.
+  const t1 = estudio ? estudio.onboarding_task_estudio : (localStorage.getItem('vmp_task_estudio') === 'true');
+  const t2 = estudio ? estudio.arca_cert_uploaded : (localStorage.getItem('vmp_arca_cert_uploaded') === 'true'); // Share with config
   const t3 = companies.length > 2; // Simulates user adding their own client (default is 3, if added then > 3)
-  const t4 = localStorage.getItem('vmp_delegation_active_1') === 'true' || localStorage.getItem('vmp_delegation_active_2') === 'true';
-  const t5 = localStorage.getItem('vmp_import_simulated') === 'true';
-  const t6 = localStorage.getItem('vmp_iva_validated_Logistica') === 'true' || localStorage.getItem('vmp_iva_validated_Software') === 'true';
+  const t4 = companies.some(getDelegationActive);
+  const t5 = estudio ? estudio.onboarding_import_simulado : (localStorage.getItem('vmp_import_simulated') === 'true');
+  const t6 = estudio ? estudio.onboarding_iva_validado : (localStorage.getItem('vmp_iva_validated_Logistica') === 'true' || localStorage.getItem('vmp_iva_validated_Software') === 'true');
 
   const completedCount = [t1, t2, t3, t4, t5, t6].filter(Boolean).length;
   const progressPercent = Math.round((completedCount / 6) * 100);
@@ -465,7 +473,7 @@ const TabContents = {
   `
 };
 
-export function initAyuda(mainApp) {
+export async function initAyuda(mainApp) {
   try {
     // Initialize Lucide Icons
     if (window.lucide) window.lucide.createIcons();
@@ -545,19 +553,25 @@ export function initAyuda(mainApp) {
       });
     });
 
-    // Checklist updates in localStorage & reactive progress
+    // Checklist updates (Supabase o localStorage) & reactive progress
     const chkEstudio = document.getElementById('chk-task-estudio');
-    chkEstudio?.addEventListener('change', (e) => {
-      localStorage.setItem('vmp_task_estudio', e.target.checked ? 'true' : 'false');
-      
+    chkEstudio?.addEventListener('change', async (e) => {
+      const checked = e.target.checked;
+      if (isSupabaseConfigured && supabase) {
+        await updateEstudioFieldsAsync({ onboarding_task_estudio: checked });
+      } else {
+        localStorage.setItem('vmp_task_estudio', checked ? 'true' : 'false');
+      }
+
       // Refresh calculations and update progress bar live
-      const companies = getCompanies() || [];
-      const t1 = localStorage.getItem('vmp_task_estudio') === 'true';
-      const t2 = localStorage.getItem('vmp_arca_cert_uploaded') === 'true';
+      const companies = (await getCompaniesAsync()) || [];
+      const estudio = await getEstudioAsync();
+      const t1 = checked;
+      const t2 = estudio ? estudio.arca_cert_uploaded : (localStorage.getItem('vmp_arca_cert_uploaded') === 'true');
       const t3 = companies.length > 2;
-      const t4 = localStorage.getItem('vmp_delegation_active_1') === 'true' || localStorage.getItem('vmp_delegation_active_2') === 'true';
-      const t5 = localStorage.getItem('vmp_import_simulated') === 'true';
-      const t6 = localStorage.getItem('vmp_iva_validated_Logistica') === 'true' || localStorage.getItem('vmp_iva_validated_Software') === 'true';
+      const t4 = companies.some(getDelegationActive);
+      const t5 = estudio ? estudio.onboarding_import_simulado : (localStorage.getItem('vmp_import_simulated') === 'true');
+      const t6 = estudio ? estudio.onboarding_iva_validado : (localStorage.getItem('vmp_iva_validated_Logistica') === 'true' || localStorage.getItem('vmp_iva_validated_Software') === 'true');
 
       const completed = [t1, t2, t3, t4, t5, t6].filter(Boolean).length;
       const percent = Math.round((completed / 6) * 100);

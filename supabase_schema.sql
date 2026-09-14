@@ -446,7 +446,11 @@ BEGIN
             'RECHAZO_CUIT_INVALIDO',
             TG_TABLE_NAME::TEXT,
             NEW.id::TEXT,
-            jsonb_build_object('cuit_invalido', NEW.cuit, 'razon_social', COALESCE(NEW.razon_social, 'N/A'))
+            -- to_jsonb(NEW)->>'razon_social' es seguro en ambas tablas: esta
+            -- función valida CUITs tanto en "empresas" (tiene razon_social)
+            -- como en "transacciones" (no la tiene) — un acceso directo
+            -- NEW.razon_social rompe con "record has no field" en esta última.
+            jsonb_build_object('cuit_invalido', NEW.cuit, 'razon_social', COALESCE(to_jsonb(NEW)->>'razon_social', 'N/A'))
         );
         RAISE EXCEPTION 'Error impositivo AFIP: La CUIT % ingresada posee un dígito verificador inválido bajo Algoritmo Módulo 11.', NEW.cuit;
     END IF;

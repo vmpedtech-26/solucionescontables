@@ -2,15 +2,13 @@
    VMP Studio Contable - WhatsApp Omnichannel Inbox View
    Pilar 2: Omnicanalidad y AI-OCR (Gemini Vision)
    ------------------------------------------------------------- */
-import { getActiveCompany, addTransaction } from '../db/mockdb.js';
+import { addTransactionAsync } from '../db/mockdb.js';
 
 let activeChatId = 'co-1'; // Default active chat
 let scanState = 'idle'; // 'idle' | 'scanning' | 'scanned' | 'registered'
 let extractedData = null;
 
 export function renderWhatsApp() {
-  const activeCompany = getActiveCompany();
-
   const unreadCounts = JSON.parse(localStorage.getItem('vmp_wa_unread_counts') || '{"co-1": 1, "co-2": 0, "co-3": 0}');
   if (unreadCounts[activeChatId] > 0) {
     unreadCounts[activeChatId] = 0;
@@ -356,15 +354,15 @@ export function initWhatsApp(mainApp) {
   });
 
   // Confirm OCR and register in ledger
-  document.getElementById('btn-confirm-ocr')?.addEventListener('click', () => {
+  document.getElementById('btn-confirm-ocr')?.addEventListener('click', async () => {
     if (extractedData) {
-      // Add transaction reactively into the DB for the sender client's company (activeChatId)
-      addTransaction(activeChatId, 'compras', extractedData);
-      
-      scanState = 'registered';
-      mainApp.showToast('¡Comprobante OCR registrado en la empresa del cliente remitente!', 'success');
-      
-      // Auto refresh the screen
+      try {
+        await addTransactionAsync(activeChatId, 'compras', extractedData);
+        scanState = 'registered';
+        mainApp.showToast('¡Comprobante OCR registrado en la empresa del cliente remitente!', 'success');
+      } catch (err) {
+        mainApp.showToast(err.message || 'Error al registrar el comprobante.', 'error');
+      }
       mainApp.router();
     }
   });

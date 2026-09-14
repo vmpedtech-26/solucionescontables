@@ -34,7 +34,7 @@ const JURISDICCIONES_SANDBOX = {
   ]
 };
 
-async function getRetencionesAsync(companyId) {
+export async function getRetencionesAsync(companyId) {
   if (isSupabaseConfigured && supabase) {
     const { data, error } = await supabase
       .from('retenciones')
