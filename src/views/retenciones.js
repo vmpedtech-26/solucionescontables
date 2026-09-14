@@ -2,14 +2,15 @@
    VMP Studio Contable — Retenciones y Percepciones
    Conciliación impositiva, cuenta puente y generador CSV ARCA
    ------------------------------------------------------------- */
-import { getActiveCompany, getTransactions } from '../db/mockdb.js';
+import { getActiveCompanyAsync, getTransactionsAsync } from '../db/mockdb.js';
+import { supabase, isSupabaseConfigured } from '../db/supabase.js';
 import { renderPremiumTeaser } from '../utils.js';
 
 function fmt(n) {
   return n.toLocaleString('es-AR', { minimumFractionDigits: 2 });
 }
 
-function getRetenciones(companyId) {
+function getRetencionesSandbox(companyId) {
   const stored = localStorage.getItem(`vmp_retenciones_${companyId}`);
   if (stored) return JSON.parse(stored);
   // Demo data
@@ -22,13 +23,120 @@ function getRetenciones(companyId) {
   ];
 }
 
-export function renderRetenciones() {
-  const company = getActiveCompany();
-  const allRets = getRetenciones(company.id);
+// Jurisdicciones de Convenio Multilateral hardcodeadas para el sandbox (antes
+// vivían en el array DEFAULT_COMPANIES de mockdb.js; en Supabase son la
+// tabla real jurisdicciones_iibb).
+const JURISDICCIONES_SANDBOX = {
+  'co-1': [
+    { provincia: "Neuquén", pctIngresos: 45, pctGastos: 50, alicuotaIIBB: 4.0 },
+    { provincia: "Río Negro", pctIngresos: 35, pctGastos: 30, alicuotaIIBB: 3.5 },
+    { provincia: "La Pampa", pctIngresos: 20, pctGastos: 20, alicuotaIIBB: 3.0 }
+  ]
+};
+
+async function getRetencionesAsync(companyId) {
+  if (isSupabaseConfigured && supabase) {
+    const { data, error } = await supabase
+      .from('retenciones')
+      .select('*')
+      .eq('empresa_id', companyId)
+      .order('fecha', { ascending: false });
+
+    if (!error) {
+      return data.map(r => ({
+        id: r.id, fecha: r.fecha, agente: r.agente, cuit: r.cuit, tipo: r.tipo,
+        monto: Number(r.monto), fuente: r.fuente, conciliado: r.conciliado, certDisponible: r.cert_disponible
+      }));
+    }
+    console.error("Error trayendo retenciones de Supabase:", error);
+  }
+  return getRetencionesSandbox(companyId);
+}
+
+async function addRetencionAsync(companyId, ret) {
+  if (isSupabaseConfigured && supabase) {
+    const { data, error } = await supabase.from('retenciones').insert({
+      id: ret.id,
+      empresa_id: companyId,
+      fecha: ret.fecha,
+      agente: ret.agente,
+      cuit: ret.cuit,
+      tipo: ret.tipo,
+      monto: ret.monto,
+      fuente: ret.fuente,
+      conciliado: ret.conciliado,
+      cert_disponible: ret.certDisponible
+    }).select().single();
+    if (error) throw error;
+    return data;
+  }
+  const rets = getRetencionesSandbox(companyId);
+  rets.push(ret);
+  localStorage.setItem(`vmp_retenciones_${companyId}`, JSON.stringify(rets));
+  return ret;
+}
+
+async function conciliarRetencionAsync(companyId, retencionId) {
+  if (isSupabaseConfigured && supabase) {
+    const { error } = await supabase
+      .from('retenciones')
+      .update({ conciliado: true, cert_disponible: true })
+      .eq('id', retencionId);
+    if (error) throw error;
+    return;
+  }
+  const rets = getRetencionesSandbox(companyId);
+  const updated = rets.map(r => r.id === retencionId ? { ...r, conciliado: true, certDisponible: true } : r);
+  localStorage.setItem(`vmp_retenciones_${companyId}`, JSON.stringify(updated));
+}
+
+async function getJurisdiccionesAsync(companyId) {
+  if (isSupabaseConfigured && supabase) {
+    const { data, error } = await supabase
+      .from('jurisdicciones_iibb')
+      .select('*')
+      .eq('empresa_id', companyId);
+    if (!error) {
+      return data.map(j => ({
+        provincia: j.provincia,
+        pctIngresos: Number(j.pct_ingresos),
+        pctGastos: Number(j.pct_gastos),
+        alicuotaIIBB: Number(j.alicuota_iibb)
+      }));
+    }
+    console.error("Error trayendo jurisdicciones de Supabase:", error);
+    return [];
+  }
+  return JURISDICCIONES_SANDBOX[companyId] || [];
+}
+
+export async function renderRetenciones() {
+  const company = await getActiveCompanyAsync();
+  if (!company) {
+    return `
+    <div class="view-header">
+      <div>
+        <h1 class="view-title">Retenciones y Percepciones</h1>
+        <p class="view-subtitle">Conciliación impositiva mensual y carga en IVA Simple.</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-body" style="text-align: center; padding: 48px;">
+        <i data-lucide="building" style="width: 48px; height: 48px; color: var(--text-muted); margin-bottom: 12px;"></i>
+        <h4>Todavía no cargaste ninguna empresa cliente</h4>
+        <p style="font-size: 13px; color: var(--text-secondary); margin-top: 6px; margin-bottom: 16px;">Registrá una empresa para empezar a conciliar sus retenciones.</p>
+        <a href="#/studio/empresas" class="btn btn-primary">Ir a Empresas Clientes</a>
+      </div>
+    </div>
+    `;
+  }
+
+  const allRets = await getRetencionesAsync(company.id);
+  const jurisdicciones = await getJurisdiccionesAsync(company.id);
 
   // Check for pre-filtering (from Dashboard alert card)
   const isSircrebFiltered = window.location.hash.includes('filter=sircreb');
-  const rets = isSircrebFiltered 
+  const rets = isSircrebFiltered
     ? allRets.filter(r => !r.conciliado && r.fuente === 'banco')
     : allRets;
 
@@ -46,11 +154,11 @@ export function renderRetenciones() {
   let cmTotalIIBB = 0;
   let cmTotalSircreb = 0;
   let cmTotalSaldo = 0;
-  if (company.jurisdicciones && company.jurisdicciones.length > 1) {
+  if (jurisdicciones && jurisdicciones.length > 1) {
     const activePeriod = localStorage.getItem('vmp_active_period') || '2026-05';
-    const txs = getTransactions(company.id);
+    const txs = await getTransactionsAsync(company.id);
     cmTotalVentas = txs.ventas.filter(v => v.fecha.startsWith(activePeriod)).reduce((s, v) => s + v.neto, 0);
-    cmTotalIIBB = company.jurisdicciones.reduce((s, j) => {
+    cmTotalIIBB = jurisdicciones.reduce((s, j) => {
       const coef = (j.pctIngresos + j.pctGastos) / 200;
       return s + (cmTotalVentas * coef * (j.alicuotaIIBB / 100));
     }, 0);
@@ -241,7 +349,7 @@ export function renderRetenciones() {
     </div>
   </div>
 
-  ${company.jurisdicciones && company.jurisdicciones.length > 1 ? `
+  ${jurisdicciones && jurisdicciones.length > 1 ? `
   <div class="card" style="margin-top:24px;">
     <div class="card-header">
       <h3><i data-lucide="map" style="color:#8b5cf6;"></i> Convenio Multilateral — Distribución de Ingresos Brutos</h3>
@@ -259,7 +367,7 @@ export function renderRetenciones() {
           <tr><th>Jurisdicción</th><th>Coef. Unificado</th><th>Base Imponible</th><th>Alícuota</th><th>IIBB Determinado</th><th>SIRCREB a Cuenta</th><th>Saldo</th></tr>
         </thead>
         <tbody>
-          ${company.jurisdicciones.map(j => {
+          ${jurisdicciones.map(j => {
             const coef = (j.pctIngresos + j.pctGastos) / 200;
             const base = cmTotalVentas * coef;
             const impuesto = base * (j.alicuotaIIBB / 100);
@@ -295,20 +403,22 @@ export function renderRetenciones() {
   `, "Conciliación de Retenciones & Percepciones", "Evitá pérdidas de saldo fiscal. Cruzá de forma automatizada las retenciones registradas en el Libro Diario, el SIRE (ARCA) y los extractos bancarios (SIRCREB/percepciones).");
 }
 
-export function initRetenciones(mainApp) {
+export async function initRetenciones(mainApp) {
   if (window.lucide) window.lucide.createIcons();
 
-  const company = getActiveCompany();
+  const company = await getActiveCompanyAsync();
+  if (!company) return; // Estado vacío ya renderizado por renderRetenciones(), nada que inicializar.
 
   // Conciliar una retención
   document.querySelectorAll('.btn-conciliar').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const rId = btn.dataset.id;
-      const rets = getRetenciones(company.id);
-      const updated = rets.map(r => r.id === rId ? { ...r, conciliado: true, certDisponible: true } : r);
-      localStorage.setItem(`vmp_retenciones_${company.id}`, JSON.stringify(updated));
-      mainApp.showToast('Retención conciliada y certificado registrado.', 'success');
-      mainApp.router();
+    btn.addEventListener('click', async () => {
+      try {
+        await conciliarRetencionAsync(company.id, btn.dataset.id);
+        mainApp.showToast('Retención conciliada y certificado registrado.', 'success');
+        mainApp.router();
+      } catch (err) {
+        mainApp.showToast(`Error al conciliar: ${err.message || err}`, 'error');
+      }
     });
   });
 
@@ -368,10 +478,10 @@ export function initRetenciones(mainApp) {
 
     modal.querySelector('#btn-cancel-csv-dl').addEventListener('click', closeModal);
     
-    modal.querySelector('#btn-confirm-csv-dl').addEventListener('click', () => {
+    modal.querySelector('#btn-confirm-csv-dl').addEventListener('click', async () => {
       closeModal();
-      
-      const rets = getRetenciones(company.id);
+
+      const rets = await getRetencionesAsync(company.id);
       const bom = '\uFEFF';
       let csv = 'Fecha;CUIT Agente;Tipo;Numero Comprobante;Monto;Estado\n';
 
@@ -484,7 +594,7 @@ export function initRetenciones(mainApp) {
 
     modal.querySelector('#btn-cancel-add-ret').addEventListener('click', closeModal);
 
-    modal.querySelector('#form-add-ret').addEventListener('submit', (e) => {
+    modal.querySelector('#form-add-ret').addEventListener('submit', async (e) => {
       e.preventDefault();
       const monto = parseFloat(modal.querySelector('#ret-monto').value) || 0;
       if (monto <= 0) {
@@ -502,12 +612,14 @@ export function initRetenciones(mainApp) {
         conciliado: false,
         certDisponible: false
       };
-      const rets = getRetenciones(company.id);
-      rets.push(newRet);
-      localStorage.setItem(`vmp_retenciones_${company.id}`, JSON.stringify(rets));
-      closeModal();
-      mainApp.showToast('Retención/percepción manual cargada. Quedó pendiente de conciliar.', 'success');
-      setTimeout(() => mainApp.router(), 260);
+      try {
+        await addRetencionAsync(company.id, newRet);
+        closeModal();
+        mainApp.showToast('Retención/percepción manual cargada. Quedó pendiente de conciliar.', 'success');
+        setTimeout(() => mainApp.router(), 260);
+      } catch (err) {
+        mainApp.showToast(`Error al guardar: ${err.message || err}`, 'error');
+      }
     });
   });
 }
