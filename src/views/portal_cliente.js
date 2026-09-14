@@ -2191,6 +2191,7 @@ Sabor digital, VMP Studio.
     if (quotaModal) quotaModal.style.display = 'none'; // Cerrar modal de cuota si está abierto
 
     const modal = document.createElement('div');
+    modal.className = 'vmp-modal-overlay';
     modal.style.position = 'fixed';
     modal.style.top = '0';
     modal.style.left = '0';

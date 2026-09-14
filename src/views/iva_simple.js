@@ -706,6 +706,7 @@ export function initIVASimple(mainApp) {
 
     // Crear el overlay del modal
     const modal = document.createElement('div');
+    modal.className = 'vmp-modal-overlay';
     modal.style.position = 'fixed';
     modal.style.top = '0';
     modal.style.left = '0';
@@ -795,6 +796,7 @@ export function initIVASimple(mainApp) {
     }, 20);
 
     const runTransmission = (simulateFailure = true) => {
+      if (!document.body.contains(modal)) return;
       document.getElementById('arca-loading-state').style.display = 'flex';
       document.getElementById('arca-failure-state').style.display = 'none';
       document.getElementById('arca-success-state').style.display = 'none';
@@ -803,10 +805,12 @@ export function initIVASimple(mainApp) {
       const text = document.getElementById('arca-progress-txt');
 
       setTimeout(() => {
+        if (!document.body.contains(modal)) return;
         title.textContent = "Transmitiendo datos XML a ARCA...";
         text.textContent = "Subiendo liquidación F.2051 con desglose de CLAE y débitos/créditos...";
 
         setTimeout(() => {
+          if (!document.body.contains(modal)) return;
           if (simulateFailure) {
             document.getElementById('arca-loading-state').style.display = 'none';
             document.getElementById('arca-failure-state').style.display = 'flex';

@@ -239,6 +239,7 @@ export function initRetenciones(mainApp) {
   const exportarCSV = () => {
     // 1. Crear el overlay del modal
     const modal = document.createElement('div');
+    modal.className = 'vmp-modal-overlay';
     modal.style.position = 'fixed';
     modal.style.top = '0';
     modal.style.left = '0';

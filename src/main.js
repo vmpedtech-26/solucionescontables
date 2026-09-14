@@ -59,6 +59,11 @@ class Application {
       this.activeChart = null;
     }
 
+    // Clean up any body-level modal overlay left open from a previous view
+    // (ARCA transmission, CSV export warning, manual expense entry, etc.)
+    // so navigating away doesn't leave a stale overlay blocking the new route.
+    document.querySelectorAll('.vmp-modal-overlay').forEach(el => el.remove());
+
     // Landing Page Route
     if (hash === '#/' || hash === '#' || hash === '') {
       if (!rootEl.querySelector('.lp-wrapper')) {
