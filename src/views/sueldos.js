@@ -65,6 +65,21 @@ export function renderSueldos() {
             <input type="checkbox" id="emp-sec" style="width: 18px; height: 18px; cursor: pointer; accent-color: var(--color-primary);">
           </div>
 
+          <!-- Cargas de familia para Ganancias 4ta categoría (Art. 30 LIG) -->
+          <div class="form-group" style="background: rgba(15, 23, 42, 0.02); border: 1px solid rgba(15, 23, 42, 0.05); padding: 12px; border-radius: 8px;">
+            <div style="font-size: 12.5px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px;">Cargas de Familia (deducciones de Ganancias)</div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: center;">
+              <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-secondary); cursor: pointer;">
+                <input type="checkbox" id="emp-conyuge" style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--color-primary);">
+                Cónyuge/conviviente a cargo
+              </label>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <label for="emp-hijos" style="font-size: 12px; color: var(--text-secondary); white-space: nowrap;">Hijos a cargo</label>
+                <input type="number" id="emp-hijos" class="form-input" value="0" min="0" max="15" step="1" style="font-size: 13px; padding: 6px 10px; width: 70px;">
+              </div>
+            </div>
+          </div>
+
           <button type="submit" class="btn btn-primary" style="background: var(--color-primary); border-color: var(--color-primary); width: 100%; font-weight: 700; padding: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; border-radius: 8px;">
             <i data-lucide="plus-circle" style="width: 18px; height: 18px;"></i>
             Guardar y Registrar Liquidación
@@ -149,7 +164,7 @@ export function renderSueldos() {
 
       </div>
       <p id="sim-ganancias-disclaimer" style="display:none; font-size: 10.5px; color: var(--text-muted); line-height: 1.5; margin: 10px 2px 0 2px;">
-        <strong>Descargo CPN:</strong> la retención de Ganancias 4ta categoría es una estimación con el mínimo no imponible vigente para un empleado soltero sin cargas de familia (2do semestre 2026) y la alícuota del primer tramo del Art. 94. No contempla cargas de familia, otras deducciones del SiRADIG ni los tramos superiores de la escala — debe ser revisada y ajustada por el profesional interviniente antes de liquidar.
+        <strong>Descargo CPN:</strong> la retención de Ganancias 4ta categoría aplica la escala completa de 9 tramos del Art. 94 y las deducciones por cónyuge/hijos vigentes para el 2do semestre 2026, pero como estimación de <strong>un único mes</strong> — no reproduce el método real de acumulado anual (que requiere el historial mes a mes de cada empleado) ni otras deducciones del SiRADIG (alquiler, seguro de vida, etc.). Debe ser revisada y ajustada por el profesional interviniente antes de liquidar.
       </p>
     </div>
   </div>
@@ -235,24 +250,49 @@ export function initSueldos(mainApp) {
   }
 
   // Deducción mensual (MNI + deducción especial) para Ganancias 4ta categoría,
-  // empleado soltero sin cargas de familia — 2do semestre 2026 (se actualiza
-  // semestralmente por inflación; verificar contra la tabla vigente de ARCA).
+  // empleado soltero sin cargas de familia — período jul-dic 2026 (ARCA, se
+  // actualiza semestralmente por inflación; verificar contra la tabla vigente).
   const GANANCIAS_DEDUCCION_MENSUAL = 2909508;
-  // Alícuota del primer tramo del Art. 94 de la Ley de Impuesto a las Ganancias.
-  const GANANCIAS_ALICUOTA_PRIMER_TRAMO = 0.05;
+  // Deducciones mensuales por cargas de familia (Art. 30 LIG), mismo período.
+  const GANANCIAS_DEDUCCION_CONYUGE = 472258;
+  const GANANCIAS_DEDUCCION_POR_HIJO = 238161;
+
+  // Escala progresiva mensual del Art. 94 LIG (escala anual jul-dic 2026 / 12,
+  // ya que la retención real usa un método de acumulado anual que requeriría
+  // historial mes a mes por empleado — inviable en un simulador de un solo mes).
+  const GANANCIAS_ESCALA = [
+    { hasta: 180707.66, fijo: 0, pct: 0.05, exceso: 0 },
+    { hasta: 361415.31, fijo: 9035.38, pct: 0.09, exceso: 180707.66 },
+    { hasta: 542122.97, fijo: 25299.07, pct: 0.12, exceso: 361415.31 },
+    { hasta: 813184.46, fijo: 46983.99, pct: 0.15, exceso: 542122.97 },
+    { hasta: 1626368.92, fijo: 87643.21, pct: 0.19, exceso: 813184.46 },
+    { hasta: 2439553.37, fijo: 242148.26, pct: 0.23, exceso: 1626368.92 },
+    { hasta: 3659330.06, fijo: 429180.69, pct: 0.27, exceso: 2439553.37 },
+    { hasta: 5488995.09, fijo: 758520.39, pct: 0.31, exceso: 3659330.06 },
+    { hasta: Infinity, fijo: 1325716.55, pct: 0.35, exceso: 5488995.09 }
+  ];
+
+  const calcularGanancias = (excedente) => {
+    if (excedente <= 0) return 0;
+    const tramo = GANANCIAS_ESCALA.find(t => excedente <= t.hasta);
+    return tramo.fijo + (excedente - tramo.exceso) * tramo.pct;
+  };
 
   // Función para realizar cálculos impositivos de liquidación
-  const calculateLiquidacion = (brutoVal, isSec) => {
+  const calculateLiquidacion = (brutoVal, isSec, conCargas) => {
+    const { conyuge = false, hijos = 0 } = conCargas || {};
     const jub = brutoVal * 0.11;
     const pami = brutoVal * 0.03;
     const os = brutoVal * 0.03;
     const sec = isSec ? brutoVal * 0.02 : 0;
 
-    // Estimación de Ganancias 4ta categoría sobre el excedente al mínimo no
-    // imponible (solo el primer tramo de la escala; ver descargo profesional).
+    // Ganancias 4ta categoría: MNI + deducción especial + cargas de familia,
+    // sobre el excedente se aplica la escala progresiva completa del Art. 94.
+    const deduccionFamilia = (conyuge ? GANANCIAS_DEDUCCION_CONYUGE : 0) + (hijos * GANANCIAS_DEDUCCION_POR_HIJO);
+    const deduccionTotal = GANANCIAS_DEDUCCION_MENSUAL + deduccionFamilia;
     const gananciaNetaSujeta = brutoVal - jub - pami - os;
-    const excedenteGanancias = Math.max(0, gananciaNetaSujeta - GANANCIAS_DEDUCCION_MENSUAL);
-    const ganancias = excedenteGanancias * GANANCIAS_ALICUOTA_PRIMER_TRAMO;
+    const excedenteGanancias = Math.max(0, gananciaNetaSujeta - deduccionTotal);
+    const ganancias = calcularGanancias(excedenteGanancias);
 
     const totalDeduc = jub + pami + os + sec + ganancias;
     const neto = brutoVal - totalDeduc;
@@ -283,6 +323,10 @@ export function initSueldos(mainApp) {
   const updateSimulation = () => {
     const brutoVal = parseFloat(inputBruto?.value) || 0;
     const isSec = inputSec?.checked || false;
+    const conCargas = {
+      conyuge: document.getElementById('emp-conyuge')?.checked || false,
+      hijos: parseInt(document.getElementById('emp-hijos')?.value, 10) || 0
+    };
 
     if (brutoVal <= 0) {
       if (simBruto) simBruto.innerText = `$0,00`;
@@ -301,7 +345,7 @@ export function initSueldos(mainApp) {
       return;
     }
 
-    const res = calculateLiquidacion(brutoVal, isSec);
+    const res = calculateLiquidacion(brutoVal, isSec, conCargas);
 
     if (simBruto) simBruto.innerText = `$${fmt(res.bruto)}`;
     if (simNeto) simNeto.innerText = `$${fmt(res.neto)}`;
@@ -338,6 +382,8 @@ export function initSueldos(mainApp) {
 
   inputBruto?.addEventListener('input', updateSimulation);
   inputSec?.addEventListener('change', updateSimulation);
+  document.getElementById('emp-conyuge')?.addEventListener('change', updateSimulation);
+  document.getElementById('emp-hijos')?.addEventListener('input', updateSimulation);
 
   // Renderizar la tabla de liquidaciones del histórico
   const renderLiquidacionesTable = () => {
@@ -419,6 +465,10 @@ export function initSueldos(mainApp) {
     const bruto = parseFloat(inputBruto?.value) || 0;
     const period = inputPeriod?.value || '';
     const isSec = inputSec?.checked || false;
+    const conCargas = {
+      conyuge: document.getElementById('emp-conyuge')?.checked || false,
+      hijos: parseInt(document.getElementById('emp-hijos')?.value, 10) || 0
+    };
 
     if (bruto <= 0) {
       mainApp.showToast("El sueldo bruto debe ser mayor a cero.", "error");
@@ -432,7 +482,7 @@ export function initSueldos(mainApp) {
       return;
     }
 
-    const res = calculateLiquidacion(bruto, isSec);
+    const res = calculateLiquidacion(bruto, isSec, conCargas);
     
     const newLiq = {
       id: "liq-" + Date.now(),
@@ -446,6 +496,8 @@ export function initSueldos(mainApp) {
       os: res.os,
       sec: res.sec,
       ganancias: res.ganancias,
+      conyuge: conCargas.conyuge,
+      hijos: conCargas.hijos,
       totalDeduc: res.totalDeduc,
       neto: res.neto
     };
