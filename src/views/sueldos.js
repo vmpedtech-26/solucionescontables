@@ -1,11 +1,102 @@
 /* -------------------------------------------------------------
    VMP Studio Contable - Libro de Sueldos Digital view Component
    ------------------------------------------------------------- */
-import { getActiveCompany } from '../db/mockdb.js';
+import { getActiveCompanyAsync } from '../db/mockdb.js';
+import { supabase, isSupabaseConfigured } from '../db/supabase.js';
 import { fmt, downloadFile, renderPremiumTeaser } from '../utils.js';
 
-export function renderSueldos() {
-  const activeCo = getActiveCompany();
+function mapLiqFromDb(l) {
+  return {
+    id: l.id, company_id: l.empresa_id, name: l.nombre_empleado, cuil: l.cuil, periodo: l.periodo,
+    bruto: Number(l.bruto), jub: Number(l.aporte_jubilacion), pami: Number(l.aporte_pami),
+    os: Number(l.aporte_obra_social), sec: Number(l.aporte_sindical), ganancias: Number(l.retencion_ganancias),
+    conyuge: l.conyuge_a_cargo, hijos: l.hijos_a_cargo,
+    totalDeduc: Number(l.total_deducciones), neto: Number(l.neto)
+  };
+}
+
+async function getLiquidacionesAsync(companyId) {
+  if (isSupabaseConfigured && supabase) {
+    const { data, error } = await supabase
+      .from('liquidaciones_sueldos')
+      .select('*')
+      .eq('empresa_id', companyId)
+      .order('created_at', { ascending: false });
+    if (!error) return data.map(mapLiqFromDb);
+    console.error("Error trayendo liquidaciones de Supabase:", error);
+    return [];
+  }
+  let liqs = [];
+  try {
+    liqs = JSON.parse(localStorage.getItem('vmp_sueldos_liquidaciones')) || [];
+  } catch (e) { liqs = []; }
+  return liqs.filter(l => l.company_id === companyId);
+}
+
+async function addLiquidacionAsync(companyId, liq) {
+  if (isSupabaseConfigured && supabase) {
+    const { data, error } = await supabase.from('liquidaciones_sueldos').insert({
+      id: liq.id,
+      empresa_id: companyId,
+      nombre_empleado: liq.name,
+      cuil: liq.cuil,
+      periodo: liq.periodo,
+      bruto: liq.bruto,
+      aporte_jubilacion: liq.jub,
+      aporte_pami: liq.pami,
+      aporte_obra_social: liq.os,
+      aporte_sindical: liq.sec,
+      retencion_ganancias: liq.ganancias,
+      conyuge_a_cargo: liq.conyuge,
+      hijos_a_cargo: liq.hijos,
+      total_deducciones: liq.totalDeduc,
+      neto: liq.neto
+    }).select().single();
+    if (error) throw error;
+    return mapLiqFromDb(data);
+  }
+  let liqs = [];
+  try {
+    liqs = JSON.parse(localStorage.getItem('vmp_sueldos_liquidaciones')) || [];
+  } catch (e) { liqs = []; }
+  liqs.unshift(liq);
+  localStorage.setItem('vmp_sueldos_liquidaciones', JSON.stringify(liqs));
+  return liq;
+}
+
+async function deleteLiquidacionAsync(companyId, liqId) {
+  if (isSupabaseConfigured && supabase) {
+    const { error } = await supabase.from('liquidaciones_sueldos').delete().eq('id', liqId);
+    if (error) throw error;
+    return;
+  }
+  let liqs = [];
+  try {
+    liqs = JSON.parse(localStorage.getItem('vmp_sueldos_liquidaciones')) || [];
+  } catch (e) { liqs = []; }
+  localStorage.setItem('vmp_sueldos_liquidaciones', JSON.stringify(liqs.filter(l => l.id !== liqId)));
+}
+
+export async function renderSueldos() {
+  const activeCo = await getActiveCompanyAsync();
+  if (!activeCo) {
+    return `
+    <div class="view-header">
+      <div>
+        <h1 class="view-title">Libro de Sueldos Digital ARCA</h1>
+        <p class="view-subtitle">Liquidación de sueldos, cálculo de aportes y exportación en formato oficial ARCA/AFIP.</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-body" style="text-align: center; padding: 48px;">
+        <i data-lucide="building" style="width: 48px; height: 48px; color: var(--text-muted); margin-bottom: 12px;"></i>
+        <h4>Todavía no cargaste ninguna empresa cliente</h4>
+        <p style="font-size: 13px; color: var(--text-secondary); margin-top: 6px; margin-bottom: 16px;">Registrá una empresa para empezar a liquidar sueldos.</p>
+        <a href="#/studio/empresas" class="btn btn-primary">Ir a Empresas Clientes</a>
+      </div>
+    </div>
+    `;
+  }
   
   // Contenido principal del módulo
   const mainHTML = `
@@ -215,13 +306,14 @@ export function renderSueldos() {
   );
 }
 
-export function initSueldos(mainApp) {
+export async function initSueldos(mainApp) {
   const isUnlocked = localStorage.getItem('vmp_premium_unlocked') === 'true';
   if (!isUnlocked) return;
 
   if (window.lucide) window.lucide.createIcons();
 
-  const activeCo = getActiveCompany();
+  const activeCo = await getActiveCompanyAsync();
+  if (!activeCo) return; // Estado vacío ya renderizado por renderSueldos(), nada que inicializar.
   const form = document.getElementById('sueldo-calc-form');
   const inputBruto = document.getElementById('emp-bruto');
   const inputSec = document.getElementById('emp-sec');
@@ -405,19 +497,11 @@ export function initSueldos(mainApp) {
   document.getElementById('emp-hijos')?.addEventListener('input', updateSimulation);
 
   // Renderizar la tabla de liquidaciones del histórico
-  const renderLiquidacionesTable = () => {
+  const renderLiquidacionesTable = async () => {
     const listContainer = document.getElementById('liquidaciones-list');
     if (!listContainer) return;
 
-    let liqs = [];
-    try {
-      liqs = JSON.parse(localStorage.getItem('vmp_sueldos_liquidaciones')) || [];
-    } catch (e) {
-      liqs = [];
-    }
-
-    // Filtrar por la empresa activa
-    const filtered = liqs.filter(l => l.company_id === activeCo.id);
+    const filtered = await getLiquidacionesAsync(activeCo.id);
 
     if (filtered.length === 0) {
       listContainer.innerHTML = `
@@ -459,24 +543,20 @@ export function initSueldos(mainApp) {
     });
   };
 
-  const deleteLiquidacion = (id) => {
+  const deleteLiquidacion = async (id) => {
     if (!confirm("¿Está seguro de que desea eliminar este registro de liquidación?")) return;
-    
-    let liqs = [];
-    try {
-      liqs = JSON.parse(localStorage.getItem('vmp_sueldos_liquidaciones')) || [];
-    } catch (e) {
-      liqs = [];
-    }
 
-    const filtered = liqs.filter(l => l.id !== id);
-    localStorage.setItem('vmp_sueldos_liquidaciones', JSON.stringify(filtered));
-    mainApp.showToast("Liquidación eliminada correctamente.", "success");
-    renderLiquidacionesTable();
+    try {
+      await deleteLiquidacionAsync(activeCo.id, id);
+      mainApp.showToast("Liquidación eliminada correctamente.", "success");
+      renderLiquidacionesTable();
+    } catch (err) {
+      mainApp.showToast(`Error al eliminar: ${err.message || err}`, "error");
+    }
   };
 
   // Enviar formulario para registrar nueva liquidación
-  form?.addEventListener('submit', (e) => {
+  form?.addEventListener('submit', async (e) => {
     e.preventDefault();
 
     const name = inputName?.value.trim() || '';
@@ -521,18 +601,15 @@ export function initSueldos(mainApp) {
       neto: res.neto
     };
 
-    let liqs = [];
     try {
-      liqs = JSON.parse(localStorage.getItem('vmp_sueldos_liquidaciones')) || [];
+      await addLiquidacionAsync(activeCo.id, newLiq);
     } catch (err) {
-      liqs = [];
+      mainApp.showToast(`Error al guardar la liquidación: ${err.message || err}`, "error");
+      return;
     }
 
-    liqs.unshift(newLiq);
-    localStorage.setItem('vmp_sueldos_liquidaciones', JSON.stringify(liqs));
-
     mainApp.showToast(`Liquidación de ${name} guardada correctamente.`, "success");
-    
+
     // Resetear formulario y simulación
     form.reset();
     if (inputPeriod) {
@@ -545,15 +622,8 @@ export function initSueldos(mainApp) {
 
   // Exportar en formato de ancho fijo ARCA / AFIP
   const btnExport = document.getElementById('btn-export-arca');
-  btnExport?.addEventListener('click', () => {
-    let liqs = [];
-    try {
-      liqs = JSON.parse(localStorage.getItem('vmp_sueldos_liquidaciones')) || [];
-    } catch (e) {
-      liqs = [];
-    }
-
-    const filtered = liqs.filter(l => l.company_id === activeCo.id);
+  btnExport?.addEventListener('click', async () => {
+    const filtered = await getLiquidacionesAsync(activeCo.id);
 
     if (filtered.length === 0) {
       mainApp.showToast("No hay registros cargados para exportar en esta empresa.", "error");
@@ -606,5 +676,5 @@ export function initSueldos(mainApp) {
   });
 
   // Inicializar tabla al entrar
-  renderLiquidacionesTable();
+  await renderLiquidacionesTable();
 }
