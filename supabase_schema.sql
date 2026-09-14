@@ -46,6 +46,12 @@ CREATE TABLE IF NOT EXISTS public.estudios (
     arca_model_type TEXT DEFAULT 'hybrid'::text NOT NULL,
     arca_cert_name TEXT,
     arca_cert_uploaded BOOLEAN DEFAULT false NOT NULL,
+    -- Progreso del checklist de onboarding (Guía de Instructivo). Antes vivía
+    -- disperso en 3 claves de localStorage sin dueño ni sincronización entre
+    -- dispositivos del mismo estudio.
+    onboarding_task_estudio BOOLEAN DEFAULT false NOT NULL,
+    onboarding_import_simulado BOOLEAN DEFAULT false NOT NULL,
+    onboarding_iva_validado BOOLEAN DEFAULT false NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
@@ -72,6 +78,20 @@ CREATE TABLE IF NOT EXISTS public.empresas (
     inicio_actividades DATE NOT NULL,
     color TEXT DEFAULT '#0d9488'::text NOT NULL,
     delegation_active BOOLEAN DEFAULT false NOT NULL,
+    -- Estado fiscal puntual por empresa, antes disperso en claves sueltas de
+    -- localStorage (vmp_consist_ok_, vmp_f2051_presented_, vmp_libro_importado_,
+    -- vmp_ret_perc_saldo_, vmp_saldo_favor_, vmp_rt54_asiento_ok_).
+    iva_consist_ok BOOLEAN DEFAULT false NOT NULL,
+    f2051_presentado BOOLEAN DEFAULT false NOT NULL,
+    libro_iva_importado BOOLEAN DEFAULT false NOT NULL,
+    ret_perc_saldo_manual NUMERIC(15,2),
+    saldo_favor_iva NUMERIC(15,2) DEFAULT 0 NOT NULL,
+    rt54_asiento_registrado BOOLEAN DEFAULT false NOT NULL,
+    -- Inputs del calculador de valuación de inventario (RT 54).
+    rt54_ingresos_periodo NUMERIC(15,2) DEFAULT 0 NOT NULL,
+    rt54_stock_final_unidades NUMERIC(15,2) DEFAULT 0 NOT NULL,
+    -- Badge de no leídos del inbox de WhatsApp (dato de UI, bajo riesgo).
+    wa_unread_count INTEGER DEFAULT 0 NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
@@ -102,8 +122,20 @@ CREATE TABLE IF NOT EXISTS public.transacciones (
     total NUMERIC(15,2) NOT NULL CHECK (total >= 0),
     es_activo BOOLEAN DEFAULT false NOT NULL, -- Para Bienes de Uso / Retenciones Especiales
     categoria TEXT DEFAULT 'General'::text NOT NULL,
+    -- Marca la venta como exenta (Art. 7/8 Ley IVA) para el prorrateo de
+    -- crédito fiscal de gastos de uso común (Art. 13 Ley IVA).
+    exento BOOLEAN DEFAULT false NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
+
+-- Un mismo punto de venta + tipo de comprobante no puede repetir número
+-- PERO solo para VENTAS (comprobantes propios, numeración que este estudio
+-- controla — WSFEv1 rechazaría un CAE duplicado). Las COMPRAS no se
+-- restringen: cada proveedor tiene su propia numeración independiente, y
+-- dos proveedores distintos bien pueden coincidir en "Factura A 0001-100".
+CREATE UNIQUE INDEX IF NOT EXISTS idx_transacciones_numeracion_propia
+    ON public.transacciones (empresa_id, tipo_comprobante, numero)
+    WHERE (tipo = 'ventas');
 
 -- Habilitar RLS en Transacciones
 ALTER TABLE public.transacciones ENABLE ROW LEVEL SECURITY;
@@ -179,6 +211,175 @@ CREATE POLICY "Anyone can view leads"
     USING (true);
 
 
+-- -------------------------------------------------------------
+-- 6. TABLA DE RETENCIONES Y PERCEPCIONES
+-- -------------------------------------------------------------
+-- Reemplaza la clave suelta `vmp_retenciones_<empresaId>`. Cubre las 3
+-- fuentes de conciliación reales: factura (Libro Compras), banco (extractos,
+-- incluye SIRCREB) y manual (lo que el cliente informa fuera de sistema).
+CREATE TABLE IF NOT EXISTS public.retenciones (
+    id TEXT PRIMARY KEY, -- Formato: 'r-' + timestamp o 'r-manual-' + timestamp
+    empresa_id TEXT NOT NULL REFERENCES public.empresas(id) ON DELETE CASCADE,
+    fecha DATE NOT NULL,
+    agente TEXT NOT NULL,
+    cuit TEXT NOT NULL,
+    tipo TEXT NOT NULL CHECK (tipo IN ('PERCEPCIÓN IVA', 'RETENCIÓN IVA', 'PERCEPCIÓN IIBB', 'RETENCIÓN IIBB', 'RETENCIÓN GANANCIAS', 'RETENCIÓN SIRCREB')),
+    monto NUMERIC(15,2) NOT NULL CHECK (monto >= 0),
+    fuente TEXT NOT NULL DEFAULT 'manual'::text CHECK (fuente IN ('factura', 'banco', 'manual')),
+    conciliado BOOLEAN DEFAULT false NOT NULL,
+    cert_disponible BOOLEAN DEFAULT false NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE public.retenciones ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Estudios can manage retenciones of their companies"
+    ON public.retenciones
+    FOR ALL
+    USING (
+        EXISTS (
+            SELECT 1 FROM public.empresas
+            WHERE empresas.id = retenciones.empresa_id
+              AND empresas.estudio_id = auth.uid()
+        )
+    );
+
+
+-- -------------------------------------------------------------
+-- 7. TABLA DE LIQUIDACIONES DE SUELDOS
+-- -------------------------------------------------------------
+-- Reemplaza la clave global `vmp_sueldos_liquidaciones` (que mezclaba TODAS
+-- las empresas en un único array filtrado en el cliente). Guarda el
+-- desglose completo: aportes del empleado, estimación de Ganancias 4ta
+-- categoría y cargas de familia declaradas al momento de liquidar.
+CREATE TABLE IF NOT EXISTS public.liquidaciones_sueldos (
+    id TEXT PRIMARY KEY, -- Formato: 'liq-' + timestamp
+    empresa_id TEXT NOT NULL REFERENCES public.empresas(id) ON DELETE CASCADE,
+    nombre_empleado TEXT NOT NULL,
+    cuil TEXT NOT NULL,
+    periodo TEXT NOT NULL, -- Formato 'YYYY-MM'
+    bruto NUMERIC(15,2) NOT NULL CHECK (bruto > 0),
+    aporte_jubilacion NUMERIC(15,2) NOT NULL,
+    aporte_pami NUMERIC(15,2) NOT NULL,
+    aporte_obra_social NUMERIC(15,2) NOT NULL,
+    aporte_sindical NUMERIC(15,2) DEFAULT 0 NOT NULL,
+    retencion_ganancias NUMERIC(15,2) DEFAULT 0 NOT NULL,
+    conyuge_a_cargo BOOLEAN DEFAULT false NOT NULL,
+    hijos_a_cargo INTEGER DEFAULT 0 NOT NULL,
+    total_deducciones NUMERIC(15,2) NOT NULL,
+    neto NUMERIC(15,2) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE public.liquidaciones_sueldos ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Estudios can manage liquidaciones of their companies"
+    ON public.liquidaciones_sueldos
+    FOR ALL
+    USING (
+        EXISTS (
+            SELECT 1 FROM public.empresas
+            WHERE empresas.id = liquidaciones_sueldos.empresa_id
+              AND empresas.estudio_id = auth.uid()
+        )
+    );
+
+
+-- -------------------------------------------------------------
+-- 8. TABLA DE ACTIVOS DE USO (RT 54 - BIENES DE USO)
+-- -------------------------------------------------------------
+-- Reemplaza `vmp_custom_assets_<empresaId>`. Los activos cargados
+-- automáticamente desde el Libro de Compras (es_activo = true) NO se
+-- duplican acá: se leen en vivo desde `transacciones` y solo estos, los
+-- cargados a mano en el sub-libro de RT 54, viven en esta tabla.
+CREATE TABLE IF NOT EXISTS public.activos_uso (
+    id TEXT PRIMARY KEY, -- Formato: 'cust-' + timestamp
+    empresa_id TEXT NOT NULL REFERENCES public.empresas(id) ON DELETE CASCADE,
+    nombre TEXT NOT NULL,
+    valor NUMERIC(15,2) NOT NULL CHECK (valor > 0),
+    fecha DATE NOT NULL,
+    categoria TEXT NOT NULL,
+    vida_util_anios INTEGER NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE public.activos_uso ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Estudios can manage activos_uso of their companies"
+    ON public.activos_uso
+    FOR ALL
+    USING (
+        EXISTS (
+            SELECT 1 FROM public.empresas
+            WHERE empresas.id = activos_uso.empresa_id
+              AND empresas.estudio_id = auth.uid()
+        )
+    );
+
+
+-- -------------------------------------------------------------
+-- 9. TABLA DE AJUSTES POR INFLACIÓN (RT 54 - AxI)
+-- -------------------------------------------------------------
+-- Reemplaza `vmp_axi_items_<empresaId>`. Igual que en Bienes de Uso, los
+-- ítems sincronizados automáticamente desde compras se leen en vivo; solo
+-- los rubros patrimoniales cargados a mano viven en esta tabla.
+CREATE TABLE IF NOT EXISTS public.ajustes_inflacion (
+    id TEXT PRIMARY KEY, -- Formato: 'axi-' + timestamp
+    empresa_id TEXT NOT NULL REFERENCES public.empresas(id) ON DELETE CASCADE,
+    concepto TEXT NOT NULL,
+    origen TEXT NOT NULL, -- Formato 'YYYY-MM' (fecha de origen del rubro)
+    valor NUMERIC(15,2) NOT NULL CHECK (valor > 0),
+    tipo TEXT NOT NULL CHECK (tipo IN ('patrimonio', 'activo')),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE public.ajustes_inflacion ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Estudios can manage ajustes_inflacion of their companies"
+    ON public.ajustes_inflacion
+    FOR ALL
+    USING (
+        EXISTS (
+            SELECT 1 FROM public.empresas
+            WHERE empresas.id = ajustes_inflacion.empresa_id
+              AND empresas.estudio_id = auth.uid()
+        )
+    );
+
+
+-- -------------------------------------------------------------
+-- 10. TABLA DE JURISDICCIONES — CONVENIO MULTILATERAL (IIBB)
+-- -------------------------------------------------------------
+-- Antes hardcodeado en el array DEFAULT_COMPANIES del cliente (solo la
+-- empresa demo de logística lo tenía). Una empresa con una sola fila acá
+-- tributa IIBB en régimen local; con más de una, se reparte por
+-- Coeficiente Unificado (RG CM 03/04) y se acredita el SIRCREB conciliado
+-- de `retenciones` contra el IIBB determinado de cada jurisdicción.
+CREATE TABLE IF NOT EXISTS public.jurisdicciones_iibb (
+    id BIGINT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+    empresa_id TEXT NOT NULL REFERENCES public.empresas(id) ON DELETE CASCADE,
+    provincia TEXT NOT NULL,
+    pct_ingresos NUMERIC(5,2) NOT NULL CHECK (pct_ingresos >= 0 AND pct_ingresos <= 100),
+    pct_gastos NUMERIC(5,2) NOT NULL CHECK (pct_gastos >= 0 AND pct_gastos <= 100),
+    alicuota_iibb NUMERIC(5,2) NOT NULL CHECK (alicuota_iibb >= 0),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    UNIQUE (empresa_id, provincia)
+);
+
+ALTER TABLE public.jurisdicciones_iibb ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Estudios can manage jurisdicciones of their companies"
+    ON public.jurisdicciones_iibb
+    FOR ALL
+    USING (
+        EXISTS (
+            SELECT 1 FROM public.empresas
+            WHERE empresas.id = jurisdicciones_iibb.empresa_id
+              AND empresas.estudio_id = auth.uid()
+        )
+    );
+
+
 -- ---------------------------------------------------------------------
 -- 🛡️ FUNCIONES DE SEGURIDAD Y TRIGGERS DE VALIDACIÓN IMPOSTIVA (CPN AUDIT)
 -- ---------------------------------------------------------------------
@@ -197,7 +398,7 @@ DECLARE
 BEGIN
     -- Limpiar guiones o espacios
     cuit_clean := regexp_replace(cuit_input, '[^0-9]', '', 'g');
-    
+
     -- Si es consumidor final sin registrar o CUIT extranjero simplificado
     IF cuit_clean = '00000000000' OR cuit_clean = '' OR cuit_clean IS NULL THEN
         RETURN TRUE;
@@ -212,7 +413,7 @@ BEGIN
     FOR i IN 1..11 LOOP
         cuit_array[i] := cast(substring(cuit_clean from i for 1) AS INT);
     END LOOP;
-    
+
     verificador := cuit_array[11];
 
     -- Aplicar algoritmo módulo 11
@@ -221,7 +422,7 @@ BEGIN
     END LOOP;
 
     calculado := 11 - (acumulado % 11);
-    
+
     IF calculado = 11 THEN
         calculado := 0;
     ELSIF calculado = 10 THEN
@@ -270,8 +471,8 @@ DECLARE
     owner_id UUID;
 BEGIN
     -- Obtener el estudio_id de la empresa asociada a la transacción
-    SELECT estudio_id INTO owner_id 
-    FROM public.empresas 
+    SELECT estudio_id INTO owner_id
+    FROM public.empresas
     WHERE empresas.id = NEW.empresa_id;
 
     -- Si la empresa no pertenece al estudio logueado, levantar alerta de intrusión impositiva
@@ -286,18 +487,38 @@ BEGIN
         );
         RAISE EXCEPTION 'Alerta de Seguridad SSL: Operación denegada. Intento ilegal de registrar datos en una empresa perteneciente a otro estudio contable.';
     END IF;
-    
+
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Aplicar aislamiento a transacciones y comprobantes digitales
+-- Aplicar aislamiento a todas las tablas hijas de "empresas"
 CREATE OR REPLACE TRIGGER on_transaccion_prevent_cross_tenant
     BEFORE INSERT OR UPDATE ON public.transacciones
     FOR EACH ROW EXECUTE FUNCTION public.trigger_prevent_cross_tenant_update();
 
 CREATE OR REPLACE TRIGGER on_comprobante_digital_prevent_cross_tenant
     BEFORE INSERT OR UPDATE ON public.comprobantes_digitales
+    FOR EACH ROW EXECUTE FUNCTION public.trigger_prevent_cross_tenant_update();
+
+CREATE OR REPLACE TRIGGER on_retencion_prevent_cross_tenant
+    BEFORE INSERT OR UPDATE ON public.retenciones
+    FOR EACH ROW EXECUTE FUNCTION public.trigger_prevent_cross_tenant_update();
+
+CREATE OR REPLACE TRIGGER on_liquidacion_prevent_cross_tenant
+    BEFORE INSERT OR UPDATE ON public.liquidaciones_sueldos
+    FOR EACH ROW EXECUTE FUNCTION public.trigger_prevent_cross_tenant_update();
+
+CREATE OR REPLACE TRIGGER on_activo_uso_prevent_cross_tenant
+    BEFORE INSERT OR UPDATE ON public.activos_uso
+    FOR EACH ROW EXECUTE FUNCTION public.trigger_prevent_cross_tenant_update();
+
+CREATE OR REPLACE TRIGGER on_ajuste_inflacion_prevent_cross_tenant
+    BEFORE INSERT OR UPDATE ON public.ajustes_inflacion
+    FOR EACH ROW EXECUTE FUNCTION public.trigger_prevent_cross_tenant_update();
+
+CREATE OR REPLACE TRIGGER on_jurisdiccion_prevent_cross_tenant
+    BEFORE INSERT OR UPDATE ON public.jurisdicciones_iibb
     FOR EACH ROW EXECUTE FUNCTION public.trigger_prevent_cross_tenant_update();
 
 
@@ -314,7 +535,7 @@ BEGIN
         'estudio_comahue_arca.crt',
         false
     );
-    
+
     -- Registrar log de auditoría del alta
     INSERT INTO public.seguridad_logs (estudio_id, evento, tabla, registro_id, detalles)
     VALUES (
@@ -324,7 +545,7 @@ BEGIN
         new.id::TEXT,
         jsonb_build_object('email', new.email)
     );
-    
+
     RETURN new;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
@@ -336,7 +557,7 @@ CREATE OR REPLACE TRIGGER on_auth_user_created
 
 
 -- -------------------------------------------------------------
--- 6. ÍNDICES DE ALTO RENDIMIENTO IMPOSITIVO (OLAP OPTIMIZATION)
+-- 11. ÍNDICES DE ALTO RENDIMIENTO IMPOSITIVO (OLAP OPTIMIZATION)
 -- -------------------------------------------------------------
 -- Optimización extrema para búsquedas subsegundo en informes mensuales de Libro IVA Digital
 CREATE INDEX IF NOT EXISTS idx_transacciones_query_opt
@@ -346,3 +567,24 @@ CREATE INDEX IF NOT EXISTS idx_transacciones_query_opt
 CREATE INDEX IF NOT EXISTS idx_transacciones_apoc_parcial
     ON public.transacciones (empresa_id, cuit)
     WHERE (es_activo = true AND categoria = 'APOC');
+
+-- Índices para las tablas nuevas: todas se filtran siempre por empresa_id,
+-- y retenciones/liquidaciones además casi siempre por período/fecha.
+CREATE INDEX IF NOT EXISTS idx_retenciones_empresa
+    ON public.retenciones (empresa_id, fecha DESC);
+
+CREATE INDEX IF NOT EXISTS idx_retenciones_sircreb_pendientes
+    ON public.retenciones (empresa_id)
+    WHERE (tipo = 'RETENCIÓN SIRCREB' AND conciliado = false);
+
+CREATE INDEX IF NOT EXISTS idx_liquidaciones_empresa_periodo
+    ON public.liquidaciones_sueldos (empresa_id, periodo DESC);
+
+CREATE INDEX IF NOT EXISTS idx_activos_uso_empresa
+    ON public.activos_uso (empresa_id);
+
+CREATE INDEX IF NOT EXISTS idx_ajustes_inflacion_empresa
+    ON public.ajustes_inflacion (empresa_id);
+
+CREATE INDEX IF NOT EXISTS idx_jurisdicciones_empresa
+    ON public.jurisdicciones_iibb (empresa_id);
