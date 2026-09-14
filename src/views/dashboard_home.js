@@ -9,6 +9,17 @@ export function renderDashboardHome() {
   const activePeriod = localStorage.getItem('vmp_active_period') || '2026-05';
   const companies = getCompanies();
 
+  // Estado real del Ticket de Acceso (TA) emitido por WSAA: vigente 12hs desde
+  // el loginCms(). Si nunca se autenticó en esta sesión, se simula un login
+  // reciente (hace 3hs) para no mostrar la consola como "caída" de arranque.
+  const WSAA_TA_VALIDITY_MS = 12 * 60 * 60 * 1000;
+  const wsaaTimestamp = parseInt(localStorage.getItem('vmp_wsaa_ta_timestamp'), 10) || (Date.now() - 3 * 60 * 60 * 1000);
+  const wsaaElapsedMs = Date.now() - wsaaTimestamp;
+  const wsaaValid = wsaaElapsedMs < WSAA_TA_VALIDITY_MS;
+  const wsaaRemainingMs = Math.max(0, WSAA_TA_VALIDITY_MS - wsaaElapsedMs);
+  const wsaaRemainingH = Math.floor(wsaaRemainingMs / 3600000);
+  const wsaaRemainingM = Math.floor((wsaaRemainingMs % 3600000) / 60000);
+
   // Helper dynamic dates generator by CUIT & Condition
   const getVencimientoDates = (cuit, cond) => {
     const clean = cuit.replace(/-/g, '').trim();
@@ -194,11 +205,18 @@ export function renderDashboardHome() {
     <div class="grid-resp-4" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; border-top: 1px solid rgba(13, 148, 136, 0.1); padding-top: 16px;">
       
       <div style="background: rgba(255,255,255,0.01); border: 1px solid var(--border-color); padding: 10px 14px; border-radius: 6px;">
-        <span style="font-size: 10px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; display: block; margin-bottom: 4px;">WSAA Autenticación</span>
+        <span style="font-size: 10px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; display: block; margin-bottom: 4px;" title="Ticket de Acceso emitido por WSAA vía loginCms(), vigente 12hs por especificación técnica de ARCA">Ticket de Acceso (WSAA)</span>
+        ${wsaaValid ? `
         <span style="font-size: 12px; font-weight: 750; color: var(--color-accent); display: flex; align-items: center; gap: 6px;">
           <span style="background: var(--color-accent-light); width: 6px; height: 6px; border-radius: 50%; display: inline-block;"></span>
-          Token de Acceso Activo
+          Vigente · vence en ${wsaaRemainingH}h ${wsaaRemainingM}m
         </span>
+        ` : `
+        <span style="font-size: 12px; font-weight: 750; color: #ef4444; display: flex; align-items: center; gap: 6px;">
+          <i data-lucide="alert-triangle" style="width: 12px; height: 12px;"></i> TA vencido (&gt;12hs)
+        </span>
+        <button id="btn-renovar-wsaa-ta" class="btn btn-outline btn-sm" style="margin-top: 6px; font-size: 10px; padding: 3px 8px; height: auto;">Renovar TA (loginCms)</button>
+        `}
       </div>
 
       <div style="background: rgba(255,255,255,0.01); border: 1px solid var(--border-color); padding: 10px 14px; border-radius: 6px;">
@@ -533,6 +551,17 @@ export function renderDashboardHome() {
 export function initDashboardHome(mainApp) {
   // Inicializar Lucide Icons
   if (window.lucide) window.lucide.createIcons();
+
+  // Renovar Ticket de Acceso (WSAA loginCms) cuando venció
+  document.getElementById('btn-renovar-wsaa-ta')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    mainApp.showToast("Generando TRA y firmando CMS (PKCS#7)...", "info");
+    setTimeout(() => {
+      localStorage.setItem('vmp_wsaa_ta_timestamp', String(Date.now()));
+      mainApp.showToast("¡Nuevo Ticket de Acceso (TA) emitido! Vigente por 12hs.", "success");
+      mainApp.router();
+    }, 900);
+  });
 
   // Inicializar Gráficos dinámicos con Chart.js
   const canvas = document.getElementById('dashboard-main-chart');

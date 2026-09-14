@@ -1220,7 +1220,7 @@ export function initPortalCliente(mainApp) {
       return;
     }
 
-    mainApp.showToast("Consultando Padrón Único de ARCA (wspadrón)...", "info");
+    mainApp.showToast("Consultando ws_sr_padron_a13 (Padrón Único de Contribuyentes ARCA)...", "info");
     
     // Simulate padron latency
     setTimeout(() => {

@@ -351,15 +351,20 @@ export function initConfiguracion(mainApp) {
   const btnSimUpload = document.getElementById('btn-simulate-upload-cert');
   btnSimUpload?.addEventListener('click', (e) => {
     e.stopPropagation();
-    mainApp.showToast("Iniciando handshake criptográfico con WSAA de ARCA...", "info");
-    
+    // Flujo real del WSAA (Web Service de Autenticación y Autorización):
+    // 1) se arma el TRA (Ticket de Requerimiento de Acceso), 2) se firma en
+    // formato CMS/PKCS#7 con el certificado X.509, 3) se invoca loginCms()
+    // y ARCA devuelve el TA (Ticket de Acceso: token + sign), vigente 12hs.
+    mainApp.showToast("Generando TRA y firmando CMS (PKCS#7) con el certificado...", "info");
+
     setTimeout(() => {
-      mainApp.showToast("Verificando cadena de confianza con AC ARCA...", "info");
-      
+      mainApp.showToast("Invocando WSAA.loginCms()... verificando cadena de confianza (AC ARCA)", "info");
+
       setTimeout(() => {
         localStorage.setItem('vmp_arca_cert_uploaded', 'true');
         localStorage.setItem('vmp_arca_cert_name', 'estudio_comahue_arca_2026.crt');
-        mainApp.showToast("¡Firma digital vinculada y autorizada por ARCA en producción!", "success");
+        localStorage.setItem('vmp_wsaa_ta_timestamp', String(Date.now()));
+        mainApp.showToast("¡Ticket de Acceso (TA) emitido! Válido por 12hs para los servicios delegados.", "success");
         mainApp.router();
       }, 1200);
     }, 1000);
