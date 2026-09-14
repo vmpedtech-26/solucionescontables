@@ -40,6 +40,20 @@ export function renderRetenciones() {
   const fuenteColor = { factura: 'var(--color-accent)', banco: '#06b6d4', manual: '#f59e0b' };
   const fuenteLabel = { factura: 'Libro Compras', banco: 'Extracto Bancario', manual: 'Manual' };
 
+  // Convenio Multilateral (IIBB): base imponible del período = ventas netas
+  // gravadas del período activo, distribuida por Coeficiente Unificado.
+  let cmTotalVentas = 0;
+  let cmTotalIIBB = 0;
+  if (company.jurisdicciones && company.jurisdicciones.length > 1) {
+    const activePeriod = localStorage.getItem('vmp_active_period') || '2026-05';
+    const txs = getTransactions(company.id);
+    cmTotalVentas = txs.ventas.filter(v => v.fecha.startsWith(activePeriod)).reduce((s, v) => s + v.neto, 0);
+    cmTotalIIBB = company.jurisdicciones.reduce((s, j) => {
+      const coef = (j.pctIngresos + j.pctGastos) / 200;
+      return s + (cmTotalVentas * coef * (j.alicuotaIIBB / 100));
+    }, 0);
+  }
+
   return renderPremiumTeaser(`
   <div class="view-header">
     <div>
@@ -215,6 +229,49 @@ export function renderRetenciones() {
       </div>
     </div>
   </div>
+
+  ${company.jurisdicciones && company.jurisdicciones.length > 1 ? `
+  <div class="card" style="margin-top:24px;">
+    <div class="card-header">
+      <h3><i data-lucide="map" style="color:#8b5cf6;"></i> Convenio Multilateral — Distribución de Ingresos Brutos</h3>
+    </div>
+    <div class="card-body">
+      <p class="text-secondary" style="font-size:12px; line-height:1.6; margin-bottom:14px;">
+        El cliente factura y gasta en más de una jurisdicción, por lo que <strong>no</strong> liquida IIBB en régimen local: la base imponible del período se distribuye entre provincias según el <strong>Coeficiente Unificado</strong> de cada una (RG CM 03/04 — promedio entre el % de ingresos y el % de gastos atribuibles a esa jurisdicción durante el ejercicio anterior), y luego cada provincia aplica su propia alícuota sobre la porción que le corresponde.
+      </p>
+      <div style="font-size:11.5px; color:var(--text-secondary); margin-bottom:10px;">
+        Ingresos brutos gravados del período activo: <strong class="font-mono" style="color:var(--text-primary);">$ ${fmt(cmTotalVentas)}</strong>
+      </div>
+      <table class="table table-sm" style="font-size:12px; width:100%;">
+        <thead>
+          <tr><th>Jurisdicción</th><th>% Ingresos</th><th>% Gastos</th><th>Coef. Unificado</th><th>Base Imponible</th><th>Alícuota</th><th>IIBB a Pagar</th></tr>
+        </thead>
+        <tbody>
+          ${company.jurisdicciones.map(j => {
+            const coef = (j.pctIngresos + j.pctGastos) / 200;
+            const base = cmTotalVentas * coef;
+            const impuesto = base * (j.alicuotaIIBB / 100);
+            return `<tr>
+              <td style="font-weight:700;">${j.provincia}</td>
+              <td class="font-mono">${j.pctIngresos.toFixed(2)}%</td>
+              <td class="font-mono">${j.pctGastos.toFixed(2)}%</td>
+              <td class="font-mono">${(coef * 100).toFixed(2)}%</td>
+              <td class="font-mono">$ ${fmt(base)}</td>
+              <td class="font-mono">${j.alicuotaIIBB.toFixed(2)}%</td>
+              <td class="font-mono" style="font-weight:800; color:var(--color-accent);">$ ${fmt(impuesto)}</td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+        <tfoot>
+          <tr style="border-top:2px solid var(--border-color);">
+            <td colspan="6" style="font-weight:800; text-align:right; padding-top:8px;">Total IIBB Convenio Multilateral del período</td>
+            <td class="font-mono" style="font-weight:800; padding-top:8px;">$ ${fmt(cmTotalIIBB)}</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+  ` : ''}
   `, "Conciliación de Retenciones & Percepciones", "Evitá pérdidas de saldo fiscal. Cruzá de forma automatizada las retenciones registradas en el Libro Diario, el SIRE (ARCA) y los extractos bancarios (SIRCREB/percepciones).");
 }
 

@@ -12,7 +12,15 @@ const DEFAULT_COMPANIES = [
     tipo: "SRL",
     actividad: "Servicios de Logística y Distribución",
     inicio_actividades: "2018-03-10",
-    color: "#0d9488"
+    color: "#0d9488",
+    // Convenio Multilateral (IIBB): opera en más de una jurisdicción, por lo que
+    // no tributa Ingresos Brutos en régimen local sino distribuido por
+    // Coeficiente Unificado (RG CM 03/04) entre las provincias donde factura y gasta.
+    jurisdicciones: [
+      { provincia: "Neuquén", pctIngresos: 45, pctGastos: 50, alicuotaIIBB: 4.0 },
+      { provincia: "Río Negro", pctIngresos: 35, pctGastos: 30, alicuotaIIBB: 3.5 },
+      { provincia: "La Pampa", pctIngresos: 20, pctGastos: 20, alicuotaIIBB: 3.0 }
+    ]
   },
   {
     id: "co-2",
