@@ -4,3 +4,6 @@ dist/
 temp_reportlab.pdf
 *.log
 .vercel
+.env
+.env.local
+.env.*.local

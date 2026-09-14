@@ -2,6 +2,7 @@
    VMP Studio Contable - Front Controller & Routing Orchestrator
    ------------------------------------------------------------- */
 import { initMockDB, getActiveCompany, setActiveCompanyId } from './db/mockdb.js';
+import { supabase, isSupabaseConfigured, getCachedSession } from './db/supabase.js';
 
 // Import Views
 import { renderLanding, initLanding } from './views/landing.js';
@@ -32,6 +33,16 @@ class Application {
     
     // 1. Initialize Mock Database (localStorage)
     initMockDB();
+
+    // 1b. Si una sesión real de Supabase se cierra o vence, sacar al usuario
+    // del studio de inmediato en vez de recién en la próxima navegación manual.
+    if (isSupabaseConfigured && supabase) {
+      supabase.auth.onAuthStateChange((event) => {
+        if (event === 'SIGNED_OUT' && window.location.hash.startsWith('#/studio')) {
+          window.location.hash = '#/';
+        }
+      });
+    }
 
     // 2. Setup Hash Routing Listener
     window.addEventListener('hashchange', () => this.router());
@@ -76,20 +87,31 @@ class Application {
     } 
     // Studio Professional Routes
     else if (hash.startsWith('#/studio')) {
-      // Global admin gate for temporary hiding
-      let isUnlocked = localStorage.getItem('vmp_premium_unlocked') === 'true';
-      if (!isUnlocked) {
-        if (hash.includes('key=vmp2026') || hash.includes('key=VMP2026')) {
-          localStorage.setItem('vmp_premium_unlocked', 'true');
-          isUnlocked = true;
-          // Strip the query key from the hash to keep it clean
-          const cleanHash = hash.split('?')[0];
-          window.location.hash = cleanHash;
-          return;
-        } else {
-          // Silently redirect to landing page
+      // Gate real de acceso: si Supabase está configurado, exige una sesión
+      // real (getCachedSession, con caché mantenida vía onAuthStateChange).
+      // Si NO está configurado, se mantiene el sandbox de siempre (?key=vmp2026)
+      // para que la demo sin backend siga funcionando sin cambios.
+      if (isSupabaseConfigured) {
+        const session = await getCachedSession();
+        if (!session) {
           window.location.hash = '#/';
           return;
+        }
+      } else {
+        let isUnlocked = localStorage.getItem('vmp_premium_unlocked') === 'true';
+        if (!isUnlocked) {
+          if (hash.includes('key=vmp2026') || hash.includes('key=VMP2026')) {
+            localStorage.setItem('vmp_premium_unlocked', 'true');
+            isUnlocked = true;
+            // Strip the query key from the hash to keep it clean
+            const cleanHash = hash.split('?')[0];
+            window.location.hash = cleanHash;
+            return;
+          } else {
+            // Silently redirect to landing page
+            window.location.hash = '#/';
+            return;
+          }
         }
       }
 
@@ -97,46 +119,46 @@ class Application {
         const subRoute = hash.substring(8).split('?')[0]; // View route after '#/studio'
 
         if (subRoute === '' || subRoute === '/') {
-          this.safeRoute(renderDashboardHome, initDashboardHome, 'studio', "Dashboard General");
-        } 
+          await this.safeRoute(renderDashboardHome, initDashboardHome, 'studio', "Dashboard General");
+        }
         else if (subRoute === '/empresas') {
-          this.safeRoute(renderEmpresas, initEmpresas, 'empresas', "Gestión de Empresas Clientes");
+          await this.safeRoute(renderEmpresas, initEmpresas, 'empresas', "Gestión de Empresas Clientes");
         }
         else if (subRoute === '/ventas') {
-          this.safeRoute(renderVentas, initVentas, 'ventas', "Libro de Comprobantes");
+          await this.safeRoute(renderVentas, initVentas, 'ventas', "Libro de Comprobantes");
         }
         else if (subRoute === '/importacion') {
-          this.safeRoute(renderImportacion, initImportacion, 'importacion', "Importación ARCA");
+          await this.safeRoute(renderImportacion, initImportacion, 'importacion', "Importación ARCA");
         }
         else if (subRoute === '/iva') {
-          this.safeRoute(renderIVA, initIVA, 'iva', "Libro IVA Digital Digitalizado");
+          await this.safeRoute(renderIVA, initIVA, 'iva', "Libro IVA Digital Digitalizado");
         }
         else if (subRoute === '/portal') {
-          this.safeRoute(renderPortalCliente, initPortalCliente, 'portal', "Portal del Cliente");
+          await this.safeRoute(renderPortalCliente, initPortalCliente, 'portal', "Portal del Cliente");
         }
         else if (subRoute === '/configuracion') {
-          this.safeRoute(renderConfiguracion, initConfiguracion, 'configuracion', "Configuración de Enlace ARCA");
+          await this.safeRoute(renderConfiguracion, initConfiguracion, 'configuracion', "Configuración de Enlace ARCA");
         }
         else if (subRoute === '/iva-simple') {
-          this.safeRoute(renderIVASimple, initIVASimple, 'iva-simple', "IVA Simple — F.2051");
+          await this.safeRoute(renderIVASimple, initIVASimple, 'iva-simple', "IVA Simple — F.2051");
         }
         else if (subRoute === '/retenciones') {
-          this.safeRoute(renderRetenciones, initRetenciones, 'retenciones', "Retenciones y Percepciones");
+          await this.safeRoute(renderRetenciones, initRetenciones, 'retenciones', "Retenciones y Percepciones");
         }
         else if (subRoute === '/rt54') {
-          this.safeRoute(renderRT54, initRT54, 'rt54', "RT 54 · Panel Contable");
+          await this.safeRoute(renderRT54, initRT54, 'rt54', "RT 54 · Panel Contable");
         }
         else if (subRoute === '/sueldos') {
-          this.safeRoute(renderSueldos, initSueldos, 'sueldos', "Libro de Sueldos Digital");
+          await this.safeRoute(renderSueldos, initSueldos, 'sueldos', "Libro de Sueldos Digital");
         }
         else if (subRoute === '/whatsapp') {
-          this.safeRoute(renderWhatsApp, initWhatsApp, 'whatsapp', "Omnicanal · WhatsApp Inbox");
+          await this.safeRoute(renderWhatsApp, initWhatsApp, 'whatsapp', "Omnicanal · WhatsApp Inbox");
         }
         else if (subRoute === '/migrador') {
-          this.safeRoute(renderMigrador, initMigrador, 'migrador', "Migrador de Sistemas Legados");
+          await this.safeRoute(renderMigrador, initMigrador, 'migrador', "Migrador de Sistemas Legados");
         }
         else if (subRoute === '/ayuda') {
-          this.safeRoute(renderAyuda, initAyuda, 'ayuda', "Instructivo & Onboarding");
+          await this.safeRoute(renderAyuda, initAyuda, 'ayuda', "Instructivo & Onboarding");
         }
         else {
           // Fallback to studio home
@@ -188,7 +210,7 @@ class Application {
     if (el) el.textContent = title;
   }
 
-  safeRoute(renderViewFn, initViewFn, activeRouteKey, breadcrumbTitle) {
+  async safeRoute(renderViewFn, initViewFn, activeRouteKey, breadcrumbTitle) {
     const rootEl = document.getElementById('view-root');
     if (!rootEl) return;
 
@@ -208,7 +230,7 @@ class Application {
     let viewFailed = false;
     let renderError = null;
     try {
-      viewHTML = renderViewFn();
+      viewHTML = await renderViewFn();
     } catch (err) {
       console.error(`Error rendering sub-view for ${activeRouteKey}:`, err);
       viewFailed = true;
@@ -275,7 +297,7 @@ class Application {
       const container = document.querySelector('.db-view-container');
       if (container) {
         try {
-          initViewFn(this);
+          await initViewFn(this);
         } catch (viewInitErr) {
           console.error(`Error initializing sub-view for ${activeRouteKey}:`, viewInitErr);
           

@@ -360,6 +360,95 @@ export function saveCompany(company) {
   return company;
 }
 
+// -------------------------------------------------------------
+// 3b. CAPA ASÍNCRONA REAL (Supabase como fuente de verdad) — Capa 1 de
+// migración: solo empresas y transacciones. El resto de las vistas sigue
+// usando las funciones sync de arriba sin cambios hasta la próxima capa.
+// -------------------------------------------------------------
+export async function getCompaniesAsync() {
+  if (!isSupabaseConfigured || !supabase) return getCompanies();
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return getCompanies();
+
+    const { data, error } = await supabase
+      .from('empresas')
+      .select('*')
+      .eq('estudio_id', user.id)
+      .order('created_at', { ascending: true });
+
+    if (error) throw error;
+
+    localStorage.setItem("vmp_studio_companies", JSON.stringify(data));
+    return data;
+  } catch (e) {
+    console.error("Error trayendo empresas de Supabase:", e);
+    return getCompanies();
+  }
+}
+
+export async function saveCompanyAsync(company) {
+  if (!isSupabaseConfigured || !supabase) return saveCompany(company);
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('No autenticado.');
+
+  const isNew = !company.id;
+  if (isNew) company.id = "co-" + Date.now();
+
+  const payload = {
+    id: company.id,
+    estudio_id: user.id,
+    razon_social: company.razon_social,
+    cuit: company.cuit,
+    tipo: company.tipo,
+    condicion_iva: company.condicion_iva,
+    actividad: company.actividad || '',
+    inicio_actividades: company.inicio_actividades,
+    color: company.color,
+    delegation_active: company.delegation_active || false
+  };
+
+  const { data, error } = await supabase.from('empresas').upsert(payload).select().single();
+  if (error) throw error;
+
+  const cos = getCompanies().filter(c => c.id !== data.id);
+  cos.push(data);
+  localStorage.setItem("vmp_studio_companies", JSON.stringify(cos));
+
+  if (isNew) {
+    try {
+      const txs = JSON.parse(localStorage.getItem("vmp_studio_transactions")) || {};
+      txs[data.id] = { ventas: [], compras: [] };
+      localStorage.setItem("vmp_studio_transactions", JSON.stringify(txs));
+    } catch (e) {
+      console.error("Error inicializando mapa transaccional local:", e);
+    }
+  }
+
+  window.dispatchEvent(new CustomEvent('vmp_db_updated', { detail: { companyId: data.id, type: 'company', item: data } }));
+
+  return data;
+}
+
+export async function getActiveCompanyAsync() {
+  if (!isSupabaseConfigured || !supabase) return getActiveCompany();
+
+  const cos = await getCompaniesAsync();
+  const id = getActiveCompanyId();
+  let found = cos.find(c => c.id === id);
+
+  if (!found && cos.length > 0) {
+    found = cos[0];
+    setActiveCompanyId(found.id);
+  }
+
+  // null es un resultado válido: un estudio real recién registrado empieza
+  // sin ninguna empresa cargada (a diferencia del sandbox, que siempre trae
+  // "co-1" sembrado). Los callers de esta función deben contemplar ese caso.
+  return found || null;
+}
+
 async function pushCompanyToSupabase(company, isNew) {
   if (!supabase) return;
   const { data: { user } } = await supabase.auth.getUser();
@@ -470,4 +559,82 @@ async function pushTransactionToSupabase(companyId, type, item) {
 
   const { error } = await supabase.from('transacciones').insert(payload);
   if (error) throw error;
+}
+
+export async function getTransactionsAsync(companyId) {
+  if (!isSupabaseConfigured || !supabase) return getTransactions(companyId);
+
+  try {
+    const { data, error } = await supabase
+      .from('transacciones')
+      .select('*')
+      .eq('empresa_id', companyId)
+      .order('fecha', { ascending: false });
+
+    if (error) throw error;
+
+    const result = { ventas: [], compras: [] };
+    data.forEach(t => {
+      result[t.tipo].push({
+        ...t,
+        // PostgREST devuelve las columnas NUMERIC como strings, no numbers.
+        neto: Number(t.neto),
+        iva: Number(t.iva),
+        total: Number(t.total)
+      });
+    });
+
+    const allTxs = JSON.parse(localStorage.getItem("vmp_studio_transactions") || '{}');
+    allTxs[companyId] = result;
+    localStorage.setItem("vmp_studio_transactions", JSON.stringify(allTxs));
+
+    return result;
+  } catch (e) {
+    console.error("Error trayendo transacciones de Supabase:", e);
+    return getTransactions(companyId);
+  }
+}
+
+export async function addTransactionAsync(companyId, type, item) {
+  if (!isSupabaseConfigured || !supabase) return addTransaction(companyId, type, item);
+
+  if (!item.id) {
+    item.id = (type === "ventas" ? "v-" : "c-") + Date.now() + Math.floor(Math.random() * 1000);
+  }
+
+  const payload = {
+    id: item.id,
+    empresa_id: companyId,
+    tipo: type,
+    fecha: item.fecha,
+    tipo_comprobante: item.tipo_comprobante,
+    numero: item.numero,
+    proveedor: item.proveedor || null,
+    cliente: item.cliente || null,
+    cuit: item.cuit,
+    neto: item.neto,
+    iva: item.iva,
+    total: item.total,
+    es_activo: item.es_activo || false,
+    categoria: item.categoria || 'General'
+  };
+
+  const { data, error } = await supabase.from('transacciones').insert(payload).select().single();
+  if (error) {
+    if (error.code === '23505') {
+      throw new Error('Ya existe un comprobante con ese número para este punto de venta.');
+    }
+    throw error;
+  }
+
+  const result = { ...data, neto: Number(data.neto), iva: Number(data.iva), total: Number(data.total) };
+
+  const allTxs = JSON.parse(localStorage.getItem("vmp_studio_transactions") || '{}');
+  if (!allTxs[companyId]) allTxs[companyId] = { ventas: [], compras: [] };
+  allTxs[companyId][type].unshift(result);
+  localStorage.setItem("vmp_studio_transactions", JSON.stringify(allTxs));
+
+  window.dispatchEvent(new CustomEvent('vmp_db_updated', { detail: { companyId, type, item: result } }));
+
+  return result;
 }

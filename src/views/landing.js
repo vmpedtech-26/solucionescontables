@@ -776,7 +776,7 @@ export function initLanding(mainApp) {
   });
 
   // Manejo de envío de formulario de lead (Registro / Onboarding de Estudio)
-  document.getElementById('lead-form')?.addEventListener('submit', (e) => {
+  document.getElementById('lead-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const name = document.getElementById('lead-name').value;
     const studio = document.getElementById('lead-studio').value;
@@ -791,6 +791,42 @@ export function initLanding(mainApp) {
       mainApp.showToast('Advertencia: El CUIT ingresado no es válido bajo el algoritmo fiscal (Módulo 11), pero se permite registrar para pruebas.', 'warning');
     }
 
+    // --- Registro real contra Supabase Auth ---
+    // No se inserta manualmente en "estudios": el trigger handle_new_user()
+    // del schema ya crea esa fila leyendo raw_user_meta_data->>'studio_name'.
+    if (isSupabaseConfigured && supabase) {
+      mainApp.showToast('Creando tu cuenta...', 'info');
+      try {
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: { data: { studio_name: studio } }
+        });
+
+        if (error) {
+          mainApp.showToast(`Error al registrar: ${error.message}`, 'error');
+          return;
+        }
+
+        // Log de CRM, no bloquea el flujo si falla
+        supabase.from('leads').insert([{ name, studio, email, cuit }])
+          .catch(err => console.error("Supabase lead log fail:", err));
+
+        if (data.session) {
+          localStorage.setItem('vmp_premium_unlocked', 'true');
+          mainApp.showToast('¡Registro exitoso! Ingresando al panel...', 'success');
+          setTimeout(() => { window.location.hash = '#/studio'; }, 1200);
+        } else {
+          mainApp.showToast(`¡Cuenta creada! Revisá ${email} y confirmá tu correo antes de ingresar.`, 'success');
+          e.target.reset();
+        }
+      } catch (err) {
+        mainApp.showToast(`Error de conexión: ${err.message}`, 'error');
+      }
+      return;
+    }
+
+    // --- Registro sandbox (sin Supabase configurado) ---
     // 2. Crear y guardar nueva empresa/estudio en la base local (vmp_studio_companies)
     const newCompany = {
       id: "co-" + Date.now(),
@@ -828,16 +864,6 @@ export function initLanding(mainApp) {
       mainApp.showToast(`Simulador: Email de bienvenida con guía de inicio enviado a ${email}.`, 'info');
     }, 800);
 
-    // Registrar lead en Supabase si está disponible
-    if (isSupabaseConfigured && supabase) {
-      supabase.from('leads').insert([{ 
-        name, 
-        studio, 
-        email,
-        cuit
-      }]).catch(err => console.error("Supabase lead log fail:", err));
-    }
-    
     // Redirigir al studio
     setTimeout(() => {
       window.location.hash = '#/studio';
@@ -998,6 +1024,12 @@ export function initLanding(mainApp) {
             }, 1200);
             return;
           }
+
+          // signInWithPassword no devolvió error pero tampoco un usuario:
+          // no seguir hacia el fallback sandbox con la contraseña real que
+          // el usuario acaba de tipear contra un intento de login en la nube.
+          mainApp.showToast('No se pudo iniciar sesión. Intentá nuevamente.', 'error');
+          return;
         } catch (err) {
           console.error("Supabase login error:", err);
           mainApp.showToast(`Error de conexión con Supabase: ${err.message}`, 'error');

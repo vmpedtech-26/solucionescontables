@@ -1,11 +1,36 @@
 /* -------------------------------------------------------------
    VMP Studio Contable - Ventas y Compras View Component
    ------------------------------------------------------------- */
-import { getActiveCompany, getTransactions, addTransaction } from '../db/mockdb.js';
+import {
+  getActiveCompanyAsync as getActiveCompany,
+  getTransactionsAsync as getTransactions,
+  addTransactionAsync as addTransaction
+} from '../db/mockdb.js';
 
-export function renderVentas() {
-  const activeCompany = getActiveCompany();
-  const txs = getTransactions(activeCompany.id);
+function renderNoCompanyState() {
+  return `
+  <div class="view-header">
+    <div>
+      <h1 class="view-title">Comprobantes Registrados</h1>
+      <p class="view-subtitle">Gestioná las facturas emitidas y recibidas de la empresa.</p>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-body" style="text-align: center; padding: 48px;">
+      <i data-lucide="building" style="width: 48px; height: 48px; color: var(--text-muted); margin-bottom: 12px;"></i>
+      <h4>Todavía no cargaste ninguna empresa cliente</h4>
+      <p style="font-size: 13px; color: var(--text-secondary); margin-top: 6px; margin-bottom: 16px;">Registrá una empresa para empezar a cargar sus comprobantes.</p>
+      <a href="#/studio/empresas" class="btn btn-primary">Ir a Empresas Clientes</a>
+    </div>
+  </div>
+  `;
+}
+
+export async function renderVentas() {
+  const activeCompany = await getActiveCompany();
+  if (!activeCompany) return renderNoCompanyState();
+
+  const txs = await getTransactions(activeCompany.id);
   const activePeriod = localStorage.getItem('vmp_active_period') || '2026-05';
 
   const filteredVentas = txs.ventas.filter(v => v.fecha.startsWith(activePeriod));
@@ -315,10 +340,12 @@ function renderTransactionsTable(transactions, type) {
   `;
 }
 
-export function initVentas(mainApp) {
+export async function initVentas(mainApp) {
   if (window.lucide) window.lucide.createIcons();
 
-  const activeCompany = getActiveCompany();
+  const activeCompany = await getActiveCompany();
+  if (!activeCompany) return; // Estado vacío ya renderizado por renderVentas(), nada que inicializar.
+
   let activeTab = "ventas"; // 'ventas' or 'compras'
 
   const container = document.getElementById('tx-list-container');
@@ -338,8 +365,8 @@ export function initVentas(mainApp) {
   const btnClearFilters = document.getElementById('btn-clear-filters');
 
   // Renders the active list with filters
-  const updateList = () => {
-    const txs = getTransactions(activeCompany.id);
+  const updateList = async () => {
+    const txs = await getTransactions(activeCompany.id);
     const activePeriod = localStorage.getItem('vmp_active_period') || '2026-05';
     let list = txs[activeTab].filter(t => t.fecha.startsWith(activePeriod));
 
@@ -373,7 +400,7 @@ export function initVentas(mainApp) {
     if (window.lucide) window.lucide.createIcons({ root: container });
   };
 
-  updateList();
+  await updateList();
 
   // Tab switching
   tabVentas?.addEventListener('click', () => {
@@ -534,7 +561,7 @@ export function initVentas(mainApp) {
   inputCuit?.addEventListener('input', validateCuitRealtime);
 
   // Form submission
-  form?.addEventListener('submit', (e) => {
+  form?.addEventListener('submit', async (e) => {
     e.preventDefault();
 
     const op = document.getElementById('tx-operation-type').value;
@@ -562,7 +589,7 @@ export function initVentas(mainApp) {
       const [pvStr, nroStr] = num.split('-');
       const nroNuevo = parseInt(nroStr, 10);
       if (pvStr && !isNaN(nroNuevo)) {
-        const mismosComprobantes = getTransactions(activeCompany.id).ventas
+        const mismosComprobantes = (await getTransactions(activeCompany.id)).ventas
           .filter(v => v.tipo_comprobante === voucher && v.numero.split('-')[0] === pvStr)
           .map(v => parseInt(v.numero.split('-')[1], 10))
           .filter(n => !isNaN(n));
@@ -600,11 +627,17 @@ export function initVentas(mainApp) {
       transaction.proveedor = entityName;
     }
 
-    addTransaction(activeCompany.id, op, transaction);
+    try {
+      await addTransaction(activeCompany.id, op, transaction);
+    } catch (err) {
+      mainApp.showToast(err.message || 'Error al guardar el comprobante.', 'error');
+      return;
+    }
+
     mainApp.showToast('¡Comprobante guardado correctamente!', 'success');
 
     hideForm();
-    
+
     // Switch active tab to match the entered transaction
     activeTab = op;
     if (op === 'ventas') {
@@ -614,8 +647,8 @@ export function initVentas(mainApp) {
       tabCompras.classList.add('active');
       tabVentas.classList.remove('active');
     }
-    
-    // Refresh main app statistics + local view table
-    mainApp.router();
+
+    // No hace falta un mainApp.router() explícito: addTransaction ya dispara
+    // "vmp_db_updated", que main.js escucha para re-renderizar toda la vista.
   });
 }

@@ -2,6 +2,7 @@
    VMP Studio Contable - Dashboard Layout Component
    ------------------------------------------------------------- */
 import { getCompanies, getActiveCompany, getSyncStatus } from '../db/mockdb.js';
+import { supabase, isSupabaseConfigured } from '../db/supabase.js';
 
 export function renderDashboardLayout(childHTML, activeRoute) {
   const activeCompany = getActiveCompany();
@@ -353,7 +354,10 @@ export function initDashboardLayout(mainApp) {
   });
 
   // Logout studio
-  document.getElementById('logout-studio-btn')?.addEventListener('click', () => {
+  document.getElementById('logout-studio-btn')?.addEventListener('click', async () => {
+    if (isSupabaseConfigured && supabase) {
+      await supabase.auth.signOut();
+    }
     localStorage.removeItem('vmp_premium_unlocked');
     window.location.hash = '#/';
   });

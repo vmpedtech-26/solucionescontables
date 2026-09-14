@@ -1,10 +1,10 @@
 /* -------------------------------------------------------------
    VMP Studio Contable - Empresas Clientes View Component
    ------------------------------------------------------------- */
-import { getCompanies, saveCompany } from '../db/mockdb.js';
+import { getCompaniesAsync, saveCompanyAsync } from '../db/mockdb.js';
 
-export function renderEmpresas() {
-  const companies = getCompanies();
+export async function renderEmpresas() {
+  const companies = await getCompaniesAsync();
 
   return `
   <div class="view-header">
@@ -38,15 +38,28 @@ export function renderEmpresas() {
           <select id="co-type" class="form-select">
             <option value="SRL">S.R.L. (Soc. Responsabilidad Limitada)</option>
             <option value="SA">S.A. (Sociedad Anónima)</option>
-            <option value="Monotributo">Monotributista Independiente</option>
-            <option value="Unipersonal">Empresa Unipersonal</option>
+            <option value="SAS">S.A.S. (Soc. por Acciones Simplificada)</option>
+            <option value="Unipersonal">Empresa Unipersonal / Monotributista</option>
+            <option value="Sucesion Indivisa">Sucesión Indivisa</option>
           </select>
         </div>
         <div class="form-group">
           <label class="form-label">Condición frente al IVA *</label>
           <select id="co-iva" class="form-select">
             <option value="Responsable Inscripto">Responsable Inscripto</option>
-            <option value="Monotributo">Monotributo</option>
+            <optgroup label="Monotributo">
+              <option value="Monotributo - Cat A">Monotributo - Categoría A</option>
+              <option value="Monotributo - Cat B">Monotributo - Categoría B</option>
+              <option value="Monotributo - Cat C">Monotributo - Categoría C</option>
+              <option value="Monotributo - Cat D">Monotributo - Categoría D</option>
+              <option value="Monotributo - Cat E">Monotributo - Categoría E</option>
+              <option value="Monotributo - Cat F">Monotributo - Categoría F</option>
+              <option value="Monotributo - Cat G">Monotributo - Categoría G</option>
+              <option value="Monotributo - Cat H">Monotributo - Categoría H</option>
+              <option value="Monotributo - Cat I">Monotributo - Categoría I</option>
+              <option value="Monotributo - Cat J">Monotributo - Categoría J</option>
+              <option value="Monotributo - Cat K">Monotributo - Categoría K</option>
+            </optgroup>
             <option value="Exento">Exento</option>
           </select>
         </div>
@@ -121,7 +134,7 @@ export function renderEmpresas() {
   `;
 }
 
-export function initEmpresas(mainApp) {
+export async function initEmpresas(mainApp) {
   if (window.lucide) window.lucide.createIcons();
 
   const btnShowAdd = document.getElementById('btn-show-add-company');
@@ -148,9 +161,9 @@ export function initEmpresas(mainApp) {
   btnFormCancel?.addEventListener('click', hideForm);
 
   // Procesar Formulario
-  form?.addEventListener('submit', (e) => {
+  form?.addEventListener('submit', async (e) => {
     e.preventDefault();
-    
+
     const name = document.getElementById('co-name').value;
     const cuit = document.getElementById('co-cuit').value;
     const type = document.getElementById('co-type').value;
@@ -169,11 +182,14 @@ export function initEmpresas(mainApp) {
       color
     };
 
-    saveCompany(newCompany);
-    mainApp.showToast(`¡Empresa "${name}" registrada con éxito!`, 'success');
-    
-    // Ocultar formulario y refrescar la vista
-    hideForm();
-    mainApp.router();
+    try {
+      await saveCompanyAsync(newCompany);
+      mainApp.showToast(`¡Empresa "${name}" registrada con éxito!`, 'success');
+      hideForm();
+      // No hace falta un mainApp.router() explícito acá: saveCompanyAsync ya
+      // dispara "vmp_db_updated", que main.js escucha para re-renderizar.
+    } catch (err) {
+      mainApp.showToast(`Error al registrar la empresa: ${err.message || err}`, 'error');
+    }
   });
 }

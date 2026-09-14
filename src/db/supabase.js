@@ -17,3 +17,28 @@ if (isSupabaseConfigured) {
 } else {
   console.log("Supabase credentials not configured. Falling back to local sandbox (localStorage).");
 }
+
+// -------------------------------------------------------------
+// Caché de sesión — evita pegarle a auth.getSession() en cada cambio de
+// hash (el router consulta esto en cada navegación a #/studio/*). Se
+// mantiene al día vía onAuthStateChange en vez de re-consultar siempre.
+// -------------------------------------------------------------
+let cachedSession = null;
+let sessionReady = false;
+
+export async function getCachedSession() {
+  if (!isSupabaseConfigured || !supabase) return null;
+  if (!sessionReady) {
+    const { data } = await supabase.auth.getSession();
+    cachedSession = data.session;
+    sessionReady = true;
+  }
+  return cachedSession;
+}
+
+if (isSupabaseConfigured && supabase) {
+  supabase.auth.onAuthStateChange((_event, session) => {
+    cachedSession = session;
+    sessionReady = true;
+  });
+}
