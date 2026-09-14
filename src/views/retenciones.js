@@ -44,6 +44,8 @@ export function renderRetenciones() {
   // gravadas del período activo, distribuida por Coeficiente Unificado.
   let cmTotalVentas = 0;
   let cmTotalIIBB = 0;
+  let cmTotalSircreb = 0;
+  let cmTotalSaldo = 0;
   if (company.jurisdicciones && company.jurisdicciones.length > 1) {
     const activePeriod = localStorage.getItem('vmp_active_period') || '2026-05';
     const txs = getTransactions(company.id);
@@ -52,6 +54,15 @@ export function renderRetenciones() {
       const coef = (j.pctIngresos + j.pctGastos) / 200;
       return s + (cmTotalVentas * coef * (j.alicuotaIIBB / 100));
     }, 0);
+
+    // El banco retiene SIRCREB en una única cuenta, pero lo distribuye ARCA
+    // entre las mismas jurisdicciones y con el mismo Coeficiente Unificado del
+    // padrón bancario — por eso se acredita a cuenta del IIBB de cada
+    // jurisdicción, no como una retención genérica más de la lista de abajo.
+    cmTotalSircreb = allRets
+      .filter(r => r.tipo === 'RETENCIÓN SIRCREB' && r.conciliado)
+      .reduce((s, r) => s + r.monto, 0);
+    cmTotalSaldo = cmTotalIIBB - cmTotalSircreb;
   }
 
   return renderPremiumTeaser(`
@@ -237,35 +248,44 @@ export function renderRetenciones() {
     </div>
     <div class="card-body">
       <p class="text-secondary" style="font-size:12px; line-height:1.6; margin-bottom:14px;">
-        El cliente factura y gasta en más de una jurisdicción, por lo que <strong>no</strong> liquida IIBB en régimen local: la base imponible del período se distribuye entre provincias según el <strong>Coeficiente Unificado</strong> de cada una (RG CM 03/04 — promedio entre el % de ingresos y el % de gastos atribuibles a esa jurisdicción durante el ejercicio anterior), y luego cada provincia aplica su propia alícuota sobre la porción que le corresponde.
+        El cliente factura y gasta en más de una jurisdicción, por lo que <strong>no</strong> liquida IIBB en régimen local: la base imponible del período se distribuye entre provincias según el <strong>Coeficiente Unificado</strong> de cada una (RG CM 03/04 — promedio entre el % de ingresos y el % de gastos atribuibles a esa jurisdicción durante el ejercicio anterior), y luego cada provincia aplica su propia alícuota sobre la porción que le corresponde. Las percepciones bancarias <strong>SIRCREB</strong> se retienen en una única cuenta, pero ARCA las distribuye entre esas mismas jurisdicciones con ese mismo coeficiente — por eso se acreditan a cuenta del IIBB determinado en cada una, no como una percepción genérica más.
       </p>
-      <div style="font-size:11.5px; color:var(--text-secondary); margin-bottom:10px;">
-        Ingresos brutos gravados del período activo: <strong class="font-mono" style="color:var(--text-primary);">$ ${fmt(cmTotalVentas)}</strong>
+      <div style="font-size:11.5px; color:var(--text-secondary); margin-bottom:10px; display:flex; gap:20px; flex-wrap:wrap;">
+        <span>Ingresos brutos gravados del período activo: <strong class="font-mono" style="color:var(--text-primary);">$ ${fmt(cmTotalVentas)}</strong></span>
+        <span>SIRCREB conciliado a distribuir: <strong class="font-mono" style="color:var(--text-primary);">$ ${fmt(cmTotalSircreb)}</strong></span>
       </div>
       <table class="table table-sm" style="font-size:12px; width:100%;">
         <thead>
-          <tr><th>Jurisdicción</th><th>% Ingresos</th><th>% Gastos</th><th>Coef. Unificado</th><th>Base Imponible</th><th>Alícuota</th><th>IIBB a Pagar</th></tr>
+          <tr><th>Jurisdicción</th><th>Coef. Unificado</th><th>Base Imponible</th><th>Alícuota</th><th>IIBB Determinado</th><th>SIRCREB a Cuenta</th><th>Saldo</th></tr>
         </thead>
         <tbody>
           ${company.jurisdicciones.map(j => {
             const coef = (j.pctIngresos + j.pctGastos) / 200;
             const base = cmTotalVentas * coef;
             const impuesto = base * (j.alicuotaIIBB / 100);
+            const sircrebJurisdiccion = cmTotalSircreb * coef;
+            const saldoJurisdiccion = impuesto - sircrebJurisdiccion;
             return `<tr>
               <td style="font-weight:700;">${j.provincia}</td>
-              <td class="font-mono">${j.pctIngresos.toFixed(2)}%</td>
-              <td class="font-mono">${j.pctGastos.toFixed(2)}%</td>
               <td class="font-mono">${(coef * 100).toFixed(2)}%</td>
               <td class="font-mono">$ ${fmt(base)}</td>
               <td class="font-mono">${j.alicuotaIIBB.toFixed(2)}%</td>
-              <td class="font-mono" style="font-weight:800; color:var(--color-accent);">$ ${fmt(impuesto)}</td>
+              <td class="font-mono">$ ${fmt(impuesto)}</td>
+              <td class="font-mono" style="color:#06b6d4;">– $ ${fmt(sircrebJurisdiccion)}</td>
+              <td class="font-mono" style="font-weight:800; color:${saldoJurisdiccion >= 0 ? 'var(--color-accent)' : '#06b6d4'};">
+                ${saldoJurisdiccion >= 0 ? '$ ' + fmt(saldoJurisdiccion) : '$ ' + fmt(Math.abs(saldoJurisdiccion)) + ' (a favor)'}
+              </td>
             </tr>`;
           }).join('')}
         </tbody>
         <tfoot>
           <tr style="border-top:2px solid var(--border-color);">
-            <td colspan="6" style="font-weight:800; text-align:right; padding-top:8px;">Total IIBB Convenio Multilateral del período</td>
+            <td colspan="4" style="font-weight:800; text-align:right; padding-top:8px;">Totales del Convenio Multilateral del período</td>
             <td class="font-mono" style="font-weight:800; padding-top:8px;">$ ${fmt(cmTotalIIBB)}</td>
+            <td class="font-mono" style="font-weight:800; padding-top:8px; color:#06b6d4;">– $ ${fmt(cmTotalSircreb)}</td>
+            <td class="font-mono" style="font-weight:800; padding-top:8px; color:${cmTotalSaldo >= 0 ? 'var(--color-accent)' : '#06b6d4'};">
+              ${cmTotalSaldo >= 0 ? '$ ' + fmt(cmTotalSaldo) : '$ ' + fmt(Math.abs(cmTotalSaldo)) + ' (a favor)'}
+            </td>
           </tr>
         </tfoot>
       </table>
