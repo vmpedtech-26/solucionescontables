@@ -7,3 +7,4 @@ temp_reportlab.pdf
 .env
 .env.local
 .env.*.local
+.claude/

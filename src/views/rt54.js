@@ -2,16 +2,135 @@
    VMP Studio Contable — RT 54 / Panel Contable
    Categorización de entidades y valuación bajo RT 54 FACPCE
    ------------------------------------------------------------- */
-import { getActiveCompany, getTransactions, addTransaction } from '../db/mockdb.js';
+import { getActiveCompanyAsync, getTransactionsAsync, addTransaction, updateEmpresaFieldsAsync } from '../db/mockdb.js';
+import { supabase, isSupabaseConfigured } from '../db/supabase.js';
 import { fmt, categorizarRT54, RT54_COEF, RT54_BASE_MEDIANA, RT54_BASE_RESTANTE, fetchAndCompileIPC } from '../utils.js';
 
 const EI_FACTOR = 1.2; // EI = stockFinal * EI_FACTOR
 
-export function renderRT54() {
-  const company = getActiveCompany();
-  const txs = getTransactions(company.id);
+// -------------------------------------------------------------
+// Bienes de Uso y Ajustes por Inflación cargados a mano (los detectados
+// automáticamente desde el Libro de Compras NUNCA se persisten acá — se
+// recalculan en vivo a partir de txs.compras en cada render).
+// -------------------------------------------------------------
+async function getActivosUsoAsync(companyId) {
+  if (isSupabaseConfigured && supabase) {
+    const { data, error } = await supabase.from('activos_uso').select('*').eq('empresa_id', companyId).order('created_at', { ascending: true });
+    if (!error) return data.map(a => ({ id: a.id, nombre: a.nombre, valor: Number(a.valor), fecha: a.fecha, categoria: a.categoria, vidaUtil: a.vida_util_anios }));
+    console.error("Error trayendo activos_uso de Supabase:", error);
+    return [];
+  }
+  return JSON.parse(localStorage.getItem(`vmp_custom_assets_${companyId}`)) || [];
+}
 
-  const ingresosGuardados = parseFloat(localStorage.getItem(`vmp_rt54_ingresos_${company.id}`) || '0');
+async function addActivoUsoAsync(companyId, asset) {
+  if (isSupabaseConfigured && supabase) {
+    const { error } = await supabase.from('activos_uso').insert({
+      id: asset.id, empresa_id: companyId, nombre: asset.nombre, valor: asset.valor,
+      fecha: asset.fecha, categoria: asset.categoria, vida_util_anios: asset.vidaUtil
+    });
+    if (error) throw error;
+    return;
+  }
+  const assets = JSON.parse(localStorage.getItem(`vmp_custom_assets_${companyId}`)) || [];
+  assets.push(asset);
+  localStorage.setItem(`vmp_custom_assets_${companyId}`, JSON.stringify(assets));
+}
+
+async function deleteActivoUsoAsync(companyId, assetId) {
+  if (isSupabaseConfigured && supabase) {
+    const { error } = await supabase.from('activos_uso').delete().eq('id', assetId);
+    if (error) throw error;
+    return;
+  }
+  const assets = JSON.parse(localStorage.getItem(`vmp_custom_assets_${companyId}`)) || [];
+  localStorage.setItem(`vmp_custom_assets_${companyId}`, JSON.stringify(assets.filter(a => a.id !== assetId)));
+}
+
+async function getAjustesInflacionAsync(companyId) {
+  if (isSupabaseConfigured && supabase) {
+    const { data, error } = await supabase.from('ajustes_inflacion').select('*').eq('empresa_id', companyId).order('created_at', { ascending: true });
+    if (!error) return data.map(i => ({ id: i.id, concepto: i.concepto, origen: i.origen, valor: Number(i.valor), tipo: i.tipo }));
+    console.error("Error trayendo ajustes_inflacion de Supabase:", error);
+    return [];
+  }
+  if (!localStorage.getItem(`vmp_axi_items_${companyId}`)) {
+    const defaultAxiItems = [
+      { id: "axi-1", concepto: "Capital Social (Patrimonio Neto)", origen: "2025-12", valor: 1000000, tipo: "patrimonio" },
+      { id: "axi-2", concepto: "Notebook Lenovo (Bien de Uso)", origen: "2026-02", valor: 500000, tipo: "activo" },
+      { id: "axi-3", concepto: "Mercaderías en Stock (Bienes de Cambio)", origen: "2026-04", valor: 300000, tipo: "activo" }
+    ];
+    localStorage.setItem(`vmp_axi_items_${companyId}`, JSON.stringify(defaultAxiItems));
+  }
+  return JSON.parse(localStorage.getItem(`vmp_axi_items_${companyId}`)) || [];
+}
+
+async function addAjusteInflacionAsync(companyId, item) {
+  if (isSupabaseConfigured && supabase) {
+    const { error } = await supabase.from('ajustes_inflacion').insert({
+      id: item.id, empresa_id: companyId, concepto: item.concepto, origen: item.origen, valor: item.valor, tipo: item.tipo
+    });
+    if (error) throw error;
+    return;
+  }
+  const items = JSON.parse(localStorage.getItem(`vmp_axi_items_${companyId}`)) || [];
+  items.push(item);
+  localStorage.setItem(`vmp_axi_items_${companyId}`, JSON.stringify(items));
+}
+
+// Campos puntuales de RT 54 en la empresa: vienen como columna real (NUMERIC
+// llega como string desde PostgREST) cuando Supabase está configurado, o
+// como clave suelta de localStorage en modo sandbox — ninguno de los dos
+// vive en el objeto `company` del sandbox, así que hay que leer distinto
+// según el modo.
+function getRt54Ingresos(company) {
+  if (isSupabaseConfigured && supabase) return Number(company.rt54_ingresos_periodo) || 0;
+  return parseFloat(localStorage.getItem(`vmp_rt54_ingresos_${company.id}`) || '0');
+}
+
+function getRt54Stock(company) {
+  if (isSupabaseConfigured && supabase) return Number(company.rt54_stock_final_unidades) || 100;
+  return parseInt(localStorage.getItem(`vmp_rt54_stock_${company.id}`) || '100', 10);
+}
+
+function getRt54AsientoRegistrado(company) {
+  if (isSupabaseConfigured && supabase) return !!company.rt54_asiento_registrado;
+  return localStorage.getItem(`vmp_rt54_asiento_ok_${company.id}`) === 'true';
+}
+
+async function deleteAjusteInflacionAsync(companyId, itemId) {
+  if (isSupabaseConfigured && supabase) {
+    const { error } = await supabase.from('ajustes_inflacion').delete().eq('id', itemId);
+    if (error) throw error;
+    return;
+  }
+  const items = JSON.parse(localStorage.getItem(`vmp_axi_items_${companyId}`)) || [];
+  localStorage.setItem(`vmp_axi_items_${companyId}`, JSON.stringify(items.filter(i => i.id !== itemId)));
+}
+
+export async function renderRT54() {
+  const company = await getActiveCompanyAsync();
+  if (!company) {
+    return `
+    <div class="view-header">
+      <div>
+        <h1 class="view-title">Panel Contable · RT 54 FACPCE</h1>
+        <p class="view-subtitle">Categorización de entidades, valuación de inventarios y amortizaciones de Bienes de Uso.</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-body" style="text-align: center; padding: 48px;">
+        <i data-lucide="building" style="width: 48px; height: 48px; color: var(--text-muted); margin-bottom: 12px;"></i>
+        <h4>Todavía no cargaste ninguna empresa cliente</h4>
+        <p style="font-size: 13px; color: var(--text-secondary); margin-top: 6px; margin-bottom: 16px;">Registrá una empresa para empezar a trabajar en RT 54.</p>
+        <a href="#/studio/empresas" class="btn btn-primary">Ir a Empresas Clientes</a>
+      </div>
+    </div>
+    `;
+  }
+  const txs = await getTransactionsAsync(company.id);
+
+  const ingresosGuardados = getRt54Ingresos(company);
   const categoria = ingresosGuardados > 0 ? categorizarRT54(ingresosGuardados) : null;
   const umbralMediana  = RT54_BASE_MEDIANA  * RT54_COEF;
   const umbralRestante = RT54_BASE_RESTANTE * RT54_COEF;
@@ -59,7 +178,7 @@ export function renderRT54() {
   // Valuación inventario: última compra
   const comprasOrdenadas = [...txs.compras].sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
   const ultimaCompra = comprasOrdenadas[0];
-  const stockUnidades = parseInt(localStorage.getItem(`vmp_rt54_stock_${company.id}`) || '100');
+  const stockUnidades = getRt54Stock(company);
   const costoUltimaCompra = ultimaCompra ? ultimaCompra.neto / 10 : 0;
   const existenciaInicial  = Math.round(stockUnidades * EI_FACTOR);
   const valuacionStock     = costoUltimaCompra * stockUnidades;
@@ -69,12 +188,9 @@ export function renderRT54() {
 
   // Asset dynamic extraction: compras where es_activo = true
   const dbAssets = txs.compras.filter(c => c.es_activo === true);
-  
-  // Load custom added assets from localstorage
-  if (!localStorage.getItem(`vmp_custom_assets_${company.id}`)) {
-    localStorage.setItem(`vmp_custom_assets_${company.id}`, '[]');
-  }
-  const customAssets = JSON.parse(localStorage.getItem(`vmp_custom_assets_${company.id}`));
+
+  // Bienes de uso cargados a mano (nunca incluye los detectados desde compras).
+  const customAssets = await getActivosUsoAsync(company.id);
 
   // Merge lists
   const allAssets = [
@@ -94,7 +210,7 @@ export function renderRT54() {
     return s + (a.valor / a.vidaUtil);
   }, 0);
 
-  const isAsientoRegistrado = localStorage.getItem(`vmp_rt54_asiento_ok_${company.id}`) === 'true';
+  const isAsientoRegistrado = getRt54AsientoRegistrado(company);
 
   // -------------------------------------------------------------
   // CALCULATOR PARAMETERS FOR INFLATION ADJUSTMENT (AxI - RT 54)
@@ -133,41 +249,25 @@ export function renderRT54() {
     return `${monthNames[month] || month} ${year}`;
   };
 
-  if (!localStorage.getItem(`vmp_axi_items_${company.id}`)) {
-    const defaultAxiItems = [
-      { id: "axi-1", concepto: "Capital Social (Patrimonio Neto)", origen: "2025-12", valor: 1000000, tipo: "patrimonio" },
-      { id: "axi-2", concepto: "Notebook Lenovo (Bien de Uso)", origen: "2026-02", valor: 500000, tipo: "activo" },
-      { id: "axi-3", concepto: "Mercaderías en Stock (Bienes de Cambio)", origen: "2026-04", valor: 300000, tipo: "activo" }
-    ];
-    localStorage.setItem(`vmp_axi_items_${company.id}`, JSON.stringify(defaultAxiItems));
-  }
-  
-  let axiItems = JSON.parse(localStorage.getItem(`vmp_axi_items_${company.id}`));
-  
-  // Auto-sync digitalized purchases (es_activo === true) from ledger
+  // Partidas cargadas a mano para reexpresar.
+  const customAxiItems = await getAjustesInflacionAsync(company.id);
+
+  // Las compras digitalizadas marcadas como Bien de Uso (es_activo) se
+  // reexpresan también, pero se recalculan en vivo desde el Libro de
+  // Compras en cada carga — nunca se persisten como una copia aparte.
   const activeDbAssets = txs.compras.filter(c => c.es_activo === true);
-  let updatedAxiItems = [...axiItems];
-  let needsAxiUpdate = false;
-  
-  activeDbAssets.forEach(c => {
-    const exists = axiItems.some(item => item.id === c.id || item.concepto.includes(c.numero) || (item.concepto.includes(c.proveedor) && item.valor === c.total));
-    if (!exists) {
-      const origenStr = c.fecha ? c.fecha.substring(0, 7) : '2026-04';
-      updatedAxiItems.push({
+  const axiItems = [
+    ...customAxiItems,
+    ...activeDbAssets
+      .filter(c => !customAxiItems.some(item => item.id === c.id))
+      .map(c => ({
         id: c.id,
         concepto: `${c.proveedor} (${c.tipo_comprobante} N° ${c.numero})`,
-        origen: origenStr,
+        origen: c.fecha ? c.fecha.substring(0, 7) : '2026-04',
         valor: c.total,
         tipo: "activo"
-      });
-      needsAxiUpdate = true;
-    }
-  });
-  
-  if (needsAxiUpdate) {
-    localStorage.setItem(`vmp_axi_items_${company.id}`, JSON.stringify(updatedAxiItems));
-    axiItems = updatedAxiItems;
-  }
+      }))
+  ];
 
   let totalHistoricAssets = 200000; // Caja y Bancos starts at 200,000
   let totalAdjustedAssets = 200000;
@@ -402,7 +502,7 @@ export function renderRT54() {
                   <td class="font-mono" style="font-weight: 700; color: var(--color-accent);">$ ${residual.toLocaleString('es-AR')}</td>
                   <td class="text-center">
                     ${asset.id.startsWith('cust-') ? `
-                      <button class="item-remove-btn btn-delete-custom-asset" data-index="${index - dbAssets.length}" style="margin:0 auto; padding:2px;">
+                      <button class="item-remove-btn btn-delete-custom-asset" data-id="${asset.id}" style="margin:0 auto; padding:2px;">
                         <i data-lucide="trash-2" style="width:14px; height:14px;"></i>
                       </button>
                     ` : `<span class="text-muted" style="font-size:9.5px;">Facturado</span>`}
@@ -832,28 +932,47 @@ export function renderRT54() {
   `;
 }
 
-export function initRT54(mainApp) {
+export async function initRT54(mainApp) {
   if (window.lucide) window.lucide.createIcons();
 
-  const company = getActiveCompany();
-  const txs = getTransactions(company.id);
+  const company = await getActiveCompanyAsync();
+  if (!company) return; // Estado vacío ya renderizado por renderRT54(), nada que inicializar.
+  const txs = await getTransactionsAsync(company.id);
 
-  document.getElementById('btn-categorizar')?.addEventListener('click', () => {
+  document.getElementById('btn-categorizar')?.addEventListener('click', async () => {
     const val = parseFloat(document.getElementById('inp-ingresos-rt54')?.value || '0');
     if (!val || val <= 0) {
       mainApp.showToast('Ingresá un valor de ingresos válido.', 'error');
       return;
     }
-    localStorage.setItem(`vmp_rt54_ingresos_${company.id}`, val.toString());
+    try {
+      if (isSupabaseConfigured && supabase) {
+        await updateEmpresaFieldsAsync(company.id, { rt54_ingresos_periodo: val });
+      } else {
+        localStorage.setItem(`vmp_rt54_ingresos_${company.id}`, val.toString());
+      }
+    } catch (err) {
+      mainApp.showToast(`Error al guardar: ${err.message || err}`, 'error');
+      return;
+    }
     const cat = categorizarRT54(val);
     const labels = { pequena: 'Pequeña', mediana: 'Mediana', restante: 'Restante / Interés Público' };
     mainApp.showToast(`Entidad categorizada como: ${labels[cat]}`, 'success');
     mainApp.router();
   });
 
-  document.getElementById('btn-calcular-inventario')?.addEventListener('click', () => {
+  document.getElementById('btn-calcular-inventario')?.addEventListener('click', async () => {
     const unidades = parseInt(document.getElementById('inp-stock-final')?.value || '0');
-    localStorage.setItem(`vmp_rt54_stock_${company.id}`, unidades.toString());
+    try {
+      if (isSupabaseConfigured && supabase) {
+        await updateEmpresaFieldsAsync(company.id, { rt54_stock_final_unidades: unidades });
+      } else {
+        localStorage.setItem(`vmp_rt54_stock_${company.id}`, unidades.toString());
+      }
+    } catch (err) {
+      mainApp.showToast(`Error al guardar: ${err.message || err}`, 'error');
+      return;
+    }
 
     const comprasOrdenadas = [...txs.compras].sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
     const ultimaCompra = comprasOrdenadas[0];
@@ -874,7 +993,7 @@ export function initRT54(mainApp) {
   // -------------------------------------------------------------
   // CONTROLS FOR THE NEW BIENES DE USO AND DEPRECIATIONS MODULE
   // -------------------------------------------------------------
-  document.getElementById('btn-add-asset-submit')?.addEventListener('click', (e) => {
+  document.getElementById('btn-add-asset-submit')?.addEventListener('click', async (e) => {
     e.stopPropagation();
 
     const nameVal = document.getElementById('asset-name').value.trim();
@@ -892,8 +1011,6 @@ export function initRT54(mainApp) {
       lifeYears = 10;
     }
 
-    const customAssets = JSON.parse(localStorage.getItem(`vmp_custom_assets_${company.id}`)) || [];
-    
     const newAsset = {
       id: "cust-" + Date.now(),
       nombre: nameVal,
@@ -903,47 +1020,52 @@ export function initRT54(mainApp) {
       vidaUtil: lifeYears
     };
 
-    customAssets.push(newAsset);
-    localStorage.setItem(`vmp_custom_assets_${company.id}`, JSON.stringify(customAssets));
-
-    mainApp.showToast(`¡Activo "${nameVal}" incorporado correctamente al Sub-Libro!`, 'success');
-    mainApp.router(); // Refresh view
+    try {
+      await addActivoUsoAsync(company.id, newAsset);
+      mainApp.showToast(`¡Activo "${nameVal}" incorporado correctamente al Sub-Libro!`, 'success');
+      mainApp.router(); // Refresh view
+    } catch (err) {
+      mainApp.showToast(`Error al guardar el activo: ${err.message || err}`, 'error');
+    }
   });
 
   // Delete Custom Asset handler
   document.querySelectorAll('.btn-delete-custom-asset').forEach(btn => {
-    btn.addEventListener('click', (e) => {
+    btn.addEventListener('click', async (e) => {
       e.stopPropagation();
-      const idx = Number(btn.dataset.index);
+      const assetId = btn.dataset.id;
 
-      const customAssets = JSON.parse(localStorage.getItem(`vmp_custom_assets_${company.id}`)) || [];
-      customAssets.splice(idx, 1);
-      localStorage.setItem(`vmp_custom_assets_${company.id}`, JSON.stringify(customAssets));
-
-      mainApp.showToast('Activo removido del sub-libro contable.', 'info');
-      
-      // If we deleted all, reset entry settlement
-      if (customAssets.length === 0) {
-        localStorage.removeItem(`vmp_rt54_asiento_ok_${company.id}`);
+      try {
+        await deleteActivoUsoAsync(company.id, assetId);
+        mainApp.showToast('Activo removido del sub-libro contable.', 'info');
+        mainApp.router();
+      } catch (err) {
+        mainApp.showToast(`Error al eliminar: ${err.message || err}`, 'error');
       }
-
-      mainApp.router();
     });
   });
 
   // Formal double-entry ledger adjustment recorder
-  document.getElementById('btn-register-amort-entry')?.addEventListener('click', (e) => {
+  document.getElementById('btn-register-amort-entry')?.addEventListener('click', async (e) => {
     e.stopPropagation();
-    
-    localStorage.setItem(`vmp_rt54_asiento_ok_${company.id}`, 'true');
-    mainApp.showToast("¡Asiento de amortizaciones registrado y conciliado según RT 54!", "success");
-    mainApp.router();
+
+    try {
+      if (isSupabaseConfigured && supabase) {
+        await updateEmpresaFieldsAsync(company.id, { rt54_asiento_registrado: true });
+      } else {
+        localStorage.setItem(`vmp_rt54_asiento_ok_${company.id}`, 'true');
+      }
+      mainApp.showToast("¡Asiento de amortizaciones registrado y conciliado según RT 54!", "success");
+      mainApp.router();
+    } catch (err) {
+      mainApp.showToast(`Error al registrar el asiento: ${err.message || err}`, 'error');
+    }
   });
 
   // -------------------------------------------------------------
   // CONTROLS FOR INFLATION ADJUSTMENT (AxI - RT 54)
   // -------------------------------------------------------------
-  document.getElementById('btn-add-axi-submit')?.addEventListener('click', (e) => {
+  document.getElementById('btn-add-axi-submit')?.addEventListener('click', async (e) => {
     e.stopPropagation();
 
     const conceptVal = document.getElementById('axi-concept').value.trim();
@@ -956,8 +1078,6 @@ export function initRT54(mainApp) {
       return;
     }
 
-    const items = JSON.parse(localStorage.getItem(`vmp_axi_items_${company.id}`)) || [];
-    
     const newItem = {
       id: "axi-" + Date.now(),
       concepto: conceptVal,
@@ -966,32 +1086,28 @@ export function initRT54(mainApp) {
       tipo: tipoVal
     };
 
-    items.push(newItem);
-    localStorage.setItem(`vmp_axi_items_${company.id}`, JSON.stringify(items));
-
-    mainApp.showToast(`¡Partida "${conceptVal}" ajustada y cargada al Balance Homogéneo!`, 'success');
-    
-    // Clear inputs
-    const conceptInp = document.getElementById('axi-concept');
-    const valueInp = document.getElementById('axi-value');
-    if (conceptInp) conceptInp.value = '';
-    if (valueInp) valueInp.value = '';
-    
-    mainApp.router(); // Refresh view
+    try {
+      await addAjusteInflacionAsync(company.id, newItem);
+      mainApp.showToast(`¡Partida "${conceptVal}" ajustada y cargada al Balance Homogéneo!`, 'success');
+      mainApp.router(); // Refresh view
+    } catch (err) {
+      mainApp.showToast(`Error al guardar la partida: ${err.message || err}`, 'error');
+    }
   });
 
   // Delete AxI item handler
   document.querySelectorAll('.btn-delete-axi-item').forEach(btn => {
-    btn.addEventListener('click', (e) => {
+    btn.addEventListener('click', async (e) => {
       e.stopPropagation();
       const id = btn.dataset.id;
 
-      const items = JSON.parse(localStorage.getItem(`vmp_axi_items_${company.id}`)) || [];
-      const filtered = items.filter(item => item.id !== id);
-      localStorage.setItem(`vmp_axi_items_${company.id}`, JSON.stringify(filtered));
-
-      mainApp.showToast('Partida eliminada de la reexpresión contable.', 'info');
-      mainApp.router();
+      try {
+        await deleteAjusteInflacionAsync(company.id, id);
+        mainApp.showToast('Partida eliminada de la reexpresión contable.', 'info');
+        mainApp.router();
+      } catch (err) {
+        mainApp.showToast(`Error al eliminar: ${err.message || err}`, 'error');
+      }
     });
   });
 

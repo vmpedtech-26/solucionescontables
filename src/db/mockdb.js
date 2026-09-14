@@ -449,6 +449,24 @@ export async function getActiveCompanyAsync() {
   return found || null;
 }
 
+// Actualiza columnas puntuales de una empresa (flags de estado fiscal: IVA
+// validado, F.2051 presentado, inputs de RT 54, etc.) sin pasar por el
+// upsert completo de saveCompanyAsync. `fields` usa los nombres de columna
+// reales de la tabla "empresas" (snake_case).
+export async function updateEmpresaFieldsAsync(companyId, fields) {
+  if (isSupabaseConfigured && supabase) {
+    const { error } = await supabase.from('empresas').update(fields).eq('id', companyId);
+    if (error) throw error;
+    return;
+  }
+  const cos = getCompanies();
+  const idx = cos.findIndex(c => c.id === companyId);
+  if (idx !== -1) {
+    cos[idx] = { ...cos[idx], ...fields };
+    localStorage.setItem("vmp_studio_companies", JSON.stringify(cos));
+  }
+}
+
 async function pushCompanyToSupabase(company, isNew) {
   if (!supabase) return;
   const { data: { user } } = await supabase.auth.getUser();
