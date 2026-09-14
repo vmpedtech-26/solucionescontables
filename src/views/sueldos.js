@@ -118,6 +118,10 @@ export function renderSueldos() {
               <span>Cuota Sindical SEC (2.0%)</span>
               <span id="sim-deduc-sec" style="font-weight: 600;">$0,00</span>
             </div>
+            <div id="sim-ganancias-row" style="display: none; justify-content: space-between; border-top: 1px dashed rgba(15, 23, 42, 0.08); padding-top: 6px; margin-top: 2px;">
+              <span>Ret. Ganancias 4ta Cat. (estimado)</span>
+              <span id="sim-deduc-ganancias" style="font-weight: 600;">$0,00</span>
+            </div>
           </div>
         </div>
 
@@ -144,6 +148,9 @@ export function renderSueldos() {
         </div>
 
       </div>
+      <p id="sim-ganancias-disclaimer" style="display:none; font-size: 10.5px; color: var(--text-muted); line-height: 1.5; margin: 10px 2px 0 2px;">
+        <strong>Descargo CPN:</strong> la retención de Ganancias 4ta categoría es una estimación con el mínimo no imponible vigente para un empleado soltero sin cargas de familia (2do semestre 2026) y la alícuota del primer tramo del Art. 94. No contempla cargas de familia, otras deducciones del SiRADIG ni los tramos superiores de la escala — debe ser revisada y ajustada por el profesional interviniente antes de liquidar.
+      </p>
     </div>
   </div>
 
@@ -212,6 +219,9 @@ export function initSueldos(mainApp) {
   const simDeducOs = document.getElementById('sim-deduc-os');
   const simSecRow = document.getElementById('sim-sec-row');
   const simDeducSec = document.getElementById('sim-deduc-sec');
+  const simGananciasRow = document.getElementById('sim-ganancias-row');
+  const simDeducGanancias = document.getElementById('sim-deduc-ganancias');
+  const simGananciasDisclaimer = document.getElementById('sim-ganancias-disclaimer');
   const simPatrTotal = document.getElementById('sim-patr-total');
   const simPatrJub = document.getElementById('sim-patr-jub');
   const simPatrOs = document.getElementById('sim-patr-os');
@@ -224,13 +234,27 @@ export function initSueldos(mainApp) {
     inputPeriod.value = currentMonth;
   }
 
+  // Deducción mensual (MNI + deducción especial) para Ganancias 4ta categoría,
+  // empleado soltero sin cargas de familia — 2do semestre 2026 (se actualiza
+  // semestralmente por inflación; verificar contra la tabla vigente de ARCA).
+  const GANANCIAS_DEDUCCION_MENSUAL = 2909508;
+  // Alícuota del primer tramo del Art. 94 de la Ley de Impuesto a las Ganancias.
+  const GANANCIAS_ALICUOTA_PRIMER_TRAMO = 0.05;
+
   // Función para realizar cálculos impositivos de liquidación
   const calculateLiquidacion = (brutoVal, isSec) => {
     const jub = brutoVal * 0.11;
     const pami = brutoVal * 0.03;
     const os = brutoVal * 0.03;
     const sec = isSec ? brutoVal * 0.02 : 0;
-    const totalDeduc = jub + pami + os + sec;
+
+    // Estimación de Ganancias 4ta categoría sobre el excedente al mínimo no
+    // imponible (solo el primer tramo de la escala; ver descargo profesional).
+    const gananciaNetaSujeta = brutoVal - jub - pami - os;
+    const excedenteGanancias = Math.max(0, gananciaNetaSujeta - GANANCIAS_DEDUCCION_MENSUAL);
+    const ganancias = excedenteGanancias * GANANCIAS_ALICUOTA_PRIMER_TRAMO;
+
+    const totalDeduc = jub + pami + os + sec + ganancias;
     const neto = brutoVal - totalDeduc;
 
     // Contribuciones patronales
@@ -245,6 +269,7 @@ export function initSueldos(mainApp) {
       pami,
       os,
       sec,
+      ganancias,
       totalDeduc,
       neto,
       pJub,
@@ -267,6 +292,8 @@ export function initSueldos(mainApp) {
       if (simDeducPami) simDeducPami.innerText = `$0,00`;
       if (simDeducOs) simDeducOs.innerText = `$0,00`;
       if (simSecRow) simSecRow.style.display = 'none';
+      if (simGananciasRow) simGananciasRow.style.display = 'none';
+      if (simGananciasDisclaimer) simGananciasDisclaimer.style.display = 'none';
       if (simPatrTotal) simPatrTotal.innerText = `+$0,00`;
       if (simPatrJub) simPatrJub.innerText = `$0,00`;
       if (simPatrOs) simPatrOs.innerText = `$0,00`;
@@ -289,6 +316,17 @@ export function initSueldos(mainApp) {
         if (simDeducSec) simDeducSec.innerText = `$${fmt(res.sec)}`;
       } else {
         simSecRow.style.display = 'none';
+      }
+    }
+
+    if (simGananciasRow) {
+      if (res.ganancias > 0) {
+        simGananciasRow.style.display = 'flex';
+        if (simDeducGanancias) simDeducGanancias.innerText = `$${fmt(res.ganancias)}`;
+        if (simGananciasDisclaimer) simGananciasDisclaimer.style.display = 'block';
+      } else {
+        simGananciasRow.style.display = 'none';
+        if (simGananciasDisclaimer) simGananciasDisclaimer.style.display = 'none';
       }
     }
 
@@ -407,6 +445,7 @@ export function initSueldos(mainApp) {
       pami: res.pami,
       os: res.os,
       sec: res.sec,
+      ganancias: res.ganancias,
       totalDeduc: res.totalDeduc,
       neto: res.neto
     };
