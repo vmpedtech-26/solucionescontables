@@ -147,6 +147,10 @@ export function renderSueldos() {
             <span id="sim-patr-total" style="color: var(--text-secondary); font-weight: 700;">+$0,00</span>
           </div>
           <div style="display: flex; flex-direction: column; gap: 4px; font-size: 11px; color: var(--text-secondary);">
+            <div style="display: flex; justify-content: space-between;" title="Decreto 814/2001, Art. 4: monto fijo por empleado que se resta del bruto antes de aplicar las alícuotas patronales">
+              <span>(–) Detracción Dto. 814/01</span>
+              <span id="sim-patr-detraccion">$0,00</span>
+            </div>
             <div style="display: flex; justify-content: space-between;">
               <span>Jubilación Patronal (10.17%)</span>
               <span id="sim-patr-jub">$0,00</span>
@@ -238,6 +242,7 @@ export function initSueldos(mainApp) {
   const simDeducGanancias = document.getElementById('sim-deduc-ganancias');
   const simGananciasDisclaimer = document.getElementById('sim-ganancias-disclaimer');
   const simPatrTotal = document.getElementById('sim-patr-total');
+  const simPatrDetraccion = document.getElementById('sim-patr-detraccion');
   const simPatrJub = document.getElementById('sim-patr-jub');
   const simPatrOs = document.getElementById('sim-patr-os');
   const simPatrOtros = document.getElementById('sim-patr-otros');
@@ -256,6 +261,14 @@ export function initSueldos(mainApp) {
   // Deducciones mensuales por cargas de familia (Art. 30 LIG), mismo período.
   const GANANCIAS_DEDUCCION_CONYUGE = 472258;
   const GANANCIAS_DEDUCCION_POR_HIJO = 238161;
+
+  // Detracción de la base imponible de contribuciones patronales (Decreto
+  // 814/2001, Art. 4) vigente 2026 — general para LCT, trabajo agrario y
+  // construcción. No incluye el adicional de $10.000 para "pequeños
+  // empleadores" (≤25 trabajadores): ese beneficio se aplica una sola vez
+  // sobre la base total de TODA la nómina, no por empleado, y este
+  // simulador liquida un empleado a la vez sin conocer el resto de la planta.
+  const DETRACCION_PATRONAL_MENSUAL = 7003.68;
 
   // Escala progresiva mensual del Art. 94 LIG (escala anual jul-dic 2026 / 12,
   // ya que la retención real usa un método de acumulado anual que requeriría
@@ -297,10 +310,13 @@ export function initSueldos(mainApp) {
     const totalDeduc = jub + pami + os + sec + ganancias;
     const neto = brutoVal - totalDeduc;
 
-    // Contribuciones patronales
-    const pJub = brutoVal * 0.1017;
-    const pOs = brutoVal * 0.06;
-    const pOtros = brutoVal * 0.07;
+    // Contribuciones patronales — Decreto 814/2001, Art. 4: se detrae un monto
+    // fijo por empleado de la base imponible ANTES de aplicar las alícuotas
+    // (LCT, trabajo agrario y construcción; monto vigente 2026 según Art. 22).
+    const basePatronal = Math.max(0, brutoVal - DETRACCION_PATRONAL_MENSUAL);
+    const pJub = basePatronal * 0.1017;
+    const pOs = basePatronal * 0.06;
+    const pOtros = basePatronal * 0.07;
     const totalPatr = pJub + pOs + pOtros;
 
     return {
@@ -312,6 +328,7 @@ export function initSueldos(mainApp) {
       ganancias,
       totalDeduc,
       neto,
+      basePatronal,
       pJub,
       pOs,
       pOtros,
@@ -339,6 +356,7 @@ export function initSueldos(mainApp) {
       if (simGananciasRow) simGananciasRow.style.display = 'none';
       if (simGananciasDisclaimer) simGananciasDisclaimer.style.display = 'none';
       if (simPatrTotal) simPatrTotal.innerText = `+$0,00`;
+      if (simPatrDetraccion) simPatrDetraccion.innerText = `$0,00`;
       if (simPatrJub) simPatrJub.innerText = `$0,00`;
       if (simPatrOs) simPatrOs.innerText = `$0,00`;
       if (simPatrOtros) simPatrOtros.innerText = `$0,00`;
@@ -375,6 +393,7 @@ export function initSueldos(mainApp) {
     }
 
     if (simPatrTotal) simPatrTotal.innerText = `+$${fmt(res.totalPatr)}`;
+    if (simPatrDetraccion) simPatrDetraccion.innerText = `-$${fmt(res.bruto - res.basePatronal)}`;
     if (simPatrJub) simPatrJub.innerText = `$${fmt(res.pJub)}`;
     if (simPatrOs) simPatrOs.innerText = `$${fmt(res.pOs)}`;
     if (simPatrOtros) simPatrOtros.innerText = `$${fmt(res.pOtros)}`;
