@@ -309,10 +309,11 @@ class Application {
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
     
-    const iconMap = { 
-      success: 'check-circle-2', 
-      error: 'alert-circle', 
-      info: 'info' 
+    const iconMap = {
+      success: 'check-circle-2',
+      error: 'alert-circle',
+      warning: 'alert-triangle',
+      info: 'info'
     };
     
     toast.innerHTML = `

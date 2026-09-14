@@ -554,6 +554,33 @@ export function initVentas(mainApp) {
       return;
     }
 
+    // Correlatividad de numeración propia (lo que WSFEv1 valida internamente
+    // contra FECompUltimoAutorizado antes de emitir un CAE): los comprobantes
+    // EMITIDOS por el cliente deben ser correlativos y únicos por punto de
+    // venta + tipo. Los RECIBIDOS de terceros no se validan (numeración ajena).
+    if (op === 'ventas') {
+      const [pvStr, nroStr] = num.split('-');
+      const nroNuevo = parseInt(nroStr, 10);
+      if (pvStr && !isNaN(nroNuevo)) {
+        const mismosComprobantes = getTransactions(activeCompany.id).ventas
+          .filter(v => v.tipo_comprobante === voucher && v.numero.split('-')[0] === pvStr)
+          .map(v => parseInt(v.numero.split('-')[1], 10))
+          .filter(n => !isNaN(n));
+
+        if (mismosComprobantes.includes(nroNuevo)) {
+          mainApp.showToast(`El comprobante ${voucher} N° ${num} ya está registrado. ARCA rechaza números de CAE duplicados por punto de venta.`, 'error');
+          return;
+        }
+
+        if (mismosComprobantes.length > 0) {
+          const ultimoAutorizado = Math.max(...mismosComprobantes);
+          if (nroNuevo > ultimoAutorizado + 1) {
+            mainApp.showToast(`Salto de numeración: el último ${voucher} del PV ${pvStr} es N° ${ultimoAutorizado}, y este es N° ${nroNuevo}. Verificá que no falten comprobantes por cargar antes de continuar.`, 'warning');
+          }
+        }
+      }
+    }
+
     const transaction = {
       fecha: date,
       hora: new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }),

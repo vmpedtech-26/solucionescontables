@@ -598,6 +598,7 @@
 .toast-success { border-left-color: var(--color-accent); }
 .toast-error { border-left-color: #dc2626; }
 .toast-info { border-left-color: var(--color-primary); }
+.toast-warning { border-left-color: #f59e0b; }
 
 /* Responsive adjustments */
 @media (max-width: 1024px) {
