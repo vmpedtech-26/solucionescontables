@@ -259,7 +259,7 @@ export function renderConfiguracion() {
             
             <div style="background: rgba(248, 250, 252, 0.6); border: 1px solid var(--border-color); padding: 10px 12px; border-radius: 6px; display: flex; flex-direction: column; gap: 4px;">
               <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span style="font-size: 11.5px; font-weight: 750; color: var(--color-primary);">RPA SICORE Retenciones</span>
+                <span style="font-size: 11.5px; font-weight: 750; color: var(--color-primary);">RPA SIRE Retenciones y Percepciones</span>
                 <span style="background: rgba(34, 197, 94, 0.1); color: var(--color-accent-light); font-size: 8.5px; font-weight: 800; padding: 1px 6px; border-radius: 10px;">IDLE</span>
               </div>
               <span style="font-size: 9.5px; color: var(--text-secondary);">Sincronizado hace 6 hs · Cada 12h</span>

@@ -325,8 +325,112 @@ export function initRetenciones(mainApp) {
   document.getElementById('btn-export-csv-sire')?.addEventListener('click', exportarCSV);
   document.getElementById('btn-export-csv-sire-lateral')?.addEventListener('click', exportarCSV);
 
-  // Agregar manual
+  // Agregar manual (tercera fuente de conciliación: retención/percepción que
+  // el cliente informa a mano porque no llegó por factura ni por extracto bancario)
   document.getElementById('btn-add-ret')?.addEventListener('click', () => {
-    mainApp.showToast('Funcionalidad de carga manual próximamente disponible.', 'info');
+    const modal = document.createElement('div');
+    modal.className = 'vmp-modal-overlay';
+    modal.style.position = 'fixed';
+    modal.style.top = '0';
+    modal.style.left = '0';
+    modal.style.width = '100%';
+    modal.style.height = '100%';
+    modal.style.background = 'rgba(15, 23, 42, 0.7)';
+    modal.style.backdropFilter = 'blur(12px)';
+    modal.style.webkitBackdropFilter = 'blur(12px)';
+    modal.style.zIndex = '9999';
+    modal.style.display = 'flex';
+    modal.style.alignItems = 'center';
+    modal.style.justifyContent = 'center';
+    modal.style.opacity = '0';
+    modal.style.transition = 'opacity 0.25s ease';
+
+    modal.innerHTML = `
+      <div style="background:#ffffff; border:1px solid rgba(15,23,42,0.1); border-radius:16px; padding:28px; max-width:420px; width:90%; box-shadow:0 25px 50px -12px rgba(15,23,42,0.25); transform:scale(0.9); transition:transform 0.25s ease;" class="add-ret-card">
+        <h3 style="font-family:var(--font-heading); font-size:17px; font-weight:800; color:var(--text-primary); margin:0 0 4px 0;">Cargar Retención/Percepción Manual</h3>
+        <p style="font-size:12px; color:var(--text-secondary); margin:0 0 18px 0;">Para comprobantes que el cliente informa a mano y que no llegaron por el Libro de Compras ni por el extracto bancario.</p>
+        <form id="form-add-ret" style="display:flex; flex-direction:column; gap:10px;">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <div>
+              <label style="font-size:11px; font-weight:700; color:var(--text-secondary); display:block; margin-bottom:4px;">Fecha</label>
+              <input type="date" id="ret-fecha" class="form-input" style="width:100%; padding:8px 10px; font-size:12.5px;" value="${new Date().toISOString().slice(0,10)}" required>
+            </div>
+            <div>
+              <label style="font-size:11px; font-weight:700; color:var(--text-secondary); display:block; margin-bottom:4px;">Tipo</label>
+              <select id="ret-tipo" class="form-input" style="width:100%; padding:8px 10px; font-size:12.5px;">
+                <option value="PERCEPCIÓN IVA">Percepción IVA</option>
+                <option value="RETENCIÓN IVA">Retención IVA</option>
+                <option value="PERCEPCIÓN IIBB">Percepción IIBB</option>
+                <option value="RETENCIÓN IIBB">Retención IIBB</option>
+                <option value="RETENCIÓN GANANCIAS">Retención Ganancias</option>
+                <option value="RETENCIÓN SIRCREB">Retención SIRCREB</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label style="font-size:11px; font-weight:700; color:var(--text-secondary); display:block; margin-bottom:4px;">Agente de Retención/Percepción</label>
+            <input type="text" id="ret-agente" class="form-input" style="width:100%; padding:8px 10px; font-size:12.5px;" placeholder="Razón social del agente" required>
+          </div>
+          <div style="display:grid; grid-template-columns:1.3fr 1fr; gap:10px;">
+            <div>
+              <label style="font-size:11px; font-weight:700; color:var(--text-secondary); display:block; margin-bottom:4px;">CUIT del Agente</label>
+              <input type="text" id="ret-cuit" class="form-input" style="width:100%; padding:8px 10px; font-size:12.5px;" placeholder="30-12345678-9" required>
+            </div>
+            <div>
+              <label style="font-size:11px; font-weight:700; color:var(--text-secondary); display:block; margin-bottom:4px;">Monto ($)</label>
+              <input type="number" step="0.01" id="ret-monto" class="form-input font-mono" style="width:100%; padding:8px 10px; font-size:12.5px;" placeholder="0.00" required>
+            </div>
+          </div>
+          <div style="display:flex; gap:12px; margin-top:6px;">
+            <button type="button" id="btn-cancel-add-ret" style="flex:1; padding:10px 16px; border:1px solid var(--border-color); border-radius:8px; background:#fff; color:var(--text-secondary); font-weight:600; cursor:pointer; font-size:13px;">Cancelar</button>
+            <button type="submit" style="flex:1; padding:10px 16px; border:none; border-radius:8px; background:var(--color-accent); color:#fff; font-weight:700; cursor:pointer; font-size:13px;">Guardar</button>
+          </div>
+        </form>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+    if (window.lucide) window.lucide.createIcons({ root: modal });
+
+    setTimeout(() => {
+      modal.style.opacity = '1';
+      modal.querySelector('.add-ret-card').style.transform = 'scale(1)';
+    }, 20);
+
+    const closeModal = () => {
+      modal.style.opacity = '0';
+      modal.querySelector('.add-ret-card').style.transform = 'scale(0.9)';
+      setTimeout(() => {
+        if (modal.parentNode) document.body.removeChild(modal);
+      }, 250);
+    };
+
+    modal.querySelector('#btn-cancel-add-ret').addEventListener('click', closeModal);
+
+    modal.querySelector('#form-add-ret').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const monto = parseFloat(modal.querySelector('#ret-monto').value) || 0;
+      if (monto <= 0) {
+        mainApp.showToast('Ingresá un monto mayor a $ 0.', 'error');
+        return;
+      }
+      const newRet = {
+        id: 'r-manual-' + Date.now(),
+        fecha: modal.querySelector('#ret-fecha').value,
+        agente: modal.querySelector('#ret-agente').value.trim(),
+        cuit: modal.querySelector('#ret-cuit').value.trim(),
+        tipo: modal.querySelector('#ret-tipo').value,
+        monto: monto,
+        fuente: 'manual',
+        conciliado: false,
+        certDisponible: false
+      };
+      const rets = getRetenciones(company.id);
+      rets.push(newRet);
+      localStorage.setItem(`vmp_retenciones_${company.id}`, JSON.stringify(rets));
+      closeModal();
+      mainApp.showToast('Retención/percepción manual cargada. Quedó pendiente de conciliar.', 'success');
+      setTimeout(() => mainApp.router(), 260);
+    });
   });
 }

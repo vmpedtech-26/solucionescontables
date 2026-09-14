@@ -5,19 +5,22 @@
 import { getActiveCompany, getTransactions } from '../db/mockdb.js';
 import { fmt, fmtDate, getVencimientos, downloadFile } from '../utils.js';
 
-// Official ARCA 2026 limits for Monotributo Categories (Régimen Simplificado)
+// Tabla oficial ARCA vigente desde 1/08/2026 (topes y cuotas del Régimen Simplificado)
+// Categorías I, J y K están reservadas por ley a venta de cosas muebles: un
+// prestador de servicios que las supera queda directamente EXCLUIDO del régimen,
+// no puede "subir" a esas categorías (por eso cuotaServicios: 0 en esas tres).
 const MONOTRIBUTO_CATEGORIAS_2026 = {
-  'A': { maxIngresos: 3000000, superficie: 30, energia: 3330, alquileres: 450000, cuotaServicios: 26600, cuotaBienes: 26600 },
-  'B': { maxIngresos: 4500000, superficie: 45, energia: 5000, alquileres: 900000, cuotaServicios: 30000, cuotaBienes: 30000 },
-  'C': { maxIngresos: 6700000, superficie: 60, energia: 6700, alquileres: 1350000, cuotaServicios: 34500, cuotaBienes: 33200 },
-  'D': { maxIngresos: 9000000, superficie: 85, energia: 10000, alquileres: 1800000, cuotaServicios: 41400, cuotaBienes: 38900 },
-  'E': { maxIngresos: 12000000, superficie: 110, energia: 13000, alquileres: 2250000, cuotaServicios: 52000, cuotaBienes: 47000 },
-  'F': { maxIngresos: 15000000, superficie: 150, energia: 16500, alquileres: 2700000, cuotaServicios: 65000, cuotaBienes: 56000 },
-  'G': { maxIngresos: 18000000, superficie: 200, energia: 20000, alquileres: 3150000, cuotaServicios: 82000, cuotaBienes: 69000 },
-  'H': { maxIngresos: 22000000, superficie: 200, energia: 20000, alquileres: 4500000, cuotaServicios: 120000, cuotaBienes: 98000 },
-  'I': { maxIngresos: 25500000, superficie: 200, energia: 20000, alquileres: 4500000, cuotaServicios: 0, cuotaBienes: 125000 }, // Servicios excluido a partir de I
-  'J': { maxIngresos: 28500000, superficie: 200, energia: 20000, alquileres: 4500000, cuotaServicios: 0, cuotaBienes: 145000 },
-  'K': { maxIngresos: 31000000, superficie: 200, energia: 20000, alquileres: 4500000, cuotaServicios: 0, cuotaBienes: 180000 }
+  'A': { maxIngresos: 12009410, superficie: 30, energia: 3330, alquileres: 2792886, cuotaServicios: 5586, cuotaBienes: 5586 },
+  'B': { maxIngresos: 17595183, superficie: 45, energia: 5000, alquileres: 2792886, cuotaServicios: 10613, cuotaBienes: 10613 },
+  'C': { maxIngresos: 24670494, superficie: 60, energia: 6700, alquileres: 3816944, cuotaServicios: 18247, cuotaBienes: 16757 },
+  'D': { maxIngresos: 30628651, superficie: 85, energia: 10000, alquileres: 3816944, cuotaServicios: 29791, cuotaBienes: 27743 },
+  'E': { maxIngresos: 36028231, superficie: 110, energia: 13000, alquileres: 4841003, cuotaServicios: 55858, cuotaBienes: 44314 },
+  'F': { maxIngresos: 45151659, superficie: 150, energia: 16500, alquileres: 4841003, cuotaServicios: 78573, cuotaBienes: 57720 },
+  'G': { maxIngresos: 53995799, superficie: 200, energia: 20000, alquileres: 5771965, cuotaServicios: 142996, cuotaBienes: 71498 },
+  'H': { maxIngresos: 81924660, superficie: 200, energia: 20000, alquileres: 8378658, cuotaServicios: 409623, cuotaBienes: 204812 },
+  'I': { maxIngresos: 91699762, superficie: 200, energia: 20000, alquileres: 8378658, cuotaServicios: 0, cuotaBienes: 325837 },
+  'J': { maxIngresos: 105012519, superficie: 200, energia: 20000, alquileres: 8378658, cuotaServicios: 0, cuotaBienes: 391004 },
+  'K': { maxIngresos: 126610839, superficie: 200, energia: 20000, alquileres: 8378658, cuotaServicios: 0, cuotaBienes: 456171 }
 };
 
 // Economist CLAE simplified sectors
@@ -69,8 +72,9 @@ export function renderIVASimple() {
       return s;
     }, 0);
 
+    const topeExclusion = MONOTRIBUTO_CATEGORIAS_2026['K'].maxIngresos;
     const percentCategory = (rollingSales / catDetails.maxIngresos) * 100;
-    const percentExclusion = (rollingSales / 31000000) * 100; // Cat K limit
+    const percentExclusion = (rollingSales / topeExclusion) * 100; // Cat K limit
 
     // 3. Warning engine and insights
     let statusColor = 'var(--color-accent-light)'; // Green
@@ -90,7 +94,7 @@ export function renderIVASimple() {
       statusBg = 'rgba(239, 68, 68, 0.04)';
       statusBorder = 'rgba(239, 68, 68, 0.2)';
       statusLabel = '🔴 RIESGO CRÍTICO DE EXCLUSIÓN';
-      statusInsight = `🚨 **ALERTA MÁXIMA CPN:** El contribuyente ha facturado **$ ${rollingSales.toLocaleString('es-AR')}** en los últimos 12 meses móviles. Esto supera el tope de su Categoría (${activeLetter}) y está al **${percentExclusion.toFixed(1)}%** de la exclusión absoluta del Régimen Simplificado ($ 31.000.000). **Riesgo inminente de pase de oficio al Régimen General con severas multas retroactivas. Se recomienda detener la facturación.**`;
+      statusInsight = `🚨 **ALERTA MÁXIMA CPN:** El contribuyente ha facturado **$ ${rollingSales.toLocaleString('es-AR')}** en los últimos 12 meses móviles. Esto supera el tope de su Categoría (${activeLetter}) y está al **${percentExclusion.toFixed(1)}%** de la exclusión absoluta del Régimen Simplificado ($ ${topeExclusion.toLocaleString('es-AR')}). Recordá que la exclusión de oficio es **retroactiva al momento en que se produjo la causal**, no desde que ARCA la detecta, y que también hay causales no vinculadas a la facturación (compras/gastos o depósitos bancarios incompatibles con lo declarado, más de 3 unidades de explotación, precio unitario de venta superior al tope). **Riesgo inminente de pase de oficio al Régimen General con severas multas retroactivas. Se recomienda detener la facturación.**`;
     }
 
     return `
@@ -130,9 +134,9 @@ export function renderIVASimple() {
         <div class="card-body" style="padding: 16px;">
           <div style="font-size: 10px; font-weight:800; color: var(--text-muted); text-transform: uppercase;">Tope de Exclusión Simplificado</div>
           <div class="font-mono" style="font-size: 26px; font-weight: 850; color: #e11d48; margin-top: 6px;">
-            $ 31.000.000,00
+            $ ${topeExclusion.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
           </div>
-          <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">Máximo de Ley para Actividades</div>
+          <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">Tope de Categoría K (venta de bienes)</div>
         </div>
       </div>
     </div>
@@ -158,9 +162,24 @@ export function renderIVASimple() {
           <div style="display: flex; justify-content: space-between; font-size: 9.5px; color: var(--text-muted); font-weight: 600;">
             <span>$ 0</span>
             <span>Límite Cat ${activeLetter}: $ ${catDetails.maxIngresos.toLocaleString('es-AR')}</span>
-            <span>Exclusión Máxima (Cat K): $ 31.000.000</span>
+            <span>Exclusión Máxima (Cat K): $ ${topeExclusion.toLocaleString('es-AR')}</span>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- Causales de exclusión de oficio no vinculadas a la facturación (Art. 20, Ley 24.977) -->
+    <div class="card" style="border-left: 3px solid #ef4444; margin-bottom: 24px;">
+      <div class="card-body" style="padding: 16px 20px;">
+        <h4 style="font-size: 12.5px; font-weight: 800; color: var(--text-primary); margin: 0 0 8px 0; display:flex; align-items:center; gap:6px;">
+          <i data-lucide="alert-triangle" style="width:15px; height:15px; color:#ef4444;"></i> Otras causales de exclusión de oficio (más allá de superar la facturación)
+        </h4>
+        <p style="font-size: 11.5px; color: var(--text-secondary); line-height: 1.6; margin: 0;">
+          Compras, gastos o inversiones incompatibles con los ingresos declarados · Depósitos bancarios incompatibles con lo declarado ·
+          Más de 3 actividades simultáneas o 3 unidades de explotación · Precio unitario de venta superior al tope de la última categoría (venta de bienes) ·
+          Adquisición de bienes o realización de gastos personales injustificados. La exclusión, cuando se detecta, opera de forma
+          <strong>retroactiva</strong> al momento en que efectivamente se produjo la causal — no desde la fecha en que ARCA la detecta.
+        </p>
       </div>
     </div>
 
@@ -479,7 +498,7 @@ export function renderIVASimple() {
       <div class="card" style="margin-bottom:0;">
         <div class="card-header">
           <h3><i data-lucide="percent" style="color:#f59e0b;"></i> Retenciones y Percepciones</h3>
-          <span class="badge" style="margin:0;font-size:10px;">SIRE / SICORE</span>
+          <span class="badge" style="margin:0;font-size:10px;">SIRE (ex-SICORE)</span>
         </div>
         <div class="card-body">
           <div style="background:rgba(239,68,68,0.03);border:1px solid rgba(239,68,68,0.2);border-radius:var(--radius-md);padding:14px 16px;margin-bottom:14px;font-size:12px;color:var(--text-secondary);">
@@ -617,7 +636,7 @@ export function initIVASimple(mainApp) {
 
       resultBox.style.display = 'block';
 
-      if (recommendedCategory === 'EXCLUIDO' || ingresos > 31000000) {
+      if (recommendedCategory === 'EXCLUIDO' || ingresos > MONOTRIBUTO_CATEGORIAS_2026['K'].maxIngresos) {
         resultText.innerHTML = `
           <strong style="color:#ef4444; font-size:13px; display:block; margin-bottom:4px;">🚨 EXCLUSIÓN RECOMENDADA</strong>
           Los ingresos declarados de **$ ${ingresos.toLocaleString('es-AR')}** superan los topes máximos de bienes y servicios del Monotributo. El contribuyente debe pasar obligatoriamente al **Régimen General (Responsable Inscripto)**.
@@ -694,7 +713,7 @@ export function initIVASimple(mainApp) {
     const retVal = parseFloat(inpRet.value) || 0;
     const csvContent = `Fecha;Código Impuesto;Régimen;Tipo Comprobante;Número Comprobante;CUIT Agente;Monto Sufrido\n24/05/2026;767;217;01;0003-00000850;30-58930219-4;${retVal.toFixed(2)}`;
     downloadFile(`SIRE-PERCEPCIONES-IVA-${company.cuit}-${new Date().toISOString().slice(0,10)}.csv`, csvContent, 'text/csv');
-    mainApp.showToast('¡Archivo CSV del SICORE generado con formato de 16 caracteres!', 'success');
+    mainApp.showToast('¡Archivo CSV del SIRE generado con formato de 16 caracteres!', 'success');
   });
 
   // Presentar F.2051 con simulación de ARCA Live, fallos de red y reintentos
