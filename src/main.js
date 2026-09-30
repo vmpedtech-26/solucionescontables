@@ -2,7 +2,7 @@
    VMP Studio Contable - Front Controller & Routing Orchestrator
    ------------------------------------------------------------- */
 import { initMockDB, getActiveCompany, setActiveCompanyId } from './db/mockdb.js';
-import { supabase, isSupabaseConfigured, getCachedSession } from './db/supabase.js';
+import { supabase, isSupabaseConfigured, getCachedSession, getCachedRole } from './db/supabase.js';
 
 // Import Views
 import { renderLanding, initLanding } from './views/landing.js';
@@ -81,15 +81,21 @@ class Application {
         rootEl.innerHTML = renderLanding();
       }
       initLanding(this);
-      
+
       // Update breadcrumb or titles if applicable
       document.title = "Soluciones Contables — El integrante virtual que elimina la carga manual de tu estudio.";
-    } 
+    }
+    // Registro de cliente final vía link de invitación del estudio (público)
+    else if (hash.startsWith('#/registro-cliente')) {
+      rootEl.innerHTML = renderLanding();
+      initLanding(this);
+      document.title = "Registro de Cliente — Soluciones Contables";
+    }
     // Studio Professional Routes
     else if (hash.startsWith('#/studio')) {
       // Gate real de acceso: si Supabase está configurado, exige una sesión
       // real (getCachedSession, con caché mantenida vía onAuthStateChange).
-      // Si NO está configurado, se mantiene el sandbox de siempre (?key=vmp2026)
+      // Si NO está configurado, se mantiene el sandbox de siempre (?key=<VITE_ADMIN_DEMO_PASS>)
       // para que la demo sin backend siga funcionando sin cambios.
       if (isSupabaseConfigured) {
         const session = await getCachedSession();
@@ -97,10 +103,29 @@ class Application {
           window.location.hash = '#/';
           return;
         }
+
+        // Gate por rol: un cliente final solo puede ver el Portal del
+        // Cliente; una cuenta real sin vínculo (ni estudio ni cliente) es
+        // huérfana y se cierra su sesión en vez de dejarla en un limbo.
+        const role = await getCachedRole();
+        const subRoutePreview = hash.substring(8).split('?')[0];
+        if (role === 'cliente') {
+          if (subRoutePreview !== '/portal') {
+            window.location.hash = '#/studio/portal';
+            return;
+          }
+        } else if (role !== 'estudio') {
+          await supabase.auth.signOut();
+          window.location.hash = '#/';
+          return;
+        }
       } else {
+        // REQ-19: la clave de acceso sandbox se lee desde variable de
+        // entorno (nunca hardcodeada), mismo patrón que ADMIN_PASS en landing.js.
+        const SANDBOX_KEY = import.meta.env.VITE_ADMIN_DEMO_PASS || 'sc-demo-2026';
         let isUnlocked = localStorage.getItem('vmp_premium_unlocked') === 'true';
         if (!isUnlocked) {
-          if (hash.includes('key=vmp2026') || hash.includes('key=VMP2026')) {
+          if (hash.includes(`key=${SANDBOX_KEY}`)) {
             localStorage.setItem('vmp_premium_unlocked', 'true');
             isUnlocked = true;
             // Strip the query key from the hash to keep it clean

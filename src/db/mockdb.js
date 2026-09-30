@@ -478,6 +478,18 @@ export async function getEstudioAsync() {
   return data;
 }
 
+// Lee el vínculo cliente-final del usuario logueado (empresa_id concreto).
+// Devuelve null en modo sandbox, si no hay sesión, o si la cuenta no es un
+// cliente final (es un estudio, o una cuenta huérfana sin vínculo).
+export async function getClienteFinalAsync() {
+  if (!isSupabaseConfigured || !supabase) return null;
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
+  const { data, error } = await supabase.from('clientes_finales').select('*').eq('id', user.id).single();
+  if (error) return null;
+  return data;
+}
+
 // Actualiza columnas puntuales del estudio logueado (arca_model_type,
 // onboarding_*, etc.), análogo a updateEmpresaFieldsAsync pero a nivel estudio.
 export async function updateEstudioFieldsAsync(fields) {

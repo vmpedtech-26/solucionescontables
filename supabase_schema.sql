@@ -380,6 +380,95 @@ CREATE POLICY "Estudios can manage jurisdicciones of their companies"
     );
 
 
+-- -------------------------------------------------------------
+-- 10. TABLA DE CLIENTES FINALES (USUARIOS PYME DEL PORTAL DEL CLIENTE)
+-- -------------------------------------------------------------
+-- Vincula un usuario real de Supabase Auth (una PyME cliente del estudio) a
+-- una única empresa. Las filas solo las crea el trigger handle_new_user()
+-- (SECURITY DEFINER) al consumir un código de invitaciones_clientes — ni el
+-- cliente ni el estudio pueden insertar/actualizar/borrar directamente.
+CREATE TABLE IF NOT EXISTS public.clientes_finales (
+    id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+    empresa_id TEXT NOT NULL REFERENCES public.empresas(id) ON DELETE CASCADE,
+    email TEXT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE public.clientes_finales ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Cliente final ve su propio vinculo"
+    ON public.clientes_finales FOR SELECT
+    USING (auth.uid() = id);
+
+CREATE POLICY "Estudio ve los clientes de sus propias empresas"
+    ON public.clientes_finales FOR SELECT
+    USING (
+        EXISTS (
+            SELECT 1 FROM public.empresas
+            WHERE empresas.id = clientes_finales.empresa_id
+              AND empresas.estudio_id = auth.uid()
+        )
+    );
+
+
+-- -------------------------------------------------------------
+-- 11. TABLA DE INVITACIONES DE CLIENTES (ALTA SIN SERVICE_ROLE)
+-- -------------------------------------------------------------
+-- Esta SPA no tiene backend propio: no puede usar auth.admin.inviteUserByEmail
+-- (requiere la service_role key, que nunca debe llegar al navegador). En su
+-- lugar, el estudio genera un código de un solo uso acá, el cliente se
+-- auto-registra con supabase.auth.signUp() pasando ese código en
+-- raw_user_meta_data, y handle_new_user() lo consume para crear el vínculo.
+CREATE TABLE IF NOT EXISTS public.invitaciones_clientes (
+    codigo TEXT PRIMARY KEY,
+    empresa_id TEXT NOT NULL REFERENCES public.empresas(id) ON DELETE CASCADE,
+    estudio_id UUID NOT NULL REFERENCES public.estudios(id) ON DELETE CASCADE,
+    usado BOOLEAN DEFAULT false NOT NULL,
+    usado_por UUID REFERENCES auth.users(id),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE public.invitaciones_clientes ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Estudio gestiona invitaciones de sus propias empresas"
+    ON public.invitaciones_clientes FOR ALL
+    USING (estudio_id = auth.uid())
+    WITH CHECK (estudio_id = auth.uid());
+
+
+-- -------------------------------------------------------------
+-- ACCESO DE CLIENTE FINAL A SUS PROPIOS DATOS (políticas adicionales,
+-- no reemplazan las de "Estudios can manage..." de arriba)
+-- -------------------------------------------------------------
+-- Función SECURITY DEFINER: rompe la recursión circular entre "empresas" y
+-- "clientes_finales" (la política de empresas necesita consultar
+-- clientes_finales, y la de clientes_finales necesita consultar empresas —
+-- si ambas se evalúan bajo RLS normal, Postgres entra en loop infinito,
+-- error 42P17 "infinite recursion detected in policy"). Al ser
+-- SECURITY DEFINER, esta consulta interna a clientes_finales corre sin
+-- pasar por su propia RLS, cortando el ciclo.
+CREATE OR REPLACE FUNCTION public.is_cliente_of_empresa(check_empresa_id TEXT)
+RETURNS BOOLEAN AS $$
+    SELECT EXISTS (
+        SELECT 1 FROM public.clientes_finales
+        WHERE clientes_finales.id = auth.uid()
+          AND clientes_finales.empresa_id = check_empresa_id
+    );
+$$ LANGUAGE sql SECURITY DEFINER STABLE;
+
+CREATE POLICY "Cliente final ve su propia empresa"
+    ON public.empresas FOR SELECT
+    USING (public.is_cliente_of_empresa(empresas.id));
+
+CREATE POLICY "Cliente final ve sus propios comprobantes"
+    ON public.comprobantes_digitales FOR SELECT
+    USING (public.is_cliente_of_empresa(comprobantes_digitales.empresa_id));
+
+CREATE POLICY "Cliente final sube sus propios comprobantes"
+    ON public.comprobantes_digitales FOR INSERT
+    WITH CHECK (public.is_cliente_of_empresa(comprobantes_digitales.empresa_id));
+
+
 -- ---------------------------------------------------------------------
 -- 🛡️ FUNCIONES DE SEGURIDAD Y TRIGGERS DE VALIDACIÓN IMPOSTIVA (CPN AUDIT)
 -- ---------------------------------------------------------------------
@@ -529,7 +618,32 @@ CREATE OR REPLACE TRIGGER on_jurisdiccion_prevent_cross_tenant
 -- D. Trigger de Auto-Perfil para nuevos Registros
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
+DECLARE
+    invite RECORD;
 BEGIN
+    -- Alta de cliente final (PyME) vía código de invitación: vincula el
+    -- usuario a la empresa de la invitación, NO crea un estudio.
+    IF new.raw_user_meta_data ? 'invite_code' THEN
+        SELECT * INTO invite
+        FROM public.invitaciones_clientes
+        WHERE codigo = new.raw_user_meta_data->>'invite_code' AND usado = false;
+
+        IF FOUND THEN
+            INSERT INTO public.clientes_finales (id, empresa_id, email)
+            VALUES (new.id, invite.empresa_id, new.email);
+
+            UPDATE public.invitaciones_clientes
+            SET usado = true, usado_por = new.id
+            WHERE codigo = invite.codigo;
+
+            INSERT INTO public.seguridad_logs (estudio_id, evento, tabla, registro_id, detalles)
+            VALUES (invite.estudio_id, 'CLIENTE_REGISTRADO', 'clientes_finales', new.id::TEXT,
+                    jsonb_build_object('email', new.email, 'empresa_id', invite.empresa_id));
+        END IF;
+        RETURN new;
+    END IF;
+
+    -- Alta de estudio contable (flujo existente, sin cambios de comportamiento)
     INSERT INTO public.estudios (id, razon_social, email, arca_model_type, arca_cert_name, arca_cert_uploaded)
     VALUES (
         new.id,

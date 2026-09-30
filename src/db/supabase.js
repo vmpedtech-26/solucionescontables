@@ -36,9 +36,37 @@ export async function getCachedSession() {
   return cachedSession;
 }
 
+// -------------------------------------------------------------
+// Caché de rol — 'estudio' (existe fila en estudios), 'cliente' (existe
+// fila en clientes_finales) o null (sesión real sin vínculo). Igual que
+// cachedSession, evita una consulta extra en cada navegación de #/studio/*.
+// -------------------------------------------------------------
+let cachedRole = null;
+let roleReady = false;
+
+export async function getCachedRole() {
+  if (!isSupabaseConfigured || !supabase) return null;
+  if (roleReady) return cachedRole;
+
+  const session = await getCachedSession();
+  if (!session) return null;
+
+  const { data: estudio } = await supabase.from('estudios').select('id').eq('id', session.user.id).maybeSingle();
+  if (estudio) {
+    cachedRole = 'estudio';
+  } else {
+    const { data: cliente } = await supabase.from('clientes_finales').select('id').eq('id', session.user.id).maybeSingle();
+    cachedRole = cliente ? 'cliente' : null;
+  }
+  roleReady = true;
+  return cachedRole;
+}
+
 if (isSupabaseConfigured && supabase) {
   supabase.auth.onAuthStateChange((_event, session) => {
     cachedSession = session;
     sessionReady = true;
+    cachedRole = null;
+    roleReady = false;
   });
 }

@@ -2,6 +2,7 @@
    VMP Studio Contable - Empresas Clientes View Component
    ------------------------------------------------------------- */
 import { getCompaniesAsync, saveCompanyAsync } from '../db/mockdb.js';
+import { supabase, isSupabaseConfigured } from '../db/supabase.js';
 
 export async function renderEmpresas() {
   const companies = await getCompaniesAsync();
@@ -97,6 +98,7 @@ export async function renderEmpresas() {
               <th>Actividad Principal</th>
               <th>Inicio Actividades</th>
               <th>Estado</th>
+              <th>Portal Cliente</th>
             </tr>
           </thead>
           <tbody>
@@ -123,6 +125,11 @@ export async function renderEmpresas() {
                 <td class="font-mono text-sm">${c.inicio_actividades.split('-').reverse().join('/')}</td>
                 <td>
                   <span class="badge-status active">Activo</span>
+                </td>
+                <td>
+                  <button class="btn btn-outline btn-sm btn-invite-client" data-id="${c.id}" data-name="${c.razon_social}" style="font-size: 11px; padding: 4px 10px; white-space: nowrap;">
+                    <i data-lucide="user-plus" style="width: 12px; height: 12px;"></i> Invitar cliente
+                  </button>
                 </td>
               </tr>
             `).join('')}
@@ -191,5 +198,33 @@ export async function initEmpresas(mainApp) {
     } catch (err) {
       mainApp.showToast(`Error al registrar la empresa: ${err.message || err}`, 'error');
     }
+  });
+
+  // Generar invitación de Portal del Cliente para una empresa puntual
+  document.querySelectorAll('.btn-invite-client').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if (!isSupabaseConfigured || !supabase) {
+        mainApp.showToast('Invitar clientes requiere una base de datos configurada.', 'error');
+        return;
+      }
+      const empresaId = btn.dataset.id;
+      const empresaName = btn.dataset.name;
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        const codigo = crypto.randomUUID().split('-')[0].toUpperCase();
+        const { error } = await supabase.from('invitaciones_clientes').insert({
+          codigo,
+          empresa_id: empresaId,
+          estudio_id: user.id
+        });
+        if (error) throw error;
+
+        const link = `${window.location.origin}${window.location.pathname}#/registro-cliente?invite=${codigo}`;
+        await navigator.clipboard.writeText(link);
+        mainApp.showToast(`¡Link de invitación para "${empresaName}" copiado al portapapeles!`, 'success');
+      } catch (err) {
+        mainApp.showToast(`Error al generar la invitación: ${err.message || err}`, 'error');
+      }
+    });
   });
 }

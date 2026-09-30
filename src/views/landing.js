@@ -624,13 +624,42 @@ export function renderLanding() {
         </div>
       </div>
     </div>
+
+    <!-- Client Signup Modal Overlay (registro vía invitación del estudio) -->
+    <div id="client-signup-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 2000; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease;">
+      <div style="background: #ffffff; border: 1px solid rgba(15, 23, 42, 0.08); border-radius: 16px; padding: 36px; max-width: 400px; width: 100%; box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25); position: relative; transform: scale(0.95); transition: transform 0.3s ease;" id="client-signup-modal-card">
+        <button id="close-client-signup-btn" style="position: absolute; top: 16px; right: 16px; background: transparent; border: none; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 4px; border-radius: 50%; transition: background 0.2s;" onmouseover="this.style.background='#f1f5f9'; this.style.color='var(--text-primary)'" onmouseout="this.style.background='transparent'; this.style.color='var(--text-secondary)'">
+          <i data-lucide="x" style="width: 20px; height: 20px;"></i>
+        </button>
+
+        <div style="text-align: center; margin-bottom: 28px;">
+          <img src="/SolucionesContables_Logo.png" alt="Logo" style="width: 50px; height: 50px; border-radius: 8px; margin-bottom: 12px; border: 1px solid rgba(15, 23, 42, 0.1);" />
+          <h2 style="font-family: var(--font-heading); font-size: 20px; font-weight: 800; color: var(--text-primary); margin: 0;">Registro de Cliente</h2>
+          <p style="font-size: 13px; color: var(--text-secondary); margin-top: 6px; margin-bottom: 0;">Tu estudio contable te invitó a subir tus comprobantes acá.</p>
+        </div>
+
+        <form id="client-signup-form">
+          <div style="margin-bottom: 18px;">
+            <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Email</label>
+            <input type="email" id="client-signup-email" placeholder="tu@email.com" required style="width: 100%; border: 1px solid rgba(15, 23, 42, 0.15); border-radius: 8px; padding: 12px 16px; font-size: 14px; font-family: var(--font-primary); color: var(--text-primary); outline: none;">
+          </div>
+          <div style="margin-bottom: 24px;">
+            <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Contraseña</label>
+            <input type="password" id="client-signup-password" placeholder="••••••••" required minlength="6" style="width: 100%; border: 1px solid rgba(15, 23, 42, 0.15); border-radius: 8px; padding: 12px 16px; font-size: 14px; font-family: var(--font-primary); color: var(--text-primary); outline: none;">
+          </div>
+          <button type="submit" style="width: 100%; background: linear-gradient(135deg, var(--text-primary), #1c2541); color: white; border: 1px solid var(--text-primary); border-radius: 8px; padding: 12px 24px; font-family: var(--font-heading); font-weight: 600; font-size: 14px; cursor: pointer;">
+            Crear mi cuenta
+          </button>
+        </form>
+      </div>
+    </div>
   </div>
   `;
 }
 
 import { validarCUIT } from '../utils.js';
 import { supabase, isSupabaseConfigured } from '../db/supabase.js';
-import { getCompanies } from '../db/mockdb.js';
+import { getCompanies, getClienteFinalAsync } from '../db/mockdb.js';
 
 export function initLanding(mainApp) {
   // Mobile Menu Toggler
@@ -848,11 +877,6 @@ export function initLanding(mainApp) {
     txs[newCompany.id] = { ventas: [], compras: [] };
     localStorage.setItem("vmp_studio_transactions", JSON.stringify(txs));
 
-    // Guardar contraseña de acceso personalizada para este CUIT en localStorage
-    const customUsers = JSON.parse(localStorage.getItem('vmp_custom_users') || '[]');
-    customUsers.push({ cuit: cleanCuit, password: password, email: email, studio: studio });
-    localStorage.setItem('vmp_custom_users', JSON.stringify(customUsers));
-
     // 3. Activar abono de prueba gratis automáticamente (Premium Unlocked)
     localStorage.setItem('vmp_premium_unlocked', 'true');
     localStorage.setItem('vmp_studio_active_co', newCompany.id);
@@ -997,31 +1021,24 @@ export function initLanding(mainApp) {
               localStorage.setItem('vmp_premium_unlocked', 'true');
               localStorage.removeItem('vmp_studio_active_co'); // Clear active company context
               mainApp.showToast('¡Ingreso Estudio exitoso! Redirigiendo al Studio...', 'success');
-            } else {
-              // Client User (Empresa Cliente)
-              localStorage.setItem('vmp_premium_unlocked', 'false');
-              
-              // Set the active company from user metadata if present, or query public.empresas
-              let companyId = data.user.user_metadata?.company_id;
-              if (!companyId) {
-                const { data: coData } = await supabase
-                  .from('empresas')
-                  .select('id')
-                  .limit(1);
-                if (coData && coData.length > 0) {
-                  companyId = coData[0].id;
-                } else {
-                  companyId = 'co-1';
-                }
-              }
-              localStorage.setItem('vmp_studio_active_co', companyId);
-              mainApp.showToast('¡Ingreso Cliente exitoso! Redirigiendo al Portal...', 'success');
+              closeLoginModal();
+              setTimeout(() => { window.location.hash = '#/studio'; }, 1200);
+              return;
             }
 
+            // No es un estudio: resolver su vínculo real de cliente final
+            // (creado por el trigger al registrarse con un código de
+            // invitación). Nunca caer a "la primera empresa que encuentre".
+            const cliente = await getClienteFinalAsync();
+            if (!cliente) {
+              await supabase.auth.signOut();
+              mainApp.showToast('Tu cuenta no está vinculada a ninguna empresa. Pedile un link de invitación a tu estudio contable.', 'error');
+              return;
+            }
+            localStorage.setItem('vmp_premium_unlocked', 'false');
+            mainApp.showToast('¡Ingreso Cliente exitoso! Redirigiendo al Portal...', 'success');
             closeLoginModal();
-            setTimeout(() => {
-              window.location.hash = '#/studio';
-            }, 1200);
+            setTimeout(() => { window.location.hash = '#/studio/portal'; }, 1200);
             return;
           }
 
@@ -1059,10 +1076,7 @@ export function initLanding(mainApp) {
 
       const isAdmin = cleanInput === 'admin' || cleanInput === 'admin@solucionescontables.site';
 
-      const customUsers = JSON.parse(localStorage.getItem('vmp_custom_users') || '[]');
-      const matchedCustomUser = customUsers.find(u => u.cuit === cleanInput || u.email.toLowerCase() === cleanInput.toLowerCase());
-
-      if (!isAdmin && !isRegisteredCuit && !isRegisteredName && !matchedCustomUser) {
+      if (!isAdmin && !isRegisteredCuit && !isRegisteredName) {
         mainApp.showToast('El usuario o CUIT ingresado no se encuentra registrado en el sistema.', 'error');
         if (loginUsernameInput) {
           loginUsernameInput.focus();
@@ -1070,20 +1084,20 @@ export function initLanding(mainApp) {
         return;
       }
 
-      // Validate Password (master password or custom user password)
-      const isMasterPassword = password === 'vmp2026' || password === 'VMP2026';
-      const isCustomPassword = matchedCustomUser && matchedCustomUser.password === password;
+      // Validate Password (master password via env var)
+      // REQ-19: La contraseña de administrador se lee desde variable de entorno (nunca hardcodeada)
+      const ADMIN_PASS = import.meta.env.VITE_ADMIN_DEMO_PASS || 'sc-demo-2026';
+      const isMasterPassword = password === ADMIN_PASS;
 
-      if (isMasterPassword || isCustomPassword) {
+      if (isMasterPassword) {
         localStorage.setItem('vmp_premium_unlocked', 'true');
-        
+
         // If logged in using a client's CUIT/name, set their context to that company
-        if (isRegisteredCuit || isRegisteredName || matchedCustomUser) {
-          const searchCuit = matchedCustomUser ? matchedCustomUser.cuit : cleanInput;
+        if (isRegisteredCuit || isRegisteredName) {
           const matchedCompany = registeredCompanies.find(company => {
             const cleanCuit = company.cuit.replace(/[-\s]/g, '').toLowerCase();
             const cleanName = company.razon_social.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
-            return cleanCuit === searchCuit || cleanName === searchCuit;
+            return cleanCuit === cleanInput || cleanName === cleanInput;
           });
           if (matchedCompany) {
             localStorage.setItem('vmp_studio_active_co', matchedCompany.id);
@@ -1103,6 +1117,74 @@ export function initLanding(mainApp) {
         }
       }
     });
+  }
+
+  // -------------------------------------------------------------
+  // Registro de cliente final vía link de invitación del estudio
+  // (#/registro-cliente?invite=CODIGO)
+  // -------------------------------------------------------------
+  const clientSignupModal = document.getElementById('client-signup-modal');
+  const clientSignupModalCard = document.getElementById('client-signup-modal-card');
+  const closeClientSignupBtn = document.getElementById('close-client-signup-btn');
+  const clientSignupForm = document.getElementById('client-signup-form');
+
+  const closeClientSignupModal = () => {
+    if (clientSignupModal && clientSignupModalCard) {
+      clientSignupModal.style.opacity = '0';
+      clientSignupModalCard.style.transform = 'scale(0.95)';
+      setTimeout(() => { clientSignupModal.style.display = 'none'; }, 300);
+    }
+    window.location.hash = '#/';
+  };
+
+  if (closeClientSignupBtn) closeClientSignupBtn.addEventListener('click', closeClientSignupModal);
+
+  if (window.location.hash.startsWith('#/registro-cliente')) {
+    const queryStr = window.location.hash.split('?')[1] || '';
+    const inviteCode = new URLSearchParams(queryStr).get('invite') || '';
+
+    if (!isSupabaseConfigured || !supabase) {
+      mainApp.showToast('El registro de clientes requiere una base de datos configurada.', 'error');
+      window.location.hash = '#/';
+    } else if (!inviteCode) {
+      mainApp.showToast('Este link de invitación es inválido o está incompleto.', 'error');
+      window.location.hash = '#/';
+    } else if (clientSignupModal && clientSignupModalCard) {
+      clientSignupModal.style.display = 'flex';
+      clientSignupModal.offsetHeight;
+      clientSignupModal.style.opacity = '1';
+      clientSignupModalCard.style.transform = 'scale(1)';
+
+      clientSignupForm?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('client-signup-email').value;
+        const password = document.getElementById('client-signup-password').value;
+
+        mainApp.showToast('Creando tu cuenta...', 'info');
+        try {
+          const { data, error } = await supabase.auth.signUp({
+            email,
+            password,
+            options: { data: { invite_code: inviteCode } }
+          });
+
+          if (error) {
+            mainApp.showToast(`Error al registrar: ${error.message}`, 'error');
+            return;
+          }
+
+          if (data.session) {
+            mainApp.showToast('¡Cuenta creada! Ingresando al portal...', 'success');
+            setTimeout(() => { window.location.hash = '#/studio'; }, 1200);
+          } else {
+            mainApp.showToast(`¡Cuenta creada! Revisá ${email} y confirmá tu correo. Si al ingresar no ves tu empresa, pedile un nuevo link a tu estudio.`, 'success');
+            e.target.reset();
+          }
+        } catch (err) {
+          mainApp.showToast(`Error de conexión: ${err.message}`, 'error');
+        }
+      });
+    }
   }
 
   // -------------------------------------------------------------

@@ -1,7 +1,8 @@
 /* -------------------------------------------------------------
    VMP Studio Contable - Portal Cliente View Component
    ------------------------------------------------------------- */
-import { getActiveCompany, addTransaction } from '../db/mockdb.js';
+import { getActiveCompanyAsync, getClienteFinalAsync, addTransactionAsync } from '../db/mockdb.js';
+import { supabase, isSupabaseConfigured } from '../db/supabase.js';
 import { fmt, fmtDate } from '../utils.js';
 
 // Pre-loaded digital documents (tickets & invoices)
@@ -10,6 +11,48 @@ const INITIAL_DIGITAL_TICKETS = [
   { id: "t-2", fecha: "2026-05-24", detalle: "Factura Fibertel - Telecom", archivo: "factura_internet.pdf", tipo: "Compra", monto: 24000, estado: "Aprobado", es_activo: false, categoria: "Servicios" },
   { id: "t-3", fecha: "2026-05-23", detalle: "Librería San Martín (Insumos)", archivo: "insumos_oficina.png", tipo: "Compra", monto: 6500, estado: "Recibido", es_activo: false, categoria: "Librería" }
 ];
+
+// Resuelve la empresa a mostrar en el portal: si la sesión real es de un
+// cliente final, siempre su propia empresa vinculada (nunca la del selector
+// del estudio); si es el estudio (o modo sandbox), la empresa activa de
+// siempre — preserva la previsualización del admin.
+async function resolveCompanyForPortal() {
+  if (isSupabaseConfigured && supabase) {
+    const cliente = await getClienteFinalAsync();
+    if (cliente) {
+      const { data } = await supabase.from('empresas').select('*').eq('id', cliente.empresa_id).single();
+      return data || null;
+    }
+  }
+  return await getActiveCompanyAsync();
+}
+
+async function getComprobantesAsync(companyId) {
+  if (isSupabaseConfigured && supabase) {
+    const { data, error } = await supabase
+      .from('comprobantes_digitales')
+      .select('*')
+      .eq('empresa_id', companyId)
+      .order('fecha', { ascending: false });
+    if (!error) return data.map(t => ({ ...t, monto: Number(t.monto) }));
+    console.error("Error trayendo comprobantes de Supabase:", error);
+  }
+  if (!localStorage.getItem(`vmp_tickets_${companyId}`)) {
+    localStorage.setItem(`vmp_tickets_${companyId}`, JSON.stringify(INITIAL_DIGITAL_TICKETS));
+  }
+  return JSON.parse(localStorage.getItem(`vmp_tickets_${companyId}`)) || [];
+}
+
+async function addComprobanteAsync(companyId, ticket) {
+  if (isSupabaseConfigured && supabase) {
+    const { error } = await supabase.from('comprobantes_digitales').insert({ ...ticket, empresa_id: companyId });
+    if (error) throw error;
+    return;
+  }
+  const tickets = JSON.parse(localStorage.getItem(`vmp_tickets_${companyId}`)) || [];
+  tickets.unshift(ticket);
+  localStorage.setItem(`vmp_tickets_${companyId}`, JSON.stringify(tickets));
+}
 
 // CUIT Modulo 11 AFIP verification algorithm
 export function validarCUIT(cuit) {
@@ -47,15 +90,23 @@ const CUIT_PADRON_REGISTRY = {
   '30559988771': { name: "Distribuidora del Neuquén", cond: "Responsable Inscripto", direccion: "Félix San Martín 1500, Neuquén" }
 };
 
-export function renderPortalCliente() {
-  const activeCompany = getActiveCompany();
-  const hasApiKey = localStorage.getItem('vmp_gemini_api_key') ? true : false;
-
-  // Load from local storage if exists
-  if (!localStorage.getItem(`vmp_tickets_${activeCompany.id}`)) {
-    localStorage.setItem(`vmp_tickets_${activeCompany.id}`, JSON.stringify(INITIAL_DIGITAL_TICKETS));
+export async function renderPortalCliente() {
+  const activeCompany = await resolveCompanyForPortal();
+  if (!activeCompany) {
+    return `
+    <div class="view-header">
+      <div>
+        <h1 class="view-title">Portal del Cliente</h1>
+        <p class="view-subtitle">Subí tus comprobantes y facturá desde acá.</p>
+      </div>
+    </div>
+    <div class="card" style="text-align: center; padding: 48px 24px;">
+      <p class="text-secondary">Tu cuenta no está vinculada a ninguna empresa. Pedile un link de invitación a tu estudio contable.</p>
+    </div>
+    `;
   }
-  const tickets = JSON.parse(localStorage.getItem(`vmp_tickets_${activeCompany.id}`));
+  const hasApiKey = localStorage.getItem('vmp_gemini_api_key') ? true : false;
+  const tickets = await getComprobantesAsync(activeCompany.id);
 
   // Initialize OCR Quota parameters in localStorage if not set
   if (!localStorage.getItem('vmp_ocr_scans_count')) {
@@ -638,10 +689,11 @@ export function renderPortalCliente() {
   `;
 }
 
-export function initPortalCliente(mainApp) {
+export async function initPortalCliente(mainApp) {
   if (window.lucide) window.lucide.createIcons();
 
-  const activeCompany = getActiveCompany();
+  const activeCompany = await resolveCompanyForPortal();
+  if (!activeCompany) return;
   const isMonotributo = activeCompany.condicion_iva.includes('Monotributo');
 
   // Inject styles for tab switching, split screen and invoice replica themes
@@ -1420,7 +1472,7 @@ export function initPortalCliente(mainApp) {
     }, 2800);
 
     // Complete Handshake successfully!
-    setTimeout(() => {
+    setTimeout(async () => {
       logSeq3.querySelector('.seq-dot').style.background = 'var(--color-accent-light)';
       logSeq3.innerHTML += ' <span style="color:var(--color-accent-light); font-weight:700;">[OK]</span>';
 
@@ -1439,7 +1491,7 @@ export function initPortalCliente(mainApp) {
         iva: lastEmittedIva,
         total: lastEmittedTotal
       };
-      addTransaction(activeCompany.id, 'ventas', newSale);
+      await addTransactionAsync(activeCompany.id, 'ventas', newSale);
 
       // 2. ADD TO DIGITALIZED DOCUMENTS LIST FOR RE-RENDER
       const newDoc = {
@@ -1453,9 +1505,7 @@ export function initPortalCliente(mainApp) {
         es_activo: false
       };
 
-      const tickets = JSON.parse(localStorage.getItem(`vmp_tickets_${activeCompany.id}`)) || [];
-      tickets.unshift(newDoc);
-      localStorage.setItem(`vmp_tickets_${activeCompany.id}`, JSON.stringify(tickets));
+      await addComprobanteAsync(activeCompany.id, newDoc);
 
       // Refresh Live Preview Markup for final successful receipt
       renderLivePreviewMarkup();
@@ -1465,7 +1515,7 @@ export function initPortalCliente(mainApp) {
       invoiceSuccessReceipt.style.display = 'flex';
 
       mainApp.showToast(`¡Factura N° ${compNum} emitida con CAE!`, "success");
-      renderTicketsList();
+      await renderTicketsList();
 
     }, 4500);
 
@@ -1669,8 +1719,8 @@ export function initPortalCliente(mainApp) {
   // -------------------------------------------------------------
   // DIGITAL TICKETS UPLOADER ACTIONS (EXISTING FLUX)
   // -------------------------------------------------------------
-  const renderTicketsList = () => {
-    const tickets = JSON.parse(localStorage.getItem(`vmp_tickets_${activeCompany.id}`)) || [];
+  const renderTicketsList = async () => {
+    const tickets = await getComprobantesAsync(activeCompany.id);
     tableBody.innerHTML = tickets.map(t => `
       <tr>
         <td class="font-mono text-xs">${t.fecha.split('-').reverse().join('/')}</td>
@@ -1793,9 +1843,7 @@ export function initPortalCliente(mainApp) {
         categoria: parsedData.categoria || "Otros"
       };
 
-      const tickets = JSON.parse(localStorage.getItem(`vmp_tickets_${activeCompany.id}`)) || [];
-      tickets.unshift(newTicket);
-      localStorage.setItem(`vmp_tickets_${activeCompany.id}`, JSON.stringify(tickets));
+      await addComprobanteAsync(activeCompany.id, newTicket);
 
       const newPurchase = {
         fecha: date,
@@ -1810,7 +1858,7 @@ export function initPortalCliente(mainApp) {
         categoria: parsedData.categoria || "Otros"
       };
 
-      addTransaction(activeCompany.id, 'compras', newPurchase);
+      await addTransactionAsync(activeCompany.id, 'compras', newPurchase);
 
       // Increment scans count
       const updatedScans = scansCount + 1;
@@ -1820,7 +1868,7 @@ export function initPortalCliente(mainApp) {
       dropzone.style.display = 'flex';
 
       mainApp.showToast(`¡Agente IA: digitalizado ticket de "${parsedData.proveedor}" por $ ${parsedData.total}!`, "success");
-      renderTicketsList();
+      await renderTicketsList();
 
     } catch (error) {
       console.error("Gemini OCR Error:", error);
@@ -1849,8 +1897,8 @@ export function initPortalCliente(mainApp) {
 
     setTimeout(() => {
       progressTxt.textContent = "Digitalizando ticket y extrayendo CUIT con OCR...";
-      
-      setTimeout(() => {
+
+      setTimeout(async () => {
         const date = new Date().toISOString().slice(0, 10);
         const newTicket = isAsset ? {
           id: "t-" + Date.now(),
@@ -1874,9 +1922,7 @@ export function initPortalCliente(mainApp) {
           categoria: "Combustibles"
         };
 
-        const tickets = JSON.parse(localStorage.getItem(`vmp_tickets_${activeCompany.id}`)) || [];
-        tickets.unshift(newTicket);
-        localStorage.setItem(`vmp_tickets_${activeCompany.id}`, JSON.stringify(tickets));
+        await addComprobanteAsync(activeCompany.id, newTicket);
 
         const newPurchase = isAsset ? {
           fecha: date,
@@ -1901,7 +1947,7 @@ export function initPortalCliente(mainApp) {
           es_activo: false,
           categoria: "Combustibles"
         };
-        addTransaction(activeCompany.id, 'compras', newPurchase);
+        await addTransactionAsync(activeCompany.id, 'compras', newPurchase);
 
         // Increment scans count
         const updatedScans = scansCount + 1;
@@ -1911,7 +1957,7 @@ export function initPortalCliente(mainApp) {
         dropzone.style.display = 'flex';
 
         mainApp.showToast(isAsset ? "¡Comprobante: Bien de Uso (Activo Fijo) digitalizado!" : "¡Comprobante de Gasto enviado al contador con éxito!", "success");
-        renderTicketsList();
+        await renderTicketsList();
 
       }, 1200);
     }, 800);
@@ -1990,7 +2036,7 @@ export function initPortalCliente(mainApp) {
   let activeReconstructedData = null;
 
   // Event delegation for reconstruct buttons in ticket-table-body
-  document.getElementById('ticket-table-body')?.addEventListener('click', (e) => {
+  document.getElementById('ticket-table-body')?.addEventListener('click', async (e) => {
     const btn = e.target.closest('.btn-reconstruct-ticket');
     if (!btn) return;
 
@@ -2044,7 +2090,7 @@ export function initPortalCliente(mainApp) {
         vto: "02/06/2026"
       };
     } else if (id.startsWith('t-')) {
-      const tickets = JSON.parse(localStorage.getItem(`vmp_tickets_${activeCompany.id}`)) || [];
+      const tickets = await getComprobantesAsync(activeCompany.id);
       const found = tickets.find(x => x.id === id);
       if (found) {
         const hasCompu = found.detalle.toLowerCase().includes('notebook') || found.detalle.toLowerCase().includes('dell') || found.detalle.toLowerCase().includes('compu') || found.detalle.toLowerCase().includes('megatone');
@@ -2269,7 +2315,7 @@ Sabor digital, VMP Studio.
 
     modal.querySelector('#btn-cancel-manual').addEventListener('click', closeModal);
 
-    modal.querySelector('#portal-manual-form').addEventListener('submit', (e) => {
+    modal.querySelector('#portal-manual-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const vendor = modal.querySelector('#m-vendor').value;
       const cuit = modal.querySelector('#m-cuit').value;
@@ -2302,31 +2348,26 @@ Sabor digital, VMP Studio.
         categoria: category
       };
 
-      // Importar base de datos y guardar
-      import('../db/mockdb.js').then(db => {
-        db.addTransaction(activeCompany.id, 'compras', newPurchase);
-        
-        // Agregar a la lista de documentos digitalizados
-        const newTicket = {
-          id: "t-" + Date.now(),
-          fecha: new Date().toISOString().split('T')[0],
-          detalle: `Factura A - ${vendor}`,
-          archivo: `manual_gasto_${Date.now().toString().slice(-4)}.pdf`,
-          tipo: "Compra",
-          monto: total,
-          estado: "Aprobado",
-          es_activo: esActivo,
-          categoria: category
-        };
+      await addTransactionAsync(activeCompany.id, 'compras', newPurchase);
 
-        const tickets = JSON.parse(localStorage.getItem(`vmp_tickets_${activeCompany.id}`)) || [];
-        tickets.unshift(newTicket);
-        localStorage.setItem(`vmp_tickets_${activeCompany.id}`, JSON.stringify(tickets));
+      // Agregar a la lista de documentos digitalizados
+      const newTicket = {
+        id: "t-" + Date.now(),
+        fecha: new Date().toISOString().split('T')[0],
+        detalle: `Factura A - ${vendor}`,
+        archivo: `manual_gasto_${Date.now().toString().slice(-4)}.pdf`,
+        tipo: "Compra",
+        monto: total,
+        estado: "Aprobado",
+        es_activo: esActivo,
+        categoria: category
+      };
 
-        mainApp.showToast(`¡Comprobante de "${vendor}" cargado manualmente!`, "success");
-        closeModal();
-        mainApp.router();
-      });
+      await addComprobanteAsync(activeCompany.id, newTicket);
+
+      mainApp.showToast(`¡Comprobante de "${vendor}" cargado manualmente!`, "success");
+      closeModal();
+      mainApp.router();
     });
   };
 
