@@ -1,6 +1,7 @@
 /* -------------------------------------------------------------
    VMP Studio Contable - Portal Cliente View Component
    ------------------------------------------------------------- */
+import { renderDatosCard, initDatosCard } from './datos.js';
 import { getActiveCompanyAsync, getClienteFinalAsync, addTransactionAsync } from '../db/mockdb.js';
 import { supabase, isSupabaseConfigured, getCachedRole } from '../db/supabase.js';
 import { fmt, fmtDate } from '../utils.js';
@@ -671,6 +672,8 @@ export async function renderPortalCliente() {
     </div>
   </div>
 
+  <div style="margin-top: 24px;">${renderDatosCard({ esEstudio: false })}</div>
+
   <!-- Modal de Cupo Excedido [NEW] -->
   <div id="ocr-quota-exceeded-modal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; padding: 20px; animation: fadeIn 0.25s ease;">
     <div class="card" style="width: 100%; max-width: 400px; border-color: #ef4444; overflow: hidden; transform: scale(0.95); animation: zoomIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;">
@@ -705,6 +708,7 @@ export async function renderPortalCliente() {
 
 export async function initPortalCliente(mainApp) {
   if (window.lucide) window.lucide.createIcons();
+  initDatosCard(mainApp);
 
   const activeCompany = await resolveCompanyForPortal();
   if (!activeCompany) return;

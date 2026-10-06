@@ -5,6 +5,7 @@ import { getCompaniesAsync, getActiveCompanyAsync, getEstudioAsync, updateEstudi
 import { isSupabaseConfigured, supabase } from '../db/supabase.js';
 import { sanitizeInput as esc } from '../utils.js';
 import { blockSimulated } from '../utils.js';
+import { renderDatosCard, initDatosCard } from './datos.js';
 
 function getDelegationActive(company) {
   if (isSupabaseConfigured && supabase) return !!company.delegation_active;
@@ -349,6 +350,8 @@ export async function renderConfiguracion() {
         </div>
       </div>
 
+      ${renderDatosCard({ esEstudio: true })}
+
     </div>
 
   </div>
@@ -357,6 +360,7 @@ export async function renderConfiguracion() {
 
 export async function initConfiguracion(mainApp) {
   if (window.lucide) window.lucide.createIcons();
+  initDatosCard(mainApp);
 
   const activeCompany = await getActiveCompanyAsync();
   if (!activeCompany) return;
