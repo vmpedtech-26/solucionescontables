@@ -3,6 +3,7 @@
    ------------------------------------------------------------- */
 import { initMockDB, getActiveCompany, setActiveCompanyId, getActiveCompanyAsync, syncClienteCompanyCache } from './db/mockdb.js';
 import { supabase, isSupabaseConfigured, getCachedSession, getCachedRole } from './db/supabase.js';
+import { initMonitoring } from './monitoring.js';
 
 // Import Views
 import { renderLanding, initLanding } from './views/landing.js';
@@ -416,5 +417,6 @@ class Application {
 }
 
 // Bootstrap the app
+initMonitoring();
 const mainApp = new Application();
 export default mainApp;

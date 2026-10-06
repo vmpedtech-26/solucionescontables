@@ -1,0 +1,22 @@
+# Chequeo de disponibilidad cada 30 minutos. Si el sitio o la API de Supabase
+# no responden, el job falla y GitHub envia un email al dueño del repo
+# (Settings > Notifications > Actions). Es una alternativa gratuita a un
+# servicio de uptime; no reemplaza a uno con alertas por SMS/Slack.
+name: Health check
+
+on:
+  schedule:
+    - cron: '7,37 * * * *'
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: El sitio responde 200
+        run: curl -fsS --retry 3 --retry-delay 10 --max-time 30 -o /dev/null https://solucionescontables.site/
+      - name: La API de Supabase responde
+        run: |
+          curl -fsS --retry 3 --retry-delay 10 --max-time 30 -o /dev/null \
+            "https://nbqlndlpzpvjmlimymdp.supabase.co/rest/v1/estudios?select=id&limit=1" \
+            -H "apikey: sb_publishable_ahaq3Gsz97t43kXs86lBMw_5vnb563D"
