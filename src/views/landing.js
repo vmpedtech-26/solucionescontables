@@ -555,6 +555,10 @@ export function renderLanding() {
                 <label class="form-label" style="font-size:11.5px;">Contraseña de Acceso</label>
                 <input type="password" class="form-input" id="lead-password" placeholder="••••••••" required style="padding: 10px 12px; font-size: 13px;">
               </div>
+<label style="display: flex; gap: 8px; align-items: flex-start; font-size: 11.5px; line-height: 1.4; color: var(--text-secondary); margin-bottom: 14px; cursor: pointer;">
+                <input type="checkbox" id="lead-acepta" required style="margin-top: 2px; flex-shrink: 0;">
+                <span>Leí y acepto los <a href="#/terminos" target="_blank" rel="noopener" style="color: var(--color-accent); font-weight: 600;">Términos y Condiciones</a> y la <a href="#/privacidad" target="_blank" rel="noopener" style="color: var(--color-accent); font-weight: 600;">Política de Privacidad</a>.</span>
+              </label>
               <button type="submit" class="btn btn-primary w-full" style="padding: 12px; font-weight: 700;">
                 Registrar e Ingresar al Studio
               </button>
@@ -573,6 +577,8 @@ export function renderLanding() {
           <a href="#partners" class="lp-footer-link">Partners</a>
           <a href="#contact" class="lp-footer-link">Contacto</a>
           <a href="#contact" class="lp-footer-link" style="color: var(--color-accent); font-weight: 700;">Solicitar Demo →</a>
+          <a href="#/terminos" class="lp-footer-link">Términos</a>
+          <a href="#/privacidad" class="lp-footer-link">Privacidad</a>
         </div>
         <div style="display: flex; gap: 20px; align-items: center;">
           <a href="https://wa.me/5492996731487" target="_blank" rel="noopener" aria-label="WhatsApp" style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: #25d366; font-weight: 700; text-decoration: none;">
@@ -647,7 +653,11 @@ export function renderLanding() {
             <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Contraseña</label>
             <input type="password" id="client-signup-password" placeholder="••••••••" required minlength="6" style="width: 100%; border: 1px solid rgba(15, 23, 42, 0.15); border-radius: 8px; padding: 12px 16px; font-size: 14px; font-family: var(--font-primary); color: var(--text-primary); outline: none;">
           </div>
-          <button type="submit" style="width: 100%; background: linear-gradient(135deg, var(--text-primary), #1c2541); color: white; border: 1px solid var(--text-primary); border-radius: 8px; padding: 12px 24px; font-family: var(--font-heading); font-weight: 600; font-size: 14px; cursor: pointer;">
+<label style="display: flex; gap: 8px; align-items: flex-start; font-size: 11.5px; line-height: 1.4; color: var(--text-secondary); margin-bottom: 18px; cursor: pointer;">
+                <input type="checkbox" id="client-signup-acepta" required style="margin-top: 2px; flex-shrink: 0;">
+                <span>Leí y acepto los <a href="#/terminos" target="_blank" rel="noopener" style="color: var(--color-accent); font-weight: 600;">Términos y Condiciones</a> y la <a href="#/privacidad" target="_blank" rel="noopener" style="color: var(--color-accent); font-weight: 600;">Política de Privacidad</a>.</span>
+              </label>
+              <button type="submit" style="width: 100%; background: linear-gradient(135deg, var(--text-primary), #1c2541); color: white; border: 1px solid var(--text-primary); border-radius: 8px; padding: 12px 24px; font-family: var(--font-heading); font-weight: 600; font-size: 14px; cursor: pointer;">
             Crear mi cuenta
           </button>
         </form>
@@ -658,6 +668,7 @@ export function renderLanding() {
 }
 
 import { validarCUIT } from '../utils.js';
+import { LEGAL } from '../legal-config.js';
 import { supabase, isSupabaseConfigured } from '../db/supabase.js';
 import { getCompanies, getClienteFinalAsync } from '../db/mockdb.js';
 
@@ -829,7 +840,7 @@ export function initLanding(mainApp) {
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
-          options: { data: { studio_name: studio } }
+          options: { data: { studio_name: studio, acepta_terminos: LEGAL.version } }
         });
 
         if (error) {
@@ -1165,7 +1176,7 @@ export function initLanding(mainApp) {
           const { data, error } = await supabase.auth.signUp({
             email,
             password,
-            options: { data: { invite_code: inviteCode } }
+            options: { data: { invite_code: inviteCode, acepta_terminos: LEGAL.version } }
           });
 
           if (error) {

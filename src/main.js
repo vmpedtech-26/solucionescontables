@@ -4,6 +4,7 @@
 import { initMockDB, getActiveCompany, setActiveCompanyId, getActiveCompanyAsync, syncClienteCompanyCache } from './db/mockdb.js';
 import { supabase, isSupabaseConfigured, getCachedSession, getCachedRole } from './db/supabase.js';
 import { initMonitoring } from './monitoring.js';
+import { renderTerminos, renderPrivacidad } from './views/legal.js';
 
 // Import Views
 import { renderLanding, initLanding } from './views/landing.js';
@@ -100,6 +101,12 @@ class Application {
 
       // Update breadcrumb or titles if applicable
       document.title = "Soluciones Contables — El integrante virtual que elimina la carga manual de tu estudio.";
+    }
+    // Paginas legales publicas
+    else if (hash === '#/terminos' || hash === '#/privacidad') {
+      rootEl.innerHTML = hash === '#/terminos' ? renderTerminos() : renderPrivacidad();
+      document.title = (hash === '#/terminos' ? 'Términos y Condiciones' : 'Política de Privacidad') + ' — Soluciones Contables';
+      window.scrollTo(0, 0);
     }
     // Registro de cliente final vía link de invitación del estudio (público)
     else if (hash.startsWith('#/registro-cliente')) {

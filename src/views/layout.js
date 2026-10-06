@@ -252,6 +252,10 @@ export function renderDashboardLayout(childHTML, activeRoute, role = null) {
 
       <div class="db-view-container">
         ${childHTML}
+        <div style="margin: 32px 0 8px; padding-top: 14px; border-top: 1px solid var(--border-color); font-size: 11px; line-height: 1.5; color: var(--text-muted);">
+          Los cálculos y liquidaciones son orientativos y de apoyo: no reemplazan el criterio ni la firma del contador público matriculado, y esta plataforma no presenta declaraciones juradas ante ARCA.
+          <a href="#/terminos" style="color: var(--color-accent);">Términos</a> · <a href="#/privacidad" style="color: var(--color-accent);">Privacidad</a>
+        </div>
       </div>
 
       <!-- Mobile Bottom Navigation Bar -->
