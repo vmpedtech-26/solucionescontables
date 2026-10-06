@@ -3,6 +3,7 @@
    ------------------------------------------------------------- */
 import { getCompaniesAsync, saveCompanyAsync } from '../db/mockdb.js';
 import { supabase, isSupabaseConfigured } from '../db/supabase.js';
+import { sanitizeInput as esc } from '../utils.js';
 
 export async function renderEmpresas() {
   const companies = await getCompaniesAsync();
@@ -107,27 +108,27 @@ export async function renderEmpresas() {
                 <td>
                   <div style="display: flex; align-items: center; gap: 12px;">
                     <div class="company-avatar" style="background: ${c.color}; width: 36px; height: 36px; border-radius: 10px; font-weight: 800; font-size: 15px;">
-                      ${c.razon_social[0]}
+                      ${esc(c.razon_social[0])}
                     </div>
                     <div>
-                      <div style="font-weight: 700; font-size: 14px;">${c.razon_social}</div>
-                      <div style="font-size: 11px; color: var(--text-secondary);">${c.tipo}</div>
+                      <div style="font-weight: 700; font-size: 14px;">${esc(c.razon_social)}</div>
+                      <div style="font-size: 11px; color: var(--text-secondary);">${esc(c.tipo)}</div>
                     </div>
                   </div>
                 </td>
-                <td class="font-mono" style="font-weight: 500;">${c.cuit}</td>
+                <td class="font-mono" style="font-weight: 500;">${esc(c.cuit)}</td>
                 <td>
                   <span class="badge" style="margin: 0; padding: 4px 12px; font-size: 11px; white-space: nowrap; display: inline-block; color: ${c.condicion_iva.includes('Inscripto') ? 'var(--color-teal-light)' : 'var(--color-accent-light)'}; border-color: ${c.condicion_iva.includes('Inscripto') ? 'rgba(13, 148, 136, 0.3)' : 'rgba(22, 163, 74, 0.3)'}; background: ${c.condicion_iva.includes('Inscripto') ? 'rgba(13, 148, 136, 0.08)' : 'rgba(22, 163, 74, 0.08)'}">
-                    ${c.condicion_iva}
+                    ${esc(c.condicion_iva)}
                   </span>
                 </td>
-                <td style="color: var(--text-secondary); font-size: 13px;">${c.actividad || 'No especificada'}</td>
+                <td style="color: var(--text-secondary); font-size: 13px;">${esc(c.actividad || 'No especificada')}</td>
                 <td class="font-mono text-sm">${c.inicio_actividades.split('-').reverse().join('/')}</td>
                 <td>
                   <span class="badge-status active">Activo</span>
                 </td>
                 <td>
-                  <button class="btn btn-outline btn-sm btn-invite-client" data-id="${c.id}" data-name="${c.razon_social}" style="font-size: 11px; padding: 4px 10px; white-space: nowrap;">
+                  <button class="btn btn-outline btn-sm btn-invite-client" data-id="${esc(c.id)}" data-name="${esc(c.razon_social)}" style="font-size: 11px; padding: 4px 10px; white-space: nowrap;">
                     <i data-lucide="user-plus" style="width: 12px; height: 12px;"></i> Invitar cliente
                   </button>
                 </td>

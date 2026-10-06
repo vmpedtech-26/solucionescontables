@@ -5,6 +5,7 @@
 import { getActiveCompanyAsync, getTransactionsAsync } from '../db/mockdb.js';
 import { supabase, isSupabaseConfigured } from '../db/supabase.js';
 import { renderPremiumTeaser } from '../utils.js';
+import { sanitizeInput as esc } from '../utils.js';
 
 function fmt(n) {
   return n.toLocaleString('es-AR', { minimumFractionDigits: 2 });
@@ -258,10 +259,10 @@ export async function renderRetenciones() {
               <tr>
                 <td style="font-size:12px;">${r.fecha.split('-').reverse().join('/')}</td>
                 <td>
-                  <div style="font-size:12.5px;font-weight:700;color:var(--color-primary);">${r.agente}</div>
-                  <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-muted);margin-top:2px;">CUIT: ${r.cuit}</div>
+                  <div style="font-size:12.5px;font-weight:700;color:var(--color-primary);">${esc(r.agente)}</div>
+                  <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-muted);margin-top:2px;">CUIT: ${esc(r.cuit)}</div>
                 </td>
-                <td style="font-size:11.5px;font-weight:600;color:var(--text-secondary);">${r.tipo}</td>
+                <td style="font-size:11.5px;font-weight:600;color:var(--text-secondary);">${esc(r.tipo)}</td>
                 <td class="font-mono font-bold" style="text-align:right;font-size:13px;color:${r.conciliado ? 'var(--color-accent)' : '#f59e0b'};">$ ${fmt(r.monto)}</td>
                 <td style="text-align:center;">
                   <span style="font-size:9.5px;font-weight:700;padding:2px 8px;border-radius:12px;background:rgba(255,255,255,0.03);border:1px solid var(--border-color);color:${fuenteColor[r.fuente] || '#fff'};">
@@ -285,7 +286,7 @@ export async function renderRetenciones() {
                       ✓ Listo
                     </button>
                   ` : `
-                    <button class="btn btn-primary btn-xs btn-conciliar" data-id="${r.id}" style="padding:2px 8px;font-size:10px;background:var(--color-accent);border-color:var(--color-accent);">
+                    <button class="btn btn-primary btn-xs btn-conciliar" data-id="${esc(r.id)}" style="padding:2px 8px;font-size:10px;background:var(--color-accent);border-color:var(--color-accent);">
                       Conciliar
                     </button>
                   `}
@@ -374,7 +375,7 @@ export async function renderRetenciones() {
             const sircrebJurisdiccion = cmTotalSircreb * coef;
             const saldoJurisdiccion = impuesto - sircrebJurisdiccion;
             return `<tr>
-              <td style="font-weight:700;">${j.provincia}</td>
+              <td style="font-weight:700;">${esc(j.provincia)}</td>
               <td class="font-mono">${(coef * 100).toFixed(2)}%</td>
               <td class="font-mono">$ ${fmt(base)}</td>
               <td class="font-mono">${j.alicuotaIIBB.toFixed(2)}%</td>
@@ -493,7 +494,7 @@ export async function initRetenciones(mainApp) {
           : r.id.replace('r', '').padStart(16, '0');
         const fechaArr = r.fecha.split('-');
         const fechaFmt = `${fechaArr[2]}/${fechaArr[1]}/${fechaArr[0]}`;
-        csv += `${fechaFmt};${cuit};${r.tipo};${numDoc};${r.monto.toFixed(2).replace('.',',')};${r.conciliado ? 'CONCILIADA' : 'PENDIENTE'}\n`;
+        csv += `${fechaFmt};${esc(cuit)};${esc(r.tipo)};${numDoc};${r.monto.toFixed(2).replace('.',',')};${r.conciliado ? 'CONCILIADA' : 'PENDIENTE'}\n`;
       });
 
       const blob = new Blob([bom + csv], { type: 'text/csv;charset=utf-8' });

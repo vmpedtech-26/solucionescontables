@@ -4,6 +4,7 @@
 import { getActiveCompanyAsync } from '../db/mockdb.js';
 import { supabase, isSupabaseConfigured } from '../db/supabase.js';
 import { fmt, downloadFile, renderPremiumTeaser } from '../utils.js';
+import { sanitizeInput as esc } from '../utils.js';
 
 function mapLiqFromDb(l) {
   return {
@@ -107,7 +108,7 @@ export async function renderSueldos() {
     </div>
     <div style="display: flex; align-items: center; gap: 10px;">
       <span class="badge" style="background: rgba(22, 163, 74, 0.08); color: var(--color-primary); border-color: rgba(22, 163, 74, 0.2); margin: 0; padding: 6px 12px; font-weight: 700;">
-        🏢 ${activeCo.razon_social}
+        🏢 ${esc(activeCo.razon_social)}
       </span>
     </div>
   </div>
@@ -525,7 +526,7 @@ export async function initSueldos(mainApp) {
         <td style="padding: 12px 20px; text-align: right; font-weight: 600; color: #ef4444; font-size: 13px;">-$${fmt(l.totalDeduc)}</td>
         <td style="padding: 12px 20px; text-align: right; font-weight: 800; color: var(--color-primary); font-size: 13px;">$${fmt(l.neto)}</td>
         <td style="padding: 12px 20px; text-align: center;">
-          <button class="btn-icon-sm btn-delete-liq" data-id="${l.id}" title="Eliminar registro" style="background: rgba(239, 68, 68, 0.05); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.15); width: 28px; height: 28px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;">
+          <button class="btn-icon-sm btn-delete-liq" data-id="${esc(l.id)}" title="Eliminar registro" style="background: rgba(239, 68, 68, 0.05); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.15); width: 28px; height: 28px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;">
             <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
           </button>
         </td>

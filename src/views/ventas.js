@@ -6,6 +6,7 @@ import {
   getTransactionsAsync as getTransactions,
   addTransactionAsync as addTransaction
 } from '../db/mockdb.js';
+import { sanitizeInput as esc } from '../utils.js';
 
 function renderNoCompanyState() {
   return `
@@ -306,24 +307,24 @@ function renderTransactionsTable(transactions, type) {
             </td>
             <td>
               <span class="badge-status ${type === 'ventas' ? 'active' : 'pending'}" style="font-size: 11.5px; font-weight: 600; padding: 2px 10px;">
-                ${t.tipo_comprobante}
+                ${esc(t.tipo_comprobante)}
               </span>
             </td>
-            <td class="font-mono text-sm" style="font-weight: 500;">${t.numero}</td>
+            <td class="font-mono text-sm" style="font-weight: 500;">${esc(t.numero)}</td>
             <td style="font-weight: 600; font-size: 13.5px;">
-              <div>${t.cliente || t.proveedor}</div>
+              <div>${esc(t.cliente || t.proveedor)}</div>
               ${type === 'compras' ? (t.es_activo ? `
                 <div style="font-size: 10px; font-weight: 700; color: var(--color-accent-light); display: flex; align-items: center; gap: 4px; margin-top: 2px;">
                   <i data-lucide="building" style="width: 10px; height: 10px;"></i> Bien de Uso / Activo
                 </div>
               ` : `
                 <div style="font-size: 10px; font-weight: 500; color: var(--text-secondary); display: flex; align-items: center; gap: 4px; margin-top: 2px;">
-                  <i data-lucide="tag" style="width: 10px; height: 10px;"></i> Gasto (${t.categoria || 'General'})
+                  <i data-lucide="tag" style="width: 10px; height: 10px;"></i> Gasto (${esc(t.categoria || 'General')})
                 </div>
               `) : ''}
             </td>
             <td class="font-mono" style="color: var(--text-secondary);">
-              <div>${t.cuit}</div>
+              <div>${esc(t.cuit)}</div>
               ${cuitStatusBadge}
             </td>
             <td class="font-mono text-right">$ ${t.neto.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</td>

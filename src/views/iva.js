@@ -2,6 +2,7 @@
    VMP Studio Contable - Libro IVA Digital View Component
    ------------------------------------------------------------- */
 import { getActiveCompany, getTransactions } from '../db/mockdb.js';
+import { sanitizeInput as esc } from '../utils.js';
 
 export function renderIVA() {
   const activeCompany = getActiveCompany();
@@ -247,12 +248,12 @@ export function renderIVA() {
                 <td class="font-mono text-sm">${item.fecha.split('-').reverse().join('/')}</td>
                 <td>
                   <span class="badge-status ${item.type === 'venta' ? 'active' : 'pending'}" style="font-size: 10px; padding: 1px 6px;">
-                    ${item.tipo_comprobante}
+                    ${esc(item.tipo_comprobante)}
                   </span>
                 </td>
-                <td class="font-mono text-xs">${item.numero}</td>
+                <td class="font-mono text-xs">${esc(item.numero)}</td>
                 <td style="font-weight: 600; font-size: 12.5px;">
-                  <div>${item.cliente || item.proveedor}</div>
+                  <div>${esc(item.cliente || item.proveedor)}</div>
                   ${item.es_activo ? `
                     <span style="font-size: 8px; font-weight: 700; color: var(--color-accent-light); background: rgba(22, 163, 74, 0.08); padding: 1px 4px; border-radius: 3px; border: 1px solid rgba(22, 163, 74, 0.2); display: inline-flex; align-items: center; gap: 2px; margin-top: 2px;">
                       <i data-lucide="building" style="width: 8px; height: 8px;"></i> BIEN DE USO
@@ -260,7 +261,7 @@ export function renderIVA() {
                   ` : ''}
                 </td>
                 <td class="font-mono text-xs" style="color: var(--text-secondary);">
-                  <div>${item.cuit}</div>
+                  <div>${esc(item.cuit)}</div>
                   ${item.isCuitInactive ? `
                     <span title="La CUIT del emisor está inactiva en ARCA. El crédito fiscal no es computable." style="font-size: 8px; font-weight: 800; color: #f59e0b; background: rgba(245, 158, 11, 0.06); padding: 1px 4px; border-radius: 3px; border: 1px solid rgba(245,158,11,0.2); display: inline-flex; align-items: center; gap: 2px; margin-top: 2px; cursor: help;">
                       <i data-lucide="shield-alert" style="width: 8px; height: 8px;"></i> INACTIVA

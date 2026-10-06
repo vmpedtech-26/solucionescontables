@@ -3,6 +3,7 @@
    Pilar 2: Omnicanalidad y AI-OCR (Gemini Vision)
    ------------------------------------------------------------- */
 import { addTransactionAsync } from '../db/mockdb.js';
+import { sanitizeInput as esc } from '../utils.js';
 
 let activeChatId = 'co-1'; // Default active chat
 let scanState = 'idle'; // 'idle' | 'scanning' | 'scanned' | 'registered'
@@ -104,7 +105,7 @@ export function renderWhatsApp() {
 
       <div class="wa-chats-container" style="flex-grow: 1; overflow-y: auto;">
         ${chats.map(c => `
-          <div class="wa-chat-item ${c.id === activeChatId ? 'active' : ''}" data-id="${c.id}" style="padding: 14px 16px; border-bottom: 1px solid rgba(0,0,0,0.04); display: flex; gap: 12px; cursor: pointer; transition: background 0.2s;">
+          <div class="wa-chat-item ${c.id === activeChatId ? 'active' : ''}" data-id="${esc(c.id)}" style="padding: 14px 16px; border-bottom: 1px solid rgba(0,0,0,0.04); display: flex; gap: 12px; cursor: pointer; transition: background 0.2s;">
             <div style="background: ${c.avatar}; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; flex-shrink: 0; font-size: 14px;">
               ${c.name.split(' ').map(w => w[0]).join('').substring(0, 2)}
             </div>

@@ -4,6 +4,7 @@
 import { getActiveCompanyAsync, getClienteFinalAsync, addTransactionAsync } from '../db/mockdb.js';
 import { supabase, isSupabaseConfigured, getCachedRole } from '../db/supabase.js';
 import { fmt, fmtDate } from '../utils.js';
+import { sanitizeInput as esc } from '../utils.js';
 
 // Pre-loaded digital documents (tickets & invoices)
 const INITIAL_DIGITAL_TICKETS = [
@@ -167,7 +168,7 @@ export async function renderPortalCliente() {
       <p class="view-subtitle">Consola de facturación y digitalización de comprobantes para la empresa activa.</p>
     </div>
     <div style="background: rgba(22, 163, 74, 0.08); border: 1px solid rgba(22, 163, 74, 0.2); padding: 8px 16px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; color: var(--color-accent-light);">
-      Acceso: Cliente Final (${activeCompany.razon_social})
+      Acceso: Cliente Final (${esc(activeCompany.razon_social)})
     </div>
   </div>
 
@@ -549,13 +550,13 @@ export async function renderPortalCliente() {
                   <tr>
                     <td class="font-mono text-xs">${t.fecha.split('-').reverse().join('/')}</td>
                     <td>
-                      <div style="font-weight: 600; font-size: 12px; color: var(--color-primary);">${t.detalle}</div>
+                      <div style="font-weight: 600; font-size: 12px; color: var(--color-primary);">${esc(t.detalle)}</div>
                       <div style="font-size: 10px; color: var(--text-secondary); display: flex; align-items: center; gap: 4px; margin-top: 2px;">
-                        <i data-lucide="file" style="width: 10px; height: 10px;"></i> ${t.archivo}
+                        <i data-lucide="file" style="width: 10px; height: 10px;"></i> ${esc(t.archivo)}
                         ${t.es_activo ? `
                           <span style="font-size: 8px; font-weight: 700; color: var(--color-accent-light); background: rgba(22, 163, 74, 0.08); padding: 1px 4px; border-radius: 3px; border: 1px solid rgba(22, 163, 74, 0.2);">BIEN DE USO</span>
                         ` : `
-                          <span style="font-size: 8px; font-weight: 600; color: var(--text-muted); background: var(--bg-secondary); padding: 1px 4px; border-radius: 3px; border: 1px solid var(--border-color);">${t.tipo === 'Venta' ? 'VENTA EMITIDA' : 'GASTO (' + (t.categoria || 'General') + ')'}</span>
+                          <span style="font-size: 8px; font-weight: 600; color: var(--text-muted); background: var(--bg-secondary); padding: 1px 4px; border-radius: 3px; border: 1px solid var(--border-color);">${t.tipo === 'Venta' ? 'VENTA EMITIDA' : 'GASTO (' + esc(t.categoria || 'General') + ')'}</span>
                         `}
                       </div>
                     </td>
@@ -564,12 +565,12 @@ export async function renderPortalCliente() {
                     </td>
                     <td>
                       <span class="badge-status ${t.estado === 'Aprobado' ? 'active' : (t.estado === 'Procesado' ? 'pending' : 'inactive')}" style="font-size: 10px; padding: 1px 6px;">
-                        ${t.estado}
+                        ${esc(t.estado)}
                       </span>
                     </td>
                     <td class="text-center">
                       ${t.tipo !== 'Venta' ? `
-                        <button class="btn btn-outline btn-xs btn-reconstruct-ticket" data-id="${t.id}" title="Reconstruir comprobante térmico: Genera una réplica digital exacta del ticket en base a la información extraída por la IA, lista para descargar o imprimir." style="display:inline-flex; align-items:center; gap:2px; font-size:9.5px; padding: 2px 6px; border-color: rgba(22, 163, 74, 0.3); color:var(--color-accent-light);">
+                        <button class="btn btn-outline btn-xs btn-reconstruct-ticket" data-id="${esc(t.id)}" title="Reconstruir comprobante térmico: Genera una réplica digital exacta del ticket en base a la información extraída por la IA, lista para descargar o imprimir." style="display:inline-flex; align-items:center; gap:2px; font-size:9.5px; padding: 2px 6px; border-color: rgba(22, 163, 74, 0.3); color:var(--color-accent-light);">
                           <i data-lucide="sparkles" style="width:10px; height:10px; color:var(--color-accent-light);"></i> Reconstruir
                         </button>
                       ` : `
@@ -1037,12 +1038,12 @@ export async function initPortalCliente(mainApp) {
           <div style="display: flex; flex-direction: column; gap: 2px; justify-content: space-between; flex:1;">
             <div style="display: flex; align-items: center; gap: 6px;">
               ${companyLogoHtml}
-              <div style="font-size: 11px; font-weight: 900; letter-spacing: -0.2px;" class="invoice-title-color">${activeCompany.razon_social}</div>
+              <div style="font-size: 11px; font-weight: 900; letter-spacing: -0.2px;" class="invoice-title-color">${esc(activeCompany.razon_social)}</div>
             </div>
             <div style="font-size: 8px; color: var(--text-secondary); line-height: 1.2; margin-top: 4px;">
-              CUIT: <strong>${activeCompany.cuit}</strong><br>
-              Condición: ${activeCompany.condicion_iva}<br>
-              Actividad: ${activeCompany.actividad}
+              CUIT: <strong>${esc(activeCompany.cuit)}</strong><br>
+              Condición: ${esc(activeCompany.condicion_iva)}<br>
+              Actividad: ${esc(activeCompany.actividad)}
             </div>
           </div>
 
@@ -1437,7 +1438,7 @@ export async function initPortalCliente(mainApp) {
     &lt;ar:Auth&gt;
       &lt;ar:Token&gt;PD94bWwgdmVyc2lvbj0iMS4w...&lt;/ar:Token&gt;
       &lt;ar:Sign&gt;MIIEPgYJKoZIhvcNAQc...&lt;/ar:Sign&gt;
-      &lt;ar:Cuit&gt;${activeCompany.cuit.replace(/-/g, '')}&lt;/ar:Cuit&gt;
+      &lt;ar:Cuit&gt;${esc(activeCompany.cuit.replace(/-/g, ''))}&lt;/ar:Cuit&gt;
     &lt;/ar:Auth&gt;
     &lt;ar:FeCAEReq&gt;
       &lt;ar:FeCabReq&gt;
@@ -1596,7 +1597,7 @@ export async function initPortalCliente(mainApp) {
       <html lang="es">
       <head>
         <meta charset="UTF-8">
-        <title>Factura Electrónica ARCA - ${activeCompany.razon_social}</title>
+        <title>Factura Electrónica ARCA - ${esc(activeCompany.razon_social)}</title>
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
         <style>
           body {
@@ -1737,13 +1738,13 @@ export async function initPortalCliente(mainApp) {
       <tr>
         <td class="font-mono text-xs">${t.fecha.split('-').reverse().join('/')}</td>
         <td>
-          <div style="font-weight: 600; font-size: 12px; color: var(--color-primary);">${t.detalle}</div>
+          <div style="font-weight: 600; font-size: 12px; color: var(--color-primary);">${esc(t.detalle)}</div>
           <div style="font-size: 10px; color: var(--text-secondary); display: flex; align-items: center; gap: 4px; margin-top: 2px;">
-            <i data-lucide="file" style="width: 10px; height: 10px;"></i> ${t.archivo}
+            <i data-lucide="file" style="width: 10px; height: 10px;"></i> ${esc(t.archivo)}
             ${t.es_activo ? `
               <span style="font-size: 8px; font-weight: 700; color: var(--color-accent-light); background: rgba(22, 163, 74, 0.08); padding: 1px 4px; border-radius: 3px; border: 1px solid rgba(22, 163, 74, 0.2);">BIEN DE USO</span>
             ` : `
-              <span style="font-size: 8px; font-weight: 600; color: var(--text-muted); background: var(--bg-secondary); padding: 1px 4px; border-radius: 3px; border: 1px solid var(--border-color);">${t.tipo === 'Venta' ? 'VENTA EMITIDA' : 'GASTO (' + (t.categoria || 'General') + ')'}</span>
+              <span style="font-size: 8px; font-weight: 600; color: var(--text-muted); background: var(--bg-secondary); padding: 1px 4px; border-radius: 3px; border: 1px solid var(--border-color);">${t.tipo === 'Venta' ? 'VENTA EMITIDA' : 'GASTO (' + esc(t.categoria || 'General') + ')'}</span>
             `}
           </div>
         </td>
@@ -1752,7 +1753,7 @@ export async function initPortalCliente(mainApp) {
         </td>
         <td>
           <span class="badge-status ${t.estado === 'Aprobado' ? 'active' : (t.estado === 'Procesado' ? 'pending' : 'inactive')}" style="font-size: 10px; padding: 1px 6px;">
-            ${t.estado}
+            ${esc(t.estado)}
           </span>
         </td>
       </tr>
@@ -2196,7 +2197,7 @@ export async function initPortalCliente(mainApp) {
 ========================================
 ${data.vendor.toUpperCase()}
 Dirección: ${data.address}
-CUIT: ${data.cuit}
+CUIT: ${esc(data.cuit)}
 ----------------------------------------
 FECHA: ${data.date}
 COMPROBANTE: FACTURA B N° ${data.ticket}

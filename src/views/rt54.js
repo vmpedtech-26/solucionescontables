@@ -5,6 +5,7 @@
 import { getActiveCompanyAsync, getTransactionsAsync, addTransaction, updateEmpresaFieldsAsync } from '../db/mockdb.js';
 import { supabase, isSupabaseConfigured } from '../db/supabase.js';
 import { fmt, categorizarRT54, RT54_COEF, RT54_BASE_MEDIANA, RT54_BASE_RESTANTE, fetchAndCompileIPC } from '../utils.js';
+import { sanitizeInput as esc } from '../utils.js';
 
 const EI_FACTOR = 1.2; // EI = stockFinal * EI_FACTOR
 
@@ -292,7 +293,7 @@ export async function renderRT54() {
 
     return `
       <tr>
-        <td style="font-weight: 700; color: var(--color-primary);">${item.concepto}</td>
+        <td style="font-weight: 700; color: var(--color-primary);">${esc(item.concepto)}</td>
         <td class="text-center font-mono" style="font-size:11px;">${item.origen}</td>
         <td class="font-mono text-right">$ ${item.valor.toLocaleString('es-AR')}</td>
         <td class="font-mono text-center text-secondary" ${isBienesDeCambio ? 'title="Bajo RT 54, los Bienes de Cambio se valúan al costo de última compra. Al estar medidos a valores de cierre, no se reexpresan (coeficiente 1.0000)." style="cursor:help; text-decoration:underline dashed;"' : ''}>
@@ -301,7 +302,7 @@ export async function renderRT54() {
         <td class="font-mono text-right text-emerald" style="font-weight:700;">$ ${Math.round(adjusted).toLocaleString('es-AR')}</td>
         <td class="font-mono text-right" style="color: #fbbf24;">$ ${Math.round(adjustment).toLocaleString('es-AR')}</td>
         <td class="text-center">
-          <button class="item-remove-btn btn-delete-axi-item" data-id="${item.id}" style="margin:0 auto; padding:2px;">
+          <button class="item-remove-btn btn-delete-axi-item" data-id="${esc(item.id)}" style="margin:0 auto; padding:2px;">
             <i data-lucide="trash-2" style="width:14px; height:14px;"></i>
           </button>
         </td>
@@ -405,8 +406,8 @@ export async function renderRT54() {
         ${ultimaCompra ? `
         <div style="background:rgba(34,197,94,0.03);border:1px solid rgba(34,197,94,0.15);border-radius:var(--radius-md);padding:14px;margin-bottom:16px;">
           <p style="font-size:11px;font-weight:700;color:var(--text-secondary);margin-bottom:6px;">ÚLTIMA COMPRA REGISTRADA</p>
-          <div style="font-size:13px;font-weight:700;">${ultimaCompra.proveedor}</div>
-          <div class="font-mono" style="font-size:11.5px;color:var(--text-secondary);">${ultimaCompra.fecha.split('-').reverse().join('/')} · Factura ${ultimaCompra.numero}</div>
+          <div style="font-size:13px;font-weight:700;">${esc(ultimaCompra.proveedor)}</div>
+          <div class="font-mono" style="font-size:11.5px;color:var(--text-secondary);">${ultimaCompra.fecha.split('-').reverse().join('/')} · Factura ${esc(ultimaCompra.numero)}</div>
           <div style="display:flex;justify-content:space-between;margin-top:8px;font-size:13px;">
             <span class="text-secondary">Total Factura:</span>
             <span class="font-mono font-bold">$ ${fmt(ultimaCompra.total)}</span>
@@ -493,7 +494,7 @@ export async function renderRT54() {
               const residual = asset.valor - accum;
               return `
                 <tr>
-                  <td style="font-weight: 700; color: var(--color-primary);">${asset.nombre}</td>
+                  <td style="font-weight: 700; color: var(--color-primary);">${esc(asset.nombre)}</td>
                   <td class="font-mono">${asset.fecha.split('-').reverse().join('/')}</td>
                   <td class="font-mono">$ ${asset.valor.toLocaleString('es-AR')}</td>
                   <td class="text-center">${asset.vidaUtil} años</td>
@@ -502,7 +503,7 @@ export async function renderRT54() {
                   <td class="font-mono" style="font-weight: 700; color: var(--color-accent);">$ ${residual.toLocaleString('es-AR')}</td>
                   <td class="text-center">
                     ${asset.id.startsWith('cust-') ? `
-                      <button class="item-remove-btn btn-delete-custom-asset" data-id="${asset.id}" style="margin:0 auto; padding:2px;">
+                      <button class="item-remove-btn btn-delete-custom-asset" data-id="${esc(asset.id)}" style="margin:0 auto; padding:2px;">
                         <i data-lucide="trash-2" style="width:14px; height:14px;"></i>
                       </button>
                     ` : `<span class="text-muted" style="font-size:9.5px;">Facturado</span>`}
@@ -694,7 +695,7 @@ export async function renderRT54() {
             </div>
             ${axiItems.filter(i => i.tipo === 'activo').map(i => `
               <div style="display:flex; justify-content:space-between;">
-                <span class="text-secondary">${i.concepto}:</span>
+                <span class="text-secondary">${esc(i.concepto)}:</span>
                 <span class="font-mono">$ ${i.valor.toLocaleString('es-AR')}</span>
               </div>
             `).join('')}
@@ -705,7 +706,7 @@ export async function renderRT54() {
             <div style="margin-top:8px; border-top: 1px dashed var(--border-color); padding-top:8px;"></div>
             ${axiItems.filter(i => i.tipo === 'patrimonio').map(i => `
               <div style="display:flex; justify-content:space-between;">
-                <span class="text-secondary">${i.concepto}:</span>
+                <span class="text-secondary">${esc(i.concepto)}:</span>
                 <span class="font-mono">$ ${i.valor.toLocaleString('es-AR')}</span>
               </div>
             `).join('')}
@@ -730,7 +731,7 @@ export async function renderRT54() {
               const adjVal = i.valor * coef;
               return `
               <div style="display:flex; justify-content:space-between;">
-                <span class="text-secondary">${i.concepto}:</span>
+                <span class="text-secondary">${esc(i.concepto)}:</span>
                 <span class="font-mono text-emerald" style="font-weight:600;">$ ${Math.round(adjVal).toLocaleString('es-AR')}</span>
               </div>
               `;
@@ -746,7 +747,7 @@ export async function renderRT54() {
               const adjVal = i.valor * coef;
               return `
               <div style="display:flex; justify-content:space-between;">
-                <span class="text-secondary">${i.concepto}:</span>
+                <span class="text-secondary">${esc(i.concepto)}:</span>
                 <span class="font-mono">$ ${Math.round(adjVal).toLocaleString('es-AR')}</span>
               </div>
               `;

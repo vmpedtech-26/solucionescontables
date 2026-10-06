@@ -3,6 +3,7 @@
    ------------------------------------------------------------- */
 import { getCompaniesAsync, getActiveCompanyAsync, getEstudioAsync, updateEstudioFieldsAsync, updateEmpresaFieldsAsync } from '../db/mockdb.js';
 import { isSupabaseConfigured, supabase } from '../db/supabase.js';
+import { sanitizeInput as esc } from '../utils.js';
 
 function getDelegationActive(company) {
   if (isSupabaseConfigured && supabase) return !!company.delegation_active;
@@ -228,15 +229,15 @@ export async function renderConfiguracion() {
                   const delegationActive = getDelegationActive(c);
                   return `
                   <tr>
-                    <td style="font-weight: 600; font-size: 12.5px;">${c.razon_social}</td>
-                    <td class="font-mono text-xs">${c.cuit}</td>
+                    <td style="font-weight: 600; font-size: 12.5px;">${esc(c.razon_social)}</td>
+                    <td class="font-mono text-xs">${esc(c.cuit)}</td>
                     <td id="cell-delegation-${c.id}">
                       ${delegationActive ? `
                         <span style="font-size: 10px; font-weight: 700; color: var(--color-accent); display: flex; align-items: center; gap: 4px;">
                           <i data-lucide="check-circle-2" style="width: 12px; height: 12px;"></i> Activa
                         </span>
                       ` : `
-                        <button class="btn-check-delegation btn-outline" data-id="${c.id}" style="padding: 2px 8px; font-size: 10px; border-radius: 4px;">
+                        <button class="btn-check-delegation btn-outline" data-id="${esc(c.id)}" style="padding: 2px 8px; font-size: 10px; border-radius: 4px;">
                           Verificar
                         </button>
                       `}

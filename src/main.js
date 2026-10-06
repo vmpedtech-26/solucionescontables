@@ -44,6 +44,21 @@ class Application {
       });
     }
 
+    // 1c. Candado "premium" del sandbox (sin backend). Con Supabase configurado
+    // el acceso lo da la sesion real del estudio, asi que no hay clave ni prompt.
+    if (!isSupabaseConfigured) {
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('[data-premium-unlock]')) return;
+        const key = prompt('Ingrese la clave de administrador para desbloquear las funciones premium:');
+        if (key && key === (import.meta.env.VITE_ADMIN_DEMO_PASS || 'sc-demo-2026')) {
+          localStorage.setItem('vmp_premium_unlocked', 'true');
+          window.location.reload();
+        } else if (key) {
+          alert('Clave incorrecta');
+        }
+      });
+    }
+
     // 2. Setup Hash Routing Listener
     window.addEventListener('hashchange', () => this.router());
 
@@ -372,10 +387,13 @@ class Application {
       info: 'info'
     };
     
+    // El mensaje suele incluir nombres de empresa/proveedor ingresados por
+    // usuarios: se inserta como texto, nunca como HTML.
     toast.innerHTML = `
       <i data-lucide="${iconMap[type] || 'info'}" style="width: 20px; height: 20px;"></i>
-      <span style="font-weight: 500;">${message}</span>
+      <span style="font-weight: 500;"></span>
     `;
+    toast.querySelector('span').textContent = message;
     
     container.appendChild(toast);
 

@@ -23,11 +23,9 @@ CREATE TABLE IF NOT EXISTS public.seguridad_logs (
 -- Enable RLS for Security Logs
 ALTER TABLE public.seguridad_logs ENABLE ROW LEVEL SECURITY;
 
--- Only authenticated users can insert logs (via database triggers)
-CREATE POLICY "Triggers can insert security logs"
-    ON public.seguridad_logs
-    FOR INSERT
-    WITH CHECK (true);
+-- Sin politica de INSERT: solo escriben los triggers SECURITY DEFINER (el
+-- owner no pasa por RLS). Una politica WITH CHECK (true) dejaba a cualquiera
+-- falsificar entradas de auditoria.
 
 -- Only administrators/owners can read logs
 CREATE POLICY "Users can view their own security logs"
@@ -71,7 +69,7 @@ CREATE TABLE IF NOT EXISTS public.empresas (
     id TEXT PRIMARY KEY, -- Formato: 'co-' + timestamp
     estudio_id UUID NOT NULL REFERENCES public.estudios(id) ON DELETE CASCADE,
     razon_social TEXT NOT NULL,
-    cuit TEXT NOT NULL, -- Debe estar validado
+    cuit TEXT NOT NULL CHECK (cuit ~ '^[0-9-]{11,13}$'), -- Debe estar validado
     tipo TEXT NOT NULL CHECK (tipo IN ('SRL', 'SA', 'SAS', 'Unipersonal', 'Sucesion Indivisa')),
     condicion_iva TEXT NOT NULL CHECK (condicion_iva IN ('Responsable Inscripto', 'Monotributo - Cat A', 'Monotributo - Cat B', 'Monotributo - Cat C', 'Monotributo - Cat D', 'Monotributo - Cat E', 'Monotributo - Cat F', 'Monotributo - Cat G', 'Monotributo - Cat H', 'Monotributo - Cat I', 'Monotributo - Cat J', 'Monotributo - Cat K', 'Exento')),
     actividad TEXT,
@@ -116,7 +114,7 @@ CREATE TABLE IF NOT EXISTS public.transacciones (
     numero TEXT NOT NULL,
     proveedor TEXT,
     cliente TEXT,
-    cuit TEXT NOT NULL,
+    cuit TEXT NOT NULL CHECK (cuit ~ '^[0-9-]{0,13}$'),
     neto NUMERIC(15,2) NOT NULL CHECK (neto >= 0),
     iva NUMERIC(15,2) NOT NULL CHECK (iva >= 0),
     total NUMERIC(15,2) NOT NULL CHECK (total >= 0),
@@ -166,7 +164,8 @@ CREATE TABLE IF NOT EXISTS public.comprobantes_digitales (
     estado TEXT DEFAULT 'Procesado'::text NOT NULL,
     es_activo BOOLEAN DEFAULT false NOT NULL,
     categoria TEXT DEFAULT 'General'::text NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    CHECK (char_length(detalle) <= 300 AND char_length(archivo) <= 300 AND char_length(categoria) <= 60 AND char_length(tipo) <= 30 AND char_length(estado) <= 30)
 );
 
 -- Habilitar RLS en Comprobantes Digitales
@@ -192,7 +191,9 @@ CREATE TABLE IF NOT EXISTS public.leads (
     name TEXT NOT NULL,
     studio TEXT NOT NULL,
     email TEXT NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+    cuit TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    CHECK (char_length(name) <= 120 AND char_length(studio) <= 160 AND char_length(email) <= 254 AND char_length(coalesce(cuit, '')) <= 20)
 );
 
 -- Habilitar RLS en Leads
@@ -205,10 +206,8 @@ CREATE POLICY "Anyone can insert leads"
     WITH CHECK (true);
 
 -- Permitir a usuarios autenticados leer los prospectos de ventas
-CREATE POLICY "Anyone can view leads"
-    ON public.leads
-    FOR SELECT
-    USING (true);
+-- Sin politica de SELECT: los prospectos (nombre, email, CUIT) solo se leen
+-- desde el dashboard / service_role. Antes USING (true) los exponia a cualquiera.
 
 
 -- -------------------------------------------------------------
@@ -222,7 +221,7 @@ CREATE TABLE IF NOT EXISTS public.retenciones (
     empresa_id TEXT NOT NULL REFERENCES public.empresas(id) ON DELETE CASCADE,
     fecha DATE NOT NULL,
     agente TEXT NOT NULL,
-    cuit TEXT NOT NULL,
+    cuit TEXT NOT NULL CHECK (cuit ~ '^[0-9-]{0,13}$'),
     tipo TEXT NOT NULL CHECK (tipo IN ('PERCEPCIÓN IVA', 'RETENCIÓN IVA', 'PERCEPCIÓN IIBB', 'RETENCIÓN IIBB', 'RETENCIÓN GANANCIAS', 'RETENCIÓN SIRCREB')),
     monto NUMERIC(15,2) NOT NULL CHECK (monto >= 0),
     fuente TEXT NOT NULL DEFAULT 'manual'::text CHECK (fuente IN ('factura', 'banco', 'manual')),
@@ -454,19 +453,22 @@ RETURNS BOOLEAN AS $$
         WHERE clientes_finales.id = auth.uid()
           AND clientes_finales.empresa_id = check_empresa_id
     );
-$$ LANGUAGE sql SECURITY DEFINER STABLE;
+$$ LANGUAGE sql SECURITY DEFINER STABLE SET search_path = public, pg_temp;
 
 CREATE POLICY "Cliente final ve su propia empresa"
-    ON public.empresas FOR SELECT
+    ON public.empresas FOR SELECT TO authenticated
     USING (public.is_cliente_of_empresa(empresas.id));
 
 CREATE POLICY "Cliente final ve sus propios comprobantes"
-    ON public.comprobantes_digitales FOR SELECT
+    ON public.comprobantes_digitales FOR SELECT TO authenticated
     USING (public.is_cliente_of_empresa(comprobantes_digitales.empresa_id));
 
 CREATE POLICY "Cliente final sube sus propios comprobantes"
-    ON public.comprobantes_digitales FOR INSERT
-    WITH CHECK (public.is_cliente_of_empresa(comprobantes_digitales.empresa_id));
+    ON public.comprobantes_digitales FOR INSERT TO authenticated
+    WITH CHECK (
+        public.is_cliente_of_empresa(comprobantes_digitales.empresa_id)
+        AND estado = 'Recibido' -- el cliente no puede autoaprobar; el estudio lo procesa
+    );
 
 
 -- ---------------------------------------------------------------------
@@ -520,7 +522,7 @@ BEGIN
 
     RETURN calculado = verificador;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_temp;
 
 
 -- B. Trigger para validar CUITs al insertar/modificar empresas y transacciones
@@ -545,7 +547,7 @@ BEGIN
     END IF;
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_temp;
 
 -- Aplicar validación a empresas y transacciones
 CREATE OR REPLACE TRIGGER on_empresa_validate_cuit
@@ -586,7 +588,7 @@ BEGIN
 
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_temp;
 
 -- Aplicar aislamiento a todas las tablas hijas de "empresas"
 CREATE OR REPLACE TRIGGER on_transaccion_prevent_cross_tenant
@@ -669,12 +671,26 @@ BEGIN
 
     RETURN new;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_temp;
 
 -- Crear el Trigger de alta
 CREATE OR REPLACE TRIGGER on_auth_user_created
     AFTER INSERT ON auth.users
     FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+
+-- ---------------------------------------------------------------------
+-- PERMISOS DE FUNCIONES SECURITY DEFINER
+-- Por defecto Postgres da EXECUTE a PUBLIC, lo que las expone como RPC en la
+-- API REST. Los triggers no necesitan EXECUTE del usuario; solo la funcion
+-- usada dentro de politicas RLS se concede a "authenticated".
+-- ---------------------------------------------------------------------
+REVOKE EXECUTE ON FUNCTION public.validar_cuit_afip(TEXT) FROM PUBLIC, anon, authenticated;
+REVOKE EXECUTE ON FUNCTION public.trigger_cuit_validation() FROM PUBLIC, anon, authenticated;
+REVOKE EXECUTE ON FUNCTION public.trigger_prevent_cross_tenant_update() FROM PUBLIC, anon, authenticated;
+REVOKE EXECUTE ON FUNCTION public.handle_new_user() FROM PUBLIC, anon, authenticated;
+REVOKE EXECUTE ON FUNCTION public.is_cliente_of_empresa(TEXT) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.is_cliente_of_empresa(TEXT) TO authenticated;
 
 
 -- -------------------------------------------------------------

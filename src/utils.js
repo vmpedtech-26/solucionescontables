@@ -2,6 +2,46 @@
    VMP Studio Contable — Shared Utilities
    ------------------------------------------------------------- */
 
+// ═══════════════════════════════════════════════════════════════
+// SECURITY UTILITIES — cybersecurity-sc skill (REQ-9, REQ-10)
+// ═══════════════════════════════════════════════════════════════
+
+/**
+ * Escapa caracteres HTML peligrosos para prevenir XSS.
+ * SIEMPRE usar cuando se interpolen datos de usuario en innerHTML.
+ * @param {string|number|null|undefined} str
+ * @returns {string} Texto con entidades HTML escapadas
+ */
+export function sanitizeInput(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;')
+    .replace(/\//g, '&#x2F;');
+}
+
+/**
+ * Sanitiza campos de exportación CSV/TXT para prevenir CSV injection.
+ * Los prefijos peligrosos (=, +, -, @, TAB, CR) se neutralizan con apóstrofe.
+ * @param {string|number|null|undefined} str
+ * @returns {string}
+ */
+export function sanitizeCSV(str) {
+  if (str === null || str === undefined) return '';
+  const s = String(str).trim();
+  // Neutralizar prefijos de fórmula de Excel (EDGE-5)
+  if (/^[=+\-@\t\r\n|]/.test(s)) {
+    return `'${s}`;
+  }
+  return s;
+}
+
+// ═══════════════════════════════════════════════════════════════
+
+
 /**
  * Formatea un número como moneda argentina.
  * @param {number} n
@@ -149,7 +189,7 @@ export function renderPremiumTeaser(childHTML, title, description) {
     </div>
     <div class="premium-lock-overlay">
       <div class="premium-lock-card">
-        <div class="premium-lock-icon" onclick="let key = prompt('Ingrese la clave de administrador para desbloquear las funciones premium:'); if (key === 'vmp2026' || key === 'VMP2026') { localStorage.setItem('vmp_premium_unlocked', 'true'); window.location.reload(); } else if (key) { alert('Clave incorrecta'); }" style="cursor: pointer;" title="Acceso de Administración">
+        <div class="premium-lock-icon" data-premium-unlock style="cursor: pointer;" title="Acceso de Administración">
           <i data-lucide="lock" style="width: 24px; height: 24px;"></i>
         </div>
         <h3 style="font-size: 17px; font-weight: 800; color: var(--text-primary); margin: 0;">${title}</h3>

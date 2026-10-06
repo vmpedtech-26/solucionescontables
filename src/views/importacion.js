@@ -3,6 +3,7 @@
    ------------------------------------------------------------- */
 import { getActiveCompany, addTransaction, getTransactions } from '../db/mockdb.js';
 import { fmt } from '../utils.js';
+import { sanitizeInput as esc } from '../utils.js';
 
 const ARCA_MOCK_EMITIDAS = [
   { fecha: "2026-05-24", tipo_comprobante: "Factura A", numero: "0003-00000850", cliente: "Comercio Mayorista Patagonia", cuit: "30-58930219-4", neto: 150000, iva: 31500, total: 181500, es_activo: false, categoria: "Venta" },
@@ -31,7 +32,7 @@ export function renderImportacion() {
       <p class="view-subtitle">Consola impositiva para la sincronización y auditoría cruzada de comprobantes con ARCA.</p>
     </div>
     <div style="background: rgba(22, 163, 74, 0.08); border: 1px solid rgba(22, 163, 74, 0.2); padding: 8px 16px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; color: var(--color-accent-light);">
-      Empresa: ${activeCompany.razon_social}
+      Empresa: ${esc(activeCompany.razon_social)}
     </div>
   </div>
 
@@ -541,10 +542,10 @@ export function initImportacion(mainApp) {
           resBody.innerHTML = batch.map(tx => `
             <tr>
               <td class="font-mono text-sm">${tx.fecha.split('-').reverse().join('/')}</td>
-              <td><span class="badge-status active" style="font-size:11px; padding:1px 6px;">${tx.tipo_comprobante}</span></td>
-              <td class="font-mono text-sm">${tx.numero}</td>
-              <td style="font-weight:600;">${tx.cliente}</td>
-              <td class="font-mono">${tx.cuit}</td>
+              <td><span class="badge-status active" style="font-size:11px; padding:1px 6px;">${esc(tx.tipo_comprobante)}</span></td>
+              <td class="font-mono text-sm">${esc(tx.numero)}</td>
+              <td style="font-weight:600;">${esc(tx.cliente)}</td>
+              <td class="font-mono">${esc(tx.cuit)}</td>
               <td class="font-mono text-right" style="font-weight:700; color: var(--color-accent-light);">$ ${tx.total.toLocaleString('es-AR')}</td>
             </tr>
           `).join('');
@@ -560,10 +561,10 @@ export function initImportacion(mainApp) {
           resBody.innerHTML = batch.map(tx => `
             <tr>
               <td class="font-mono text-sm">${tx.fecha.split('-').reverse().join('/')}</td>
-              <td><span class="badge-status pending" style="font-size:11px; padding:1px 6px;">${tx.tipo_comprobante}</span></td>
-              <td class="font-mono text-sm">${tx.numero}</td>
-              <td style="font-weight:600;">${tx.proveedor}</td>
-              <td class="font-mono">${tx.cuit}</td>
+              <td><span class="badge-status pending" style="font-size:11px; padding:1px 6px;">${esc(tx.tipo_comprobante)}</span></td>
+              <td class="font-mono text-sm">${esc(tx.numero)}</td>
+              <td style="font-weight:600;">${esc(tx.proveedor)}</td>
+              <td class="font-mono">${esc(tx.cuit)}</td>
               <td class="font-mono text-right" style="font-weight:700;">$ ${tx.total.toLocaleString('es-AR')}</td>
             </tr>
           `).join('');
@@ -642,10 +643,10 @@ export function initImportacion(mainApp) {
       tbodyMissingLedger.innerHTML = missingLedger.map((tx, index) => `
         <tr>
           <td class="font-mono text-sm">${tx.fecha.split('-').reverse().join('/')}</td>
-          <td><span class="badge-status active" style="font-size:10px; padding:1px 6px;">${tx.tipo_comprobante}</span></td>
-          <td class="font-mono text-sm">${tx.numero}</td>
-          <td style="font-weight:600;">${type === 'compras' ? tx.proveedor : tx.cliente}</td>
-          <td class="font-mono">${tx.cuit}</td>
+          <td><span class="badge-status active" style="font-size:10px; padding:1px 6px;">${esc(tx.tipo_comprobante)}</span></td>
+          <td class="font-mono text-sm">${esc(tx.numero)}</td>
+          <td style="font-weight:600;">${esc(type === 'compras' ? tx.proveedor : tx.cliente)}</td>
+          <td class="font-mono">${esc(tx.cuit)}</td>
           <td class="font-mono text-right" style="font-weight:700;">$ ${tx.total.toLocaleString('es-AR')}</td>
           <td class="text-center">
             <button class="btn btn-xs btn-primary btn-rec-incorporate" data-index="${index}" style="font-size: 10px; padding: 2px 8px; background: var(--color-accent); border-color: var(--color-accent);">
@@ -683,10 +684,10 @@ export function initImportacion(mainApp) {
       tbodyCoincident.innerHTML = coincident.map(pair => `
         <tr>
           <td class="font-mono text-sm">${pair.afip.fecha.split('-').reverse().join('/')}</td>
-          <td><span class="badge-status active" style="font-size:10px; padding:1px 6px; background: rgba(34, 197, 94, 0.08); color: var(--color-accent-light);">${pair.afip.tipo_comprobante}</span></td>
-          <td class="font-mono text-sm">${pair.afip.numero}</td>
-          <td style="font-weight:600;">${type === 'compras' ? pair.afip.proveedor : pair.afip.cliente}</td>
-          <td class="font-mono">${pair.afip.cuit}</td>
+          <td><span class="badge-status active" style="font-size:10px; padding:1px 6px; background: rgba(34, 197, 94, 0.08); color: var(--color-accent-light);">${esc(pair.afip.tipo_comprobante)}</span></td>
+          <td class="font-mono text-sm">${esc(pair.afip.numero)}</td>
+          <td style="font-weight:600;">${esc(type === 'compras' ? pair.afip.proveedor : pair.afip.cliente)}</td>
+          <td class="font-mono">${esc(pair.afip.cuit)}</td>
           <td class="font-mono text-right" style="font-weight:700;">$ ${pair.afip.total.toLocaleString('es-AR')}</td>
           <td class="text-center">
             <span style="font-size: 10px; font-weight:700; color:var(--color-accent-light); background:rgba(34, 197, 94, 0.08); padding:2px 8px; border-radius:4px;">
@@ -704,10 +705,10 @@ export function initImportacion(mainApp) {
       tbodyMissingAfip.innerHTML = missingAfip.map(tx => `
         <tr>
           <td class="font-mono text-sm">${tx.fecha.split('-').reverse().join('/')}</td>
-          <td><span class="badge-status active" style="font-size:10px; padding:1px 6px; background: rgba(245, 158, 11, 0.08); color: #f59e0b;">${tx.tipo_comprobante}</span></td>
-          <td class="font-mono text-sm">${tx.numero}</td>
-          <td style="font-weight:600;">${type === 'compras' ? (tx.proveedor || 'Proveedor') : (tx.cliente || 'Cliente')}</td>
-          <td class="font-mono">${tx.cuit}</td>
+          <td><span class="badge-status active" style="font-size:10px; padding:1px 6px; background: rgba(245, 158, 11, 0.08); color: #f59e0b;">${esc(tx.tipo_comprobante)}</span></td>
+          <td class="font-mono text-sm">${esc(tx.numero)}</td>
+          <td style="font-weight:600;">${esc(type === 'compras' ? (tx.proveedor || 'Proveedor') : (tx.cliente || 'Cliente'))}</td>
+          <td class="font-mono">${esc(tx.cuit)}</td>
           <td class="font-mono text-right" style="font-weight:700;">$ ${tx.total.toLocaleString('es-AR')}</td>
           <td class="text-center" style="font-size: 10.5px; font-weight:600; color: #f59e0b; line-height:1.2;">
             ⚠️ Carga interna manual<br><span style="font-size:9px; color:var(--text-muted);">Verificar CAE impositivo</span>

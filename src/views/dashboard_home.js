@@ -2,6 +2,7 @@
    VMP Studio Contable - Dashboard Home View (Charts & KPI)
    ------------------------------------------------------------- */
 import { getActiveCompany, getTransactions, getCompanies } from '../db/mockdb.js';
+import { sanitizeInput as esc } from '../utils.js';
 
 export function renderDashboardHome() {
   const activeCompany = getActiveCompany();
@@ -173,7 +174,7 @@ export function renderDashboardHome() {
       <p class="view-subtitle">Resumen contable y fiscal para la empresa activa.</p>
     </div>
     <div style="background: rgba(13, 148, 136, 0.08); border: 1px solid rgba(13, 148, 136, 0.2); padding: 8px 16px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600;">
-      Régimen: <span style="color: var(--color-teal-light)">${activeCompany.condicion_iva}</span>
+      Régimen: <span style="color: var(--color-teal-light)">${esc(activeCompany.condicion_iva)}</span>
     </div>
   </div>
 
@@ -440,11 +441,11 @@ export function renderDashboardHome() {
                   <td class="font-mono text-sm">${tx.fecha.split('-').reverse().join('/')}</td>
                   <td>
                     <span class="badge-status ${tx.tipo === 'Venta' ? 'active' : 'pending'}" style="font-size: 11px; padding: 2px 8px;">
-                      ${tx.tipo}
+                      ${esc(tx.tipo)}
                     </span>
                   </td>
                   <td style="font-weight: 500; font-size: 13px; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                    ${tx.cliente || tx.proveedor}
+                    ${esc(tx.cliente || tx.proveedor)}
                   </td>
                   <td class="font-mono text-right ${tx.colorClass}" style="font-weight: 600;">
                     ${tx.sign} $ ${tx.total.toLocaleString('es-AR')}
@@ -490,10 +491,10 @@ export function renderDashboardHome() {
               
               return `
                 <tr>
-                  <td style="font-weight: 700; color: var(--color-primary);">${co.razon_social}</td>
+                  <td style="font-weight: 700; color: var(--color-primary);">${esc(co.razon_social)}</td>
                   <td>
-                    <span class="font-mono" style="font-size: 11px; color: var(--text-secondary);">${co.cuit}</span><br>
-                    <span style="font-size: 9.5px; font-weight:600; color: var(--text-muted);">${co.condicion_iva}</span>
+                    <span class="font-mono" style="font-size: 11px; color: var(--text-secondary);">${esc(co.cuit)}</span><br>
+                    <span style="font-size: 9.5px; font-weight:600; color: var(--text-muted);">${esc(co.condicion_iva)}</span>
                   </td>
                   
                   <!-- IVA Column -->

@@ -6,6 +6,7 @@ import { getActiveCompanyAsync, getTransactionsAsync, updateEmpresaFieldsAsync }
 import { isSupabaseConfigured, supabase } from '../db/supabase.js';
 import { getRetencionesAsync } from './retenciones.js';
 import { fmt, fmtDate, getVencimientos, downloadFile } from '../utils.js';
+import { sanitizeInput as esc } from '../utils.js';
 
 function getIvaConsistOk(company) {
   if (isSupabaseConfigured && supabase) return !!company.iva_consist_ok;
@@ -146,7 +147,7 @@ export async function renderIVASimple() {
         <p class="view-subtitle">Monitoreo continuo de exclusión, límites de categorías y recategorización semestral.</p>
       </div>
       <div style="background: rgba(22, 163, 74, 0.08); border: 1px solid rgba(22, 163, 74, 0.2); padding: 8px 16px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; color: var(--color-accent-light);">
-        Contribuyente: ${company.razon_social} (${company.condicion_iva})
+        Contribuyente: ${esc(company.razon_social)} (${esc(company.condicion_iva)})
       </div>
     </div>
 
@@ -399,7 +400,7 @@ export async function renderIVASimple() {
     </div>
     <div style="display:flex;gap:10px;align-items:center;">
       <div style="background:rgba(22,163,74,0.08);border:1px solid rgba(22,163,74,0.2);padding:7px 14px;border-radius:var(--radius-sm);font-size:12px;font-weight:600;color:var(--color-accent-light);">
-        CUIT: ${company.cuit}
+        CUIT: ${esc(company.cuit)}
       </div>
       <button class="btn btn-primary" id="btn-presentar-f2051" ${!consistenciaOk ? 'disabled' : ''} style="${!consistenciaOk ? 'opacity:.45;cursor:not-allowed;' : ''}">
         <i data-lucide="send"></i> Presentar F.2051
@@ -500,7 +501,7 @@ export async function renderIVASimple() {
                 ${actividadRows.map(r => `
                 <tr>
                   <td class="font-mono text-xs">${r.codigo}</td>
-                  <td style="font-size:12.5px;">${r.descripcion} <span style="font-size:10px;color:var(--text-muted);">(${(r.pct*100).toFixed(0)}%)</span></td>
+                  <td style="font-size:12.5px;">${esc(r.descripcion)} <span style="font-size:10px;color:var(--text-muted);">(${(r.pct*100).toFixed(0)}%)</span></td>
                   <td class="font-mono text-right">$ ${fmt(r.neto)}</td>
                   <td class="font-mono text-right">${r.alicuota}%</td>
                   <td class="font-mono text-right text-emerald">$ ${fmt(r.df)}</td>
@@ -835,7 +836,7 @@ export async function initIVASimple(mainApp) {
             </div>
             <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
               <span class="text-secondary">Contribuyente:</span>
-              <strong style="color:var(--text-primary);">${company.razon_social}</strong>
+              <strong style="color:var(--text-primary);">${esc(company.razon_social)}</strong>
             </div>
             <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
               <span class="text-secondary">Período Fiscal:</span>

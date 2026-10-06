@@ -3,6 +3,7 @@
    ------------------------------------------------------------- */
 import { getCompanies, getActiveCompany, getSyncStatus } from '../db/mockdb.js';
 import { supabase, isSupabaseConfigured, getCachedStudioName } from '../db/supabase.js';
+import { sanitizeInput as esc } from '../utils.js';
 
 export function renderDashboardLayout(childHTML, activeRoute, role = null) {
   const isCliente = role === 'cliente';
@@ -80,11 +81,11 @@ export function renderDashboardLayout(childHTML, activeRoute, role = null) {
             <span style="font-size: 9.5px; font-weight: 700; color: var(--color-teal-light); text-transform: uppercase; letter-spacing: 0.05em;">${isCliente ? 'Tu empresa' : 'Cliente Seleccionado'}</span>
           </div>
           <div>
-            <div style="font-size: 13.5px; font-weight: 700; color: var(--color-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 190px;" title="${activeCompany.razon_social}">
-              ${activeCompany.razon_social}
+            <div style="font-size: 13.5px; font-weight: 700; color: var(--color-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 190px;" title="${esc(activeCompany.razon_social)}">
+              ${esc(activeCompany.razon_social)}
             </div>
             <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-secondary); margin-top: 2px;">
-              CUIT: ${activeCompany.cuit}
+              CUIT: ${esc(activeCompany.cuit)}
             </div>
           </div>
         </div>
@@ -164,7 +165,7 @@ export function renderDashboardLayout(childHTML, activeRoute, role = null) {
 
       <div class="db-sidebar-footer">
         <div class="user-info">
-          <span class="user-name">${isCliente ? activeCompany.razon_social : studioName}</span>
+          <span class="user-name">${esc(isCliente ? activeCompany.razon_social : studioName)}</span>
           <span class="user-role" style="display: flex; align-items: center; gap: 4px;">
             ${isCliente ? 'Cliente' : 'Administrador'}
             ${isAdminUnlocked ? `
@@ -218,11 +219,11 @@ export function renderDashboardLayout(childHTML, activeRoute, role = null) {
           <div style="position: relative;">
             <div class="company-selector-container" id="topbar-company-selector" style="border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 5px 12px; display: flex; align-items: center; gap: 8px; background: #fff; box-shadow: var(--shadow-sm); cursor: pointer; transition: border-color 0.2s;">
               <div class="company-avatar" style="background: ${activeCompany.color}; width: 22px; height: 22px; border-radius: 50%; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700;">
-                ${activeCompany.razon_social[0]}
+                ${esc(activeCompany.razon_social[0])}
               </div>
               <div class="company-select-text" style="display: flex; flex-direction: column; text-align: left;">
-                <span class="c-sel-name" style="font-size: 12.5px; font-weight: 700; color: var(--color-primary); max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${activeCompany.razon_social}</span>
-                <span class="c-sel-cuit" style="font-size: 9.5px; color: var(--text-secondary); font-family: 'JetBrains Mono', monospace; line-height: 1;">CUIT: ${activeCompany.cuit}</span>
+                <span class="c-sel-name" style="font-size: 12.5px; font-weight: 700; color: var(--color-primary); max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${esc(activeCompany.razon_social)}</span>
+                <span class="c-sel-cuit" style="font-size: 9.5px; color: var(--text-secondary); font-family: 'JetBrains Mono', monospace; line-height: 1;">CUIT: ${esc(activeCompany.cuit)}</span>
               </div>
               <i data-lucide="chevron-down" style="width: 14px; height: 14px; margin-left: 4px; color: var(--text-secondary);"></i>
             </div>
@@ -232,13 +233,13 @@ export function renderDashboardLayout(childHTML, activeRoute, role = null) {
               <div style="padding: 6px 12px; font-size: 9.5px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border-color); margin-bottom: 4px;">Cambiar Empresa</div>
               <div style="max-height: 250px; overflow-y: auto;">
                 ${companies.map(c => `
-                  <div class="dropdown-item ${c.id === activeCompany.id ? 'active' : ''}" data-id="${c.id}" style="padding: 8px 12px; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: background 0.15s;">
+                  <div class="dropdown-item ${c.id === activeCompany.id ? 'active' : ''}" data-id="${esc(c.id)}" style="padding: 8px 12px; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: background 0.15s;">
                     <div class="company-avatar" style="background: ${c.color}; width: 22px; height: 22px; border-radius: 50%; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700;">
-                      ${c.razon_social[0]}
+                      ${esc(c.razon_social[0])}
                     </div>
                     <div class="company-select-text" style="display: flex; flex-direction: column; text-align: left;">
-                      <span class="c-sel-name" style="font-size: 12px; font-weight: 600; color: var(--text-primary); max-width: 170px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${c.razon_social}</span>
-                      <span class="c-sel-cuit" style="font-size: 9.5px; color: var(--text-secondary); font-family: 'JetBrains Mono', monospace;">${c.cuit}</span>
+                      <span class="c-sel-name" style="font-size: 12px; font-weight: 600; color: var(--text-primary); max-width: 170px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${esc(c.razon_social)}</span>
+                      <span class="c-sel-cuit" style="font-size: 9.5px; color: var(--text-secondary); font-family: 'JetBrains Mono', monospace;">${esc(c.cuit)}</span>
                     </div>
                   </div>
                 `).join('')}
