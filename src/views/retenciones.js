@@ -5,6 +5,7 @@
 import { getActiveCompanyAsync, getTransactionsAsync } from '../db/mockdb.js';
 import { supabase, isSupabaseConfigured } from '../db/supabase.js';
 import { renderPremiumTeaser } from '../utils.js';
+import { resumenRetenciones, coeficienteUnificado, calcularConvenioMultilateral } from '../domain/fiscal.js';
 import { sanitizeInput as esc } from '../utils.js';
 
 function fmt(n) {
@@ -141,10 +142,7 @@ export async function renderRetenciones() {
     ? allRets.filter(r => !r.conciliado && r.fuente === 'banco')
     : allRets;
 
-  const totalRet = rets.reduce((s, r) => s + r.monto, 0);
-  const totalConc = rets.filter(r => r.conciliado).reduce((s, r) => s + r.monto, 0);
-  const totalPuente = rets.filter(r => !r.conciliado).reduce((s, r) => s + r.monto, 0);
-  const totalSinCert = rets.filter(r => !r.certDisponible).reduce((s, r) => s + r.monto, 0);
+  const { total: totalRet, conciliadas: totalConc, puente: totalPuente, sinCertificado: totalSinCert } = resumenRetenciones(rets);
 
   const fuenteColor = { factura: 'var(--color-accent)', banco: '#06b6d4', manual: '#f59e0b' };
   const fuenteLabel = { factura: 'Libro Compras', banco: 'Extracto Bancario', manual: 'Manual' };
@@ -158,20 +156,18 @@ export async function renderRetenciones() {
   if (jurisdicciones && jurisdicciones.length > 1) {
     const activePeriod = localStorage.getItem('vmp_active_period') || '2026-05';
     const txs = await getTransactionsAsync(company.id);
-    cmTotalVentas = txs.ventas.filter(v => v.fecha.startsWith(activePeriod)).reduce((s, v) => s + v.neto, 0);
-    cmTotalIIBB = jurisdicciones.reduce((s, j) => {
-      const coef = (j.pctIngresos + j.pctGastos) / 200;
-      return s + (cmTotalVentas * coef * (j.alicuotaIIBB / 100));
-    }, 0);
-
-    // El banco retiene SIRCREB en una única cuenta, pero lo distribuye ARCA
-    // entre las mismas jurisdicciones y con el mismo Coeficiente Unificado del
-    // padrón bancario — por eso se acredita a cuenta del IIBB de cada
-    // jurisdicción, no como una retención genérica más de la lista de abajo.
-    cmTotalSircreb = allRets
+    const ventasPeriodo = txs.ventas.filter(v => v.fecha.startsWith(activePeriod)).reduce((s, v) => s + v.neto, 0);
+    // El banco retiene SIRCREB en una unica cuenta, pero ARCA lo distribuye entre
+    // las mismas jurisdicciones y con el mismo Coeficiente Unificado: se acredita
+    // a cuenta del IIBB de cada jurisdiccion, no como una retencion generica.
+    const sircrebConciliado = allRets
       .filter(r => r.tipo === 'RETENCIÓN SIRCREB' && r.conciliado)
       .reduce((s, r) => s + r.monto, 0);
-    cmTotalSaldo = cmTotalIIBB - cmTotalSircreb;
+    const cm = calcularConvenioMultilateral({ ventasPeriodo, jurisdicciones, sircrebConciliado });
+    cmTotalVentas = cm.totalVentas;
+    cmTotalIIBB = cm.totalIIBB;
+    cmTotalSircreb = cm.totalSircreb;
+    cmTotalSaldo = cm.saldo;
   }
 
   return renderPremiumTeaser(`
@@ -369,7 +365,7 @@ export async function renderRetenciones() {
         </thead>
         <tbody>
           ${jurisdicciones.map(j => {
-            const coef = (j.pctIngresos + j.pctGastos) / 200;
+            const coef = coeficienteUnificado(j);
             const base = cmTotalVentas * coef;
             const impuesto = base * (j.alicuotaIIBB / 100);
             const sircrebJurisdiccion = cmTotalSircreb * coef;

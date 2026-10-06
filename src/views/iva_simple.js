@@ -5,6 +5,7 @@
 import { getActiveCompanyAsync, getTransactionsAsync, updateEmpresaFieldsAsync } from '../db/mockdb.js';
 import { isSupabaseConfigured, supabase } from '../db/supabase.js';
 import { getRetencionesAsync } from './retenciones.js';
+import { MONOTRIBUTO_CATEGORIAS_2026, ventasMoviles12Meses, letraCategoria, consumoMonotributo, categoriaMonotributoRecomendada, calcularIvaRI, consistenciaCLAE } from '../domain/fiscal.js';
 import { fmt, fmtDate, getVencimientos, downloadFile } from '../utils.js';
 import { sanitizeInput as esc } from '../utils.js';
 import { blockSimulated } from '../utils.js';
@@ -31,24 +32,6 @@ function getIvaSaldoFavor(company) {
   if (isSupabaseConfigured && supabase) return Number(company.saldo_favor_iva) || 0;
   return parseFloat(localStorage.getItem(`vmp_saldo_favor_${company.id}`) || '0');
 }
-
-// Tabla oficial ARCA vigente desde 1/08/2026 (topes y cuotas del Régimen Simplificado)
-// Categorías I, J y K están reservadas por ley a venta de cosas muebles: un
-// prestador de servicios que las supera queda directamente EXCLUIDO del régimen,
-// no puede "subir" a esas categorías (por eso cuotaServicios: 0 en esas tres).
-const MONOTRIBUTO_CATEGORIAS_2026 = {
-  'A': { maxIngresos: 12009410, superficie: 30, energia: 3330, alquileres: 2792886, cuotaServicios: 5586, cuotaBienes: 5586 },
-  'B': { maxIngresos: 17595183, superficie: 45, energia: 5000, alquileres: 2792886, cuotaServicios: 10613, cuotaBienes: 10613 },
-  'C': { maxIngresos: 24670494, superficie: 60, energia: 6700, alquileres: 3816944, cuotaServicios: 18247, cuotaBienes: 16757 },
-  'D': { maxIngresos: 30628651, superficie: 85, energia: 10000, alquileres: 3816944, cuotaServicios: 29791, cuotaBienes: 27743 },
-  'E': { maxIngresos: 36028231, superficie: 110, energia: 13000, alquileres: 4841003, cuotaServicios: 55858, cuotaBienes: 44314 },
-  'F': { maxIngresos: 45151659, superficie: 150, energia: 16500, alquileres: 4841003, cuotaServicios: 78573, cuotaBienes: 57720 },
-  'G': { maxIngresos: 53995799, superficie: 200, energia: 20000, alquileres: 5771965, cuotaServicios: 142996, cuotaBienes: 71498 },
-  'H': { maxIngresos: 81924660, superficie: 200, energia: 20000, alquileres: 8378658, cuotaServicios: 409623, cuotaBienes: 204812 },
-  'I': { maxIngresos: 91699762, superficie: 200, energia: 20000, alquileres: 8378658, cuotaServicios: 0, cuotaBienes: 325837 },
-  'J': { maxIngresos: 105012519, superficie: 200, energia: 20000, alquileres: 8378658, cuotaServicios: 0, cuotaBienes: 391004 },
-  'K': { maxIngresos: 126610839, superficie: 200, energia: 20000, alquileres: 8378658, cuotaServicios: 0, cuotaBienes: 456171 }
-};
 
 // Economist CLAE simplified sectors
 function getActividadesPorEmpresa(company) {
@@ -100,25 +83,14 @@ export async function renderIVASimple() {
   // -------------------------------------------------------------
   if (isMonotributo) {
     // 1. Parse active category letter (e.g. "Cat H")
-    const matchCat = company.condicion_iva.match(/Cat\s+([A-K])/i);
-    const activeLetter = matchCat ? matchCat[1].toUpperCase() : 'H';
+    const activeLetter = letraCategoria(company.condicion_iva);
     const catDetails = MONOTRIBUTO_CATEGORIAS_2026[activeLetter] || MONOTRIBUTO_CATEGORIAS_2026['H'];
 
     // 2. Sum rolling 12-month sales (cutoff 365 days ago)
+    const rollingSales = ventasMoviles12Meses(txs.ventas);
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - 365);
-    
-    const rollingSales = txs.ventas.reduce((s, v) => {
-      const vDate = new Date(v.fecha);
-      if (vDate >= cutoffDate) {
-        return s + v.total;
-      }
-      return s;
-    }, 0);
-
-    const topeExclusion = MONOTRIBUTO_CATEGORIAS_2026['K'].maxIngresos;
-    const percentCategory = (rollingSales / catDetails.maxIngresos) * 100;
-    const percentExclusion = (rollingSales / topeExclusion) * 100; // Cat K limit
+    const { topeExclusion, percentCategory, percentExclusion } = consumoMonotributo(rollingSales, activeLetter);
 
     // 3. Warning engine and insights
     let statusColor = 'var(--color-accent-light)'; // Green
@@ -328,21 +300,6 @@ export async function renderIVASimple() {
   // -------------------------------------------------------------
   // STANDARD RENDERING FOR RESPONSABLES INSCRIPTOS (RI)
   // -------------------------------------------------------------
-  const debFiscal    = txs.ventas.reduce((s, v) => s + v.iva, 0);
-  // Exclude CUIT inactiva from computed credit fiscal
-  const creditoHabilitado = txs.compras.reduce((s, c) => {
-    const cleanCuit = c.cuit.replace(/[^0-9]/g, '');
-    if (cleanCuit.endsWith('9')) return s;
-    return s + c.iva;
-  }, 0);
-  // Prorrateo del crédito fiscal de uso común (Art. 13 Ley de IVA) cuando el
-  // cliente tiene ventas exentas además de gravadas — debe ser el mismo
-  // criterio que en Libro IVA Digital para que el saldo a presentar coincida.
-  const totalVentasNetoRI = txs.ventas.reduce((s, v) => s + v.neto, 0);
-  const totalVentasExentoRI = txs.ventas.filter(v => v.exento).reduce((s, v) => s + v.neto, 0);
-  const prorrateoGravadoRI = totalVentasNetoRI > 0 ? (1 - totalVentasExentoRI / totalVentasNetoRI) : 1;
-  const credFiscal = Math.round(creditoHabilitado * prorrateoGravadoRI * 100) / 100;
-
   // Reconciled retenciones (excluye cuenta puente de $ 6.080,75). Si el usuario
   // no fijó un override manual, se calcula a partir de la misma fuente que
   // Retenciones y Percepciones (Supabase real o sandbox), no de una copia propia.
@@ -356,7 +313,12 @@ export async function renderIVASimple() {
   }
 
   const saldoFavor   = getIvaSaldoFavor(company);
-  const saldoNeto    = debFiscal - credFiscal - retPercSaldo - saldoFavor;
+  // Sandbox: el demo marca como "CUIT inactiva" a los proveedores terminados en 9
+  // y no les computa credito. Con datos reales se computa todo el credito fiscal.
+  const excluirCredito = isSupabaseConfigured ? null : (c) => c.cuit.replace(/[^0-9]/g, '').endsWith('9');
+  const { debFiscal, credFiscal, saldoNeto } = calcularIvaRI({
+    ventas: txs.ventas, compras: txs.compras, retPercSaldo, saldoFavor, excluirCredito
+  });
 
   const venc      = getVencimientos(company.cuit);
 
@@ -364,14 +326,8 @@ export async function renderIVASimple() {
   const actividades = getActividadesPorEmpresa(company);
   const totalNetVentas = txs.ventas.reduce((s, v) => s + v.neto, 0);
 
-  const actividadRows = actividades.map(a => ({
-    ...a,
-    neto: totalNetVentas * a.pct,
-    df:   totalNetVentas * a.pct * a.alicuota / 100,
-  }));
-  const totalActividadDF = actividadRows.reduce((s, r) => s + r.df, 0);
-  const consistDiff = Math.abs(totalActividadDF - debFiscal);
-  const consistOkCalc = consistDiff < 1; // less than $1 difference = OK
+  const { rows: actividadRows, totalActividadDF, diff: consistDiff, ok: consistOkCalc } =
+    consistenciaCLAE(totalNetVentas, actividades, debFiscal);
 
   // Auto-validación si la diferencia es exactamente $ 0,00
   let consistenciaOk = getIvaConsistOk(company);
@@ -658,25 +614,7 @@ export async function initIVASimple(mainApp) {
       const superficie = Number(document.getElementById('recat-superficie').value) || 0;
 
       // Calculate suggested category
-      let recommendedCategory = 'A';
-      const keys = Object.keys(MONOTRIBUTO_CATEGORIAS_2026);
-      
-      for (let i = 0; i < keys.length; i++) {
-        const catLetter = keys[i];
-        const val = MONOTRIBUTO_CATEGORIAS_2026[catLetter];
-        
-        if (ingresos <= val.maxIngresos && 
-            energia <= val.energia && 
-            alquileres <= val.alquileres && 
-            superficie <= val.superficie) {
-          recommendedCategory = catLetter;
-          break;
-        }
-        // If it exceeds all, it remains K or gets excluded
-        if (i === keys.length - 1) {
-          recommendedCategory = 'EXCLUIDO';
-        }
-      }
+      const recommendedCategory = categoriaMonotributoRecomendada({ ingresos, energia, alquileres, superficie });
 
       const resultBox = document.getElementById('recat-result-box');
       const resultText = document.getElementById('recat-result-text');

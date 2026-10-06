@@ -4,6 +4,7 @@
 import { getActiveCompanyAsync } from '../db/mockdb.js';
 import { supabase, isSupabaseConfigured } from '../db/supabase.js';
 import { fmt, downloadFile, renderPremiumTeaser } from '../utils.js';
+import { calcularLiquidacion } from '../domain/fiscal.js';
 import { sanitizeInput as esc } from '../utils.js';
 
 function mapLiqFromDb(l) {
@@ -347,87 +348,7 @@ export async function initSueldos(mainApp) {
     inputPeriod.value = currentMonth;
   }
 
-  // Deducción mensual (MNI + deducción especial) para Ganancias 4ta categoría,
-  // empleado soltero sin cargas de familia — período jul-dic 2026 (ARCA, se
-  // actualiza semestralmente por inflación; verificar contra la tabla vigente).
-  const GANANCIAS_DEDUCCION_MENSUAL = 2909508;
-  // Deducciones mensuales por cargas de familia (Art. 30 LIG), mismo período.
-  const GANANCIAS_DEDUCCION_CONYUGE = 472258;
-  const GANANCIAS_DEDUCCION_POR_HIJO = 238161;
-
-  // Detracción de la base imponible de contribuciones patronales (Decreto
-  // 814/2001, Art. 4) vigente 2026 — general para LCT, trabajo agrario y
-  // construcción. No incluye el adicional de $10.000 para "pequeños
-  // empleadores" (≤25 trabajadores): ese beneficio se aplica una sola vez
-  // sobre la base total de TODA la nómina, no por empleado, y este
-  // simulador liquida un empleado a la vez sin conocer el resto de la planta.
-  const DETRACCION_PATRONAL_MENSUAL = 7003.68;
-
-  // Escala progresiva mensual del Art. 94 LIG (escala anual jul-dic 2026 / 12,
-  // ya que la retención real usa un método de acumulado anual que requeriría
-  // historial mes a mes por empleado — inviable en un simulador de un solo mes).
-  const GANANCIAS_ESCALA = [
-    { hasta: 180707.66, fijo: 0, pct: 0.05, exceso: 0 },
-    { hasta: 361415.31, fijo: 9035.38, pct: 0.09, exceso: 180707.66 },
-    { hasta: 542122.97, fijo: 25299.07, pct: 0.12, exceso: 361415.31 },
-    { hasta: 813184.46, fijo: 46983.99, pct: 0.15, exceso: 542122.97 },
-    { hasta: 1626368.92, fijo: 87643.21, pct: 0.19, exceso: 813184.46 },
-    { hasta: 2439553.37, fijo: 242148.26, pct: 0.23, exceso: 1626368.92 },
-    { hasta: 3659330.06, fijo: 429180.69, pct: 0.27, exceso: 2439553.37 },
-    { hasta: 5488995.09, fijo: 758520.39, pct: 0.31, exceso: 3659330.06 },
-    { hasta: Infinity, fijo: 1325716.55, pct: 0.35, exceso: 5488995.09 }
-  ];
-
-  const calcularGanancias = (excedente) => {
-    if (excedente <= 0) return 0;
-    const tramo = GANANCIAS_ESCALA.find(t => excedente <= t.hasta);
-    return tramo.fijo + (excedente - tramo.exceso) * tramo.pct;
-  };
-
-  // Función para realizar cálculos impositivos de liquidación
-  const calculateLiquidacion = (brutoVal, isSec, conCargas) => {
-    const { conyuge = false, hijos = 0 } = conCargas || {};
-    const jub = brutoVal * 0.11;
-    const pami = brutoVal * 0.03;
-    const os = brutoVal * 0.03;
-    const sec = isSec ? brutoVal * 0.02 : 0;
-
-    // Ganancias 4ta categoría: MNI + deducción especial + cargas de familia,
-    // sobre el excedente se aplica la escala progresiva completa del Art. 94.
-    const deduccionFamilia = (conyuge ? GANANCIAS_DEDUCCION_CONYUGE : 0) + (hijos * GANANCIAS_DEDUCCION_POR_HIJO);
-    const deduccionTotal = GANANCIAS_DEDUCCION_MENSUAL + deduccionFamilia;
-    const gananciaNetaSujeta = brutoVal - jub - pami - os;
-    const excedenteGanancias = Math.max(0, gananciaNetaSujeta - deduccionTotal);
-    const ganancias = calcularGanancias(excedenteGanancias);
-
-    const totalDeduc = jub + pami + os + sec + ganancias;
-    const neto = brutoVal - totalDeduc;
-
-    // Contribuciones patronales — Decreto 814/2001, Art. 4: se detrae un monto
-    // fijo por empleado de la base imponible ANTES de aplicar las alícuotas
-    // (LCT, trabajo agrario y construcción; monto vigente 2026 según Art. 22).
-    const basePatronal = Math.max(0, brutoVal - DETRACCION_PATRONAL_MENSUAL);
-    const pJub = basePatronal * 0.1017;
-    const pOs = basePatronal * 0.06;
-    const pOtros = basePatronal * 0.07;
-    const totalPatr = pJub + pOs + pOtros;
-
-    return {
-      bruto: brutoVal,
-      jub,
-      pami,
-      os,
-      sec,
-      ganancias,
-      totalDeduc,
-      neto,
-      basePatronal,
-      pJub,
-      pOs,
-      pOtros,
-      totalPatr
-    };
-  };
+  const calculateLiquidacion = calcularLiquidacion;
 
   // Escuchar inputs para simulación en vivo
   const updateSimulation = () => {

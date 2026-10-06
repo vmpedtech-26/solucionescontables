@@ -5,6 +5,7 @@
 import { getActiveCompanyAsync, getTransactionsAsync, addTransaction, updateEmpresaFieldsAsync } from '../db/mockdb.js';
 import { supabase, isSupabaseConfigured } from '../db/supabase.js';
 import { fmt, categorizarRT54, RT54_COEF, RT54_BASE_MEDIANA, RT54_BASE_RESTANTE, fetchAndCompileIPC } from '../utils.js';
+import { amortizacionAnualTotal, coeficienteReexpresion } from '../domain/fiscal.js';
 import { sanitizeInput as esc } from '../utils.js';
 
 const EI_FACTOR = 1.2; // EI = stockFinal * EI_FACTOR
@@ -207,9 +208,7 @@ export async function renderRT54() {
   ];
 
   // Sum total annual amortizations
-  const totalAnnualAmortization = allAssets.reduce((s, a) => {
-    return s + (a.valor / a.vidaUtil);
-  }, 0);
+  const totalAnnualAmortization = amortizacionAnualTotal(allAssets);
 
   const isAsientoRegistrado = getRt54AsientoRegistrado(company);
 
@@ -278,8 +277,7 @@ export async function renderRT54() {
 
   const axiRowsHtml = axiItems.map(item => {
     const isBienesDeCambio = item.concepto.toLowerCase().includes('cambio');
-    const ipcOrig = IPC_INDICES[item.origen] || 1500.0;
-    const coef = isBienesDeCambio ? 1.0000 : (latestValue / ipcOrig);
+    const coef = coeficienteReexpresion(item, IPC_INDICES, latestValue);
     const adjusted = item.valor * coef;
     const adjustment = adjusted - item.valor;
 
