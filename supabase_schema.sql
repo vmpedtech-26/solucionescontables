@@ -424,7 +424,7 @@ CREATE TABLE IF NOT EXISTS public.invitaciones_clientes (
     empresa_id TEXT NOT NULL REFERENCES public.empresas(id) ON DELETE CASCADE,
     estudio_id UUID NOT NULL REFERENCES public.estudios(id) ON DELETE CASCADE,
     usado BOOLEAN DEFAULT false NOT NULL,
-    usado_por UUID REFERENCES auth.users(id),
+    usado_por UUID REFERENCES auth.users(id) ON DELETE SET NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
