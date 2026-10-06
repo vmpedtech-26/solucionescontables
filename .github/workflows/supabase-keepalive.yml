@@ -1,0 +1,20 @@
+# Evita que el proyecto Supabase (plan free) se pause por inactividad: una
+# consulta de lectura cada 3 dias cuenta como actividad. No reemplaza al plan
+# Pro. La URL y la clave publishable son publicas por diseno (RLS protege los datos).
+name: Supabase keep-alive
+
+on:
+  schedule:
+    - cron: '17 6 */3 * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Consulta liviana a la API REST
+        run: |
+          curl -fsS --retry 3 --max-time 30 \
+            "https://nbqlndlpzpvjmlimymdp.supabase.co/rest/v1/estudios?select=id&limit=1" \
+            -H "apikey: sb_publishable_ahaq3Gsz97t43kXs86lBMw_5vnb563D" \
+            -H "Authorization: Bearer sb_publishable_ahaq3Gsz97t43kXs86lBMw_5vnb563D"
