@@ -5,6 +5,7 @@ import { getActiveCompanyAsync, getClienteFinalAsync, addTransactionAsync } from
 import { supabase, isSupabaseConfigured, getCachedRole } from '../db/supabase.js';
 import { fmt, fmtDate } from '../utils.js';
 import { sanitizeInput as esc } from '../utils.js';
+import { blockSimulated } from '../utils.js';
 
 // Pre-loaded digital documents (tickets & invoices)
 const INITIAL_DIGITAL_TICKETS = [
@@ -242,11 +243,11 @@ export async function renderPortalCliente() {
             </label>
 
             <div class="demo-afip-pills" style="margin-top: 16px; display: flex; gap: 8px; justify-content: center;">
-              <div class="afip-sample-pill" id="btn-simulate-ticket" style="border-color: rgba(22, 163, 74, 0.25);">
+              <div class="afip-sample-pill" id="btn-simulate-ticket" data-simulated="1" title="Simulación: no disponible todavía" style="border-color: rgba(22, 163, 74, 0.25);">
                 <i data-lucide="refresh-cw" style="width: 12px; height: 12px; display: inline; vertical-align: middle; margin-right: 4px; color:var(--color-accent-light);"></i>
                 Digitalizar Gasto de Combustible
               </div>
-              <div class="afip-sample-pill" id="btn-simulate-asset" style="border-color: rgba(22, 163, 74, 0.4); color: var(--color-accent-light); font-weight: 600;">
+              <div class="afip-sample-pill" id="btn-simulate-asset" data-simulated="1" title="Simulación: no disponible todavía" style="border-color: rgba(22, 163, 74, 0.4); color: var(--color-accent-light); font-weight: 600;">
                 <i data-lucide="refresh-cw" style="width: 12px; height: 12px; display: inline; vertical-align: middle; margin-right: 4px; color:var(--color-accent-light);"></i>
                 Digitalizar Compra de Notebook
               </div>
@@ -434,7 +435,7 @@ export async function renderPortalCliente() {
             </div>
 
             <!-- Actions -->
-            <button type="button" id="btn-emitir-factura" class="btn btn-primary w-full" style="background: linear-gradient(135deg, var(--color-accent-light) 0%, var(--color-accent) 100%); border: none; font-size: 13.5px; font-weight: 800; height: 44px; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: var(--shadow-sm);">
+            <button type="button" id="btn-emitir-factura" data-simulated="1" title="Simulación: no disponible todavía" class="btn btn-primary w-full" style="background: linear-gradient(135deg, var(--color-accent-light) 0%, var(--color-accent) 100%); border: none; font-size: 13.5px; font-weight: 800; height: 44px; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: var(--shadow-sm);">
               <i data-lucide="zap"></i> Solicitar CAE & Emitir Comprobante
             </button>
 
@@ -1349,6 +1350,7 @@ export async function initPortalCliente(mainApp) {
   // DIRECT INVOICE EMISSION & CAE REQUEST (WSAA & WSFE CRYTOGRAPHIC HANDSHAKE)
   // -------------------------------------------------------------
   btnEmitirFactura?.addEventListener('click', (e) => {
+    if (blockSimulated(mainApp, 'La emisión de facturas electrónicas', 'La emisión de facturas electrónicas todavía no está conectada con ARCA (WSFE), así que está deshabilitada: no se genera ningún CAE real.')) return;
     e.stopPropagation();
 
     const cuitVal = inputCuit.value.trim();
@@ -1988,6 +1990,7 @@ export async function initPortalCliente(mainApp) {
                          file.name.toLowerCase().includes('dell') ||
                          file.name.toLowerCase().includes('laptop') ||
                          file.name.toLowerCase().includes('pc');
+      if (blockSimulated(mainApp, 'La digitalización con IA', 'La digitalización automática requiere configurar la clave de Gemini. Mientras tanto, cargá el comprobante con "Carga manual".')) return;
       startUploadSimulation(isAssetSim);
     }
   };
@@ -2017,11 +2020,13 @@ export async function initPortalCliente(mainApp) {
   });
 
   btnSim?.addEventListener('click', (e) => {
+    if (blockSimulated(mainApp, 'El ticket de ejemplo')) return;
     e.stopPropagation();
     startUploadSimulation(false);
   });
 
   btnSimAsset?.addEventListener('click', (e) => {
+    if (blockSimulated(mainApp, 'El ticket de ejemplo')) return;
     e.stopPropagation();
     startUploadSimulation(true);
   });

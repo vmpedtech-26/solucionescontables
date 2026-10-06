@@ -4,6 +4,7 @@
 import { getActiveCompany, addTransaction, getTransactions } from '../db/mockdb.js';
 import { fmt } from '../utils.js';
 import { sanitizeInput as esc } from '../utils.js';
+import { blockSimulated } from '../utils.js';
 
 const ARCA_MOCK_EMITIDAS = [
   { fecha: "2026-05-24", tipo_comprobante: "Factura A", numero: "0003-00000850", cliente: "Comercio Mayorista Patagonia", cuit: "30-58930219-4", neto: 150000, iva: 31500, total: 181500, es_activo: false, categoria: "Venta" },
@@ -70,11 +71,11 @@ export function renderImportacion() {
           </label>
 
           <div class="demo-afip-pills" style="margin-top: 16px; display: flex; gap: 8px; justify-content: center;">
-            <div class="afip-sample-pill" id="btn-simulate-emitidas" style="border-color: rgba(22, 163, 74, 0.25);">
+            <div class="afip-sample-pill" id="btn-simulate-emitidas" data-simulated="1" title="Simulación: no disponible todavía" style="border-color: rgba(22, 163, 74, 0.25);">
               <i data-lucide="refresh-cw" style="width: 12px; height: 12px; display: inline; vertical-align: middle; margin-right: 4px; color:var(--color-accent-light);"></i>
               Sincronizar Emitidas ARCA (Ventas)
             </div>
-            <div class="afip-sample-pill" id="btn-simulate-recibidas" style="border-color: rgba(22, 163, 74, 0.25);">
+            <div class="afip-sample-pill" id="btn-simulate-recibidas" data-simulated="1" title="Simulación: no disponible todavía" style="border-color: rgba(22, 163, 74, 0.25);">
               <i data-lucide="refresh-cw" style="width: 12px; height: 12px; display: inline; vertical-align: middle; margin-right: 4px; color:var(--color-accent-light);"></i>
               Sincronizar Recibidas ARCA (Compras)
             </div>
@@ -288,7 +289,7 @@ export function renderImportacion() {
           <div>
             <label style="font-size: 11px; font-weight: 700; color: var(--text-secondary); display:block; margin-bottom:6px;">2. Cargar Extracto Bancario (Excel o CSV)</label>
             <div style="display:flex; gap:10px;">
-              <button type="button" class="btn btn-outline" id="btn-simulate-bank-extract" style="flex:1; display:flex; align-items:center; justify-content:center; gap:6px; font-size:12px; height:38px; border-color: rgba(245, 158, 11, 0.3); color:#f59e0b; font-weight:700; cursor:pointer;">
+              <button type="button" class="btn btn-outline" id="btn-simulate-bank-extract" data-simulated="1" title="Simulación: no disponible todavía" style="flex:1; display:flex; align-items:center; justify-content:center; gap:6px; font-size:12px; height:38px; border-color: rgba(245, 158, 11, 0.3); color:#f59e0b; font-weight:700; cursor:pointer;">
                 <i data-lucide="refresh-cw" style="width:14px; height:14px;"></i> Cargar Extracto Demo
               </button>
               <label class="btn btn-outline" style="cursor: pointer; font-size:12px; height:38px; display:flex; align-items:center; justify-content:center; gap:6px; margin:0;">
@@ -970,11 +971,13 @@ export function initImportacion(mainApp) {
 
   // ARCA Connection Sincronización (Direct Integration)
   btnSimEmitidas?.addEventListener('click', (e) => {
+    if (blockSimulated(mainApp, 'La importación de muestra de ARCA')) return;
     e.stopPropagation();
     startSimulation(ARCA_MOCK_EMITIDAS, 'ventas');
   });
 
   btnSimRecibidas?.addEventListener('click', (e) => {
+    if (blockSimulated(mainApp, 'La importación de muestra de ARCA')) return;
     e.stopPropagation();
     startSimulation(ARCA_MOCK_RECIBIDAS, 'compras');
   });
@@ -988,6 +991,7 @@ export function initImportacion(mainApp) {
   const bankResults = document.getElementById('bank-results-container');
 
   btnSimBank?.addEventListener('click', (e) => {
+    if (blockSimulated(mainApp, 'La conciliación bancaria de muestra')) return;
     e.stopPropagation();
     if (bankResults) bankResults.style.display = 'none';
     if (bankProgContainer) bankProgContainer.style.display = 'block';

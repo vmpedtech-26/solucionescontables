@@ -57,6 +57,7 @@ export function renderDashboardLayout(childHTML, activeRoute, role = null) {
   <style>
       .role-cliente .db-nav-label, .role-cliente .db-nav-item:not([data-route="portal"]), .role-cliente #company-selector-dropdown, .role-cliente #topbar-company-selector i[data-lucide="chevron-down"], .role-cliente .mobile-bottom-nav .mb-nav-item { display: none !important; }
       .role-cliente #topbar-company-selector { cursor: default; }
+      ${isSupabaseConfigured ? '.db-wrapper [data-simulated] { opacity: .5; cursor: not-allowed; }' : ''}
     </style>
   <div class="db-wrapper ${isCliente ? 'role-cliente' : ''}" id="db-wrapper-root">
     <!-- Sidebar -->

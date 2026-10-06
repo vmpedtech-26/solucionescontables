@@ -4,6 +4,7 @@
 import { getCompaniesAsync, getActiveCompanyAsync, getEstudioAsync, updateEstudioFieldsAsync, updateEmpresaFieldsAsync } from '../db/mockdb.js';
 import { isSupabaseConfigured, supabase } from '../db/supabase.js';
 import { sanitizeInput as esc } from '../utils.js';
+import { blockSimulated } from '../utils.js';
 
 function getDelegationActive(company) {
   if (isSupabaseConfigured && supabase) return !!company.delegation_active;
@@ -137,7 +138,7 @@ export async function renderConfiguracion() {
             </div>
             
             <div style="text-align: center;">
-              <button class="btn btn-primary" id="btn-simulate-upload-cert" style="background: var(--color-accent); border-color: var(--color-accent); font-size: 12.5px; padding: 8px 16px;">
+              <button class="btn btn-primary" id="btn-simulate-upload-cert" data-simulated="1" title="Simulación: no disponible todavía" style="background: var(--color-accent); border-color: var(--color-accent); font-size: 12.5px; padding: 8px 16px;">
                 <i data-lucide="shield-check"></i> Enlazar y Homologar Firma Digital
               </button>
             </div>
@@ -237,7 +238,7 @@ export async function renderConfiguracion() {
                           <i data-lucide="check-circle-2" style="width: 12px; height: 12px;"></i> Activa
                         </span>
                       ` : `
-                        <button class="btn-check-delegation btn-outline" data-id="${esc(c.id)}" style="padding: 2px 8px; font-size: 10px; border-radius: 4px;">
+                        <button class="btn-check-delegation btn-outline" data-simulated="1" title="Simulación: no disponible todavía" data-id="${esc(c.id)}" style="padding: 2px 8px; font-size: 10px; border-radius: 4px;">
                           Verificar
                         </button>
                       `}
@@ -311,7 +312,7 @@ export async function renderConfiguracion() {
             </select>
           </div>
 
-          <button class="btn btn-primary w-full" id="btn-run-rpa" style="background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-light) 100%); border:none; font-weight:800; font-size:12.5px; height:38px; display:flex; align-items:center; justify-content:center; gap:6px;">
+          <button class="btn btn-primary w-full" id="btn-run-rpa" data-simulated="1" title="Simulación: no disponible todavía" style="background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-light) 100%); border:none; font-weight:800; font-size:12.5px; height:38px; display:flex; align-items:center; justify-content:center; gap:6px;">
             <i data-lucide="play" style="width:14px; height:14px;"></i> Sincronizar Robots RPA Ahora
           </button>
 
@@ -378,6 +379,7 @@ export async function initConfiguracion(mainApp) {
   // Sincronizar y Enlazar Certificado ARCA
   const btnSimUpload = document.getElementById('btn-simulate-upload-cert');
   btnSimUpload?.addEventListener('click', (e) => {
+    if (blockSimulated(mainApp, 'La carga y homologación de firma digital')) return;
     e.stopPropagation();
     // Flujo real del WSAA (Web Service de Autenticación y Autorización):
     // 1) se arma el TRA (Ticket de Requerimiento de Acceso), 2) se firma en
@@ -419,6 +421,7 @@ export async function initConfiguracion(mainApp) {
   // Verify Delegated CUITs
   document.querySelectorAll('.btn-check-delegation').forEach(btn => {
     btn.addEventListener('click', (e) => {
+      if (blockSimulated(mainApp, 'La verificación de delegación en ARCA')) return;
       e.stopPropagation();
       const coId = btn.dataset.id;
       const cell = document.getElementById(`cell-delegation-${coId}`);
@@ -482,6 +485,7 @@ export async function initConfiguracion(mainApp) {
   const rpaStatus = document.getElementById('rpa-terminal-status');
 
   btnRunRpa?.addEventListener('click', (e) => {
+    if (blockSimulated(mainApp, 'Los robots RPA')) return;
     e.stopPropagation();
 
     // Disable button and prepare terminal

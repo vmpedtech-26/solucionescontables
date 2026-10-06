@@ -1,6 +1,7 @@
 /* -------------------------------------------------------------
    VMP Studio Contable — Shared Utilities
    ------------------------------------------------------------- */
+import { isSupabaseConfigured } from './db/supabase.js';
 
 // ═══════════════════════════════════════════════════════════════
 // SECURITY UTILITIES — cybersecurity-sc skill (REQ-9, REQ-10)
@@ -271,3 +272,36 @@ export async function fetchAndCompileIPC() {
   return indices;
 }
 
+
+// -------------------------------------------------------------
+// Funciones simuladas: con backend real nunca deben parecer reales
+// -------------------------------------------------------------
+export function isRealMode() {
+  return isSupabaseConfigured;
+}
+
+/**
+ * Corta una accion que hoy es una simulacion (no habla con ARCA ni con ningun
+ * servicio real). Devuelve true si la accion debe abortarse. En modo sandbox
+ * (demo sin backend) no bloquea nada.
+ */
+export function blockSimulated(mainApp, feature, detail) {
+  if (!isSupabaseConfigured) return false;
+  mainApp.showToast(detail || `${feature}: función en desarrollo. Todavía no se conecta con ARCA, así que está deshabilitada para no generar datos o presentaciones falsas.`, 'warning');
+  return true;
+}
+
+export function renderComingSoon(title, description) {
+  return `
+  <div class="view-header">
+    <div>
+      <h1 class="view-title">${title}</h1>
+      <p class="view-subtitle">Próximamente</p>
+    </div>
+  </div>
+  <div class="card" style="text-align: center; padding: 56px 24px;">
+    <p style="font-size: 15px; font-weight: 700; margin-bottom: 8px;">Esta sección todavía no está disponible</p>
+    <p class="text-secondary" style="max-width: 460px; margin: 0 auto; line-height: 1.5;">${description}</p>
+  </div>
+  `;
+}

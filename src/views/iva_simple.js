@@ -7,6 +7,7 @@ import { isSupabaseConfigured, supabase } from '../db/supabase.js';
 import { getRetencionesAsync } from './retenciones.js';
 import { fmt, fmtDate, getVencimientos, downloadFile } from '../utils.js';
 import { sanitizeInput as esc } from '../utils.js';
+import { blockSimulated } from '../utils.js';
 
 function getIvaConsistOk(company) {
   if (isSupabaseConfigured && supabase) return !!company.iva_consist_ok;
@@ -402,7 +403,7 @@ export async function renderIVASimple() {
       <div style="background:rgba(22,163,74,0.08);border:1px solid rgba(22,163,74,0.2);padding:7px 14px;border-radius:var(--radius-sm);font-size:12px;font-weight:600;color:var(--color-accent-light);">
         CUIT: ${esc(company.cuit)}
       </div>
-      <button class="btn btn-primary" id="btn-presentar-f2051" ${!consistenciaOk ? 'disabled' : ''} style="${!consistenciaOk ? 'opacity:.45;cursor:not-allowed;' : ''}">
+      <button class="btn btn-primary" id="btn-presentar-f2051" data-simulated="1" title="Simulación: no disponible todavía" ${!consistenciaOk ? 'disabled' : ''} style="${!consistenciaOk ? 'opacity:.45;cursor:not-allowed;' : ''}">
         <i data-lucide="send"></i> Presentar F.2051
       </button>
     </div>
@@ -454,7 +455,7 @@ export async function renderIVASimple() {
             </div>
           </div>
           <div style="display:flex;gap:10px;align-items:center;">
-            <button class="btn btn-outline" id="btn-simular-import-libro" style="flex:1;">
+            <button class="btn btn-outline" id="btn-simular-import-libro" data-simulated="1" title="Simulación: no disponible todavía" style="flex:1;">
               <i data-lucide="refresh-cw"></i> Sincronizar Libro Digital ARCA
             </button>
             ${libroImportado ? `
@@ -772,6 +773,7 @@ export async function initIVASimple(mainApp) {
 
   // Presentar F.2051 con simulación de ARCA Live, fallos de red y reintentos
   btnPresentar?.addEventListener('click', (e) => {
+    if (blockSimulated(mainApp, 'La presentación del F.2051 ante ARCA')) return;
     e.stopPropagation();
 
     // Leer el saldo neto ya calculado y mostrado en el panel "Liquidación Estimada"
@@ -935,6 +937,7 @@ export async function initIVASimple(mainApp) {
 
   // Simulate Import Books
   document.getElementById('btn-simular-import-libro')?.addEventListener('click', (e) => {
+    if (blockSimulated(mainApp, 'La sincronización del Libro IVA Digital con ARCA')) return;
     e.stopPropagation();
     mainApp.showToast('Sincronizando libros con el portal de ARCA...', 'info');
     setTimeout(async () => {

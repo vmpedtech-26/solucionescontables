@@ -3,6 +3,7 @@
    Pilar 5: Migrador de Sistemas Legados (Tango, Bejerman, Excel)
    ------------------------------------------------------------- */
 import { getCompaniesAsync, saveCompanyAsync, addTransactionAsync } from '../db/mockdb.js';
+import { isRealMode, renderComingSoon } from '../utils.js';
 
 let migrationState = 'idle'; // 'idle' | 'uploaded' | 'migrating' | 'success'
 let selectedSystem = 'tango'; // 'tango' | 'bejerman' | 'excel'
@@ -10,6 +11,7 @@ let uploadFileName = '';
 let migrationLogs = [];
 
 export function renderMigrador() {
+  if (isRealMode()) return renderComingSoon('Migrador de Sistemas', 'La importación desde Tango, Bejerman y Excel todavía no está disponible. Por ahora podés cargar empresas y comprobantes manualmente o importar el Libro IVA en TXT.');
   const systems = [
     { id: 'tango', name: 'Tango Gestión', desc: 'Sistemas ERP Tango (.xlsx / .csv)', icon: 'settings' },
     { id: 'bejerman', name: 'Bejerman Contable', desc: 'Mapeo de archivos planos Bejerman (.txt / .xlsx)', icon: 'layout' },
@@ -194,6 +196,7 @@ function renderMigrationFlowPanel() {
 }
 
 export function initMigrador(mainApp) {
+  if (isRealMode()) return;
   // Handle switching source system
   document.querySelectorAll('.sys-option').forEach(item => {
     item.addEventListener('click', () => {

@@ -4,12 +4,14 @@
    ------------------------------------------------------------- */
 import { addTransactionAsync } from '../db/mockdb.js';
 import { sanitizeInput as esc } from '../utils.js';
+import { isRealMode, renderComingSoon } from '../utils.js';
 
 let activeChatId = 'co-1'; // Default active chat
 let scanState = 'idle'; // 'idle' | 'scanning' | 'scanned' | 'registered'
 let extractedData = null;
 
 export function renderWhatsApp() {
+  if (isRealMode()) return renderComingSoon('Inbox de WhatsApp', 'La recepción de comprobantes por WhatsApp todavía no está integrada. Mientras tanto, tus clientes pueden subirlos desde el Portal del Cliente.');
   const unreadCounts = JSON.parse(localStorage.getItem('vmp_wa_unread_counts') || '{"co-1": 1, "co-2": 0, "co-3": 0}');
   if (unreadCounts[activeChatId] > 0) {
     unreadCounts[activeChatId] = 0;
@@ -266,6 +268,7 @@ function renderOCRScannerPanel() {
 }
 
 export function initWhatsApp(mainApp) {
+  if (isRealMode()) return;
   // Inject keyframe animation for laser scanning
   if (!document.getElementById('vmp-ocr-laser-style')) {
     const style = document.createElement('style');
