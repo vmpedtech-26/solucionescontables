@@ -2,9 +2,11 @@
    VMP Studio Contable - Dashboard Layout Component
    ------------------------------------------------------------- */
 import { getCompanies, getActiveCompany, getSyncStatus } from '../db/mockdb.js';
-import { supabase, isSupabaseConfigured } from '../db/supabase.js';
+import { supabase, isSupabaseConfigured, getCachedStudioName } from '../db/supabase.js';
 
-export function renderDashboardLayout(childHTML, activeRoute) {
+export function renderDashboardLayout(childHTML, activeRoute, role = null) {
+  const isCliente = role === 'cliente';
+  const studioName = (isSupabaseConfigured && getCachedStudioName()) || 'Estudio Contable Comahue';
   const activeCompany = getActiveCompany();
   const companies = getCompanies();
   const isAdminUnlocked = localStorage.getItem('vmp_premium_unlocked') === 'true';
@@ -51,7 +53,11 @@ export function renderDashboardLayout(childHTML, activeRoute) {
   }
 
   return `
-  <div class="db-wrapper" id="db-wrapper-root">
+  <style>
+      .role-cliente .db-nav-label, .role-cliente .db-nav-item:not([data-route="portal"]), .role-cliente #company-selector-dropdown, .role-cliente #topbar-company-selector i[data-lucide="chevron-down"], .role-cliente .mobile-bottom-nav .mb-nav-item { display: none !important; }
+      .role-cliente #topbar-company-selector { cursor: default; }
+    </style>
+  <div class="db-wrapper ${isCliente ? 'role-cliente' : ''}" id="db-wrapper-root">
     <!-- Sidebar -->
     <aside class="db-sidebar">
       <div class="db-sidebar-header">
@@ -71,7 +77,7 @@ export function renderDashboardLayout(childHTML, activeRoute) {
         <div class="sidebar-active-client-card" style="background: rgba(13, 148, 136, 0.04); border: 1px solid rgba(13, 148, 136, 0.15); border-radius: var(--radius-md); padding: 12px; margin: 4px 8px 16px; display: flex; flex-direction: column; gap: 8px;">
           <div style="display: flex; align-items: center; gap: 6px;">
             <div style="background: ${activeCompany.color}; width: 8px; height: 8px; border-radius: 50%;"></div>
-            <span style="font-size: 9.5px; font-weight: 700; color: var(--color-teal-light); text-transform: uppercase; letter-spacing: 0.05em;">Cliente Seleccionado</span>
+            <span style="font-size: 9.5px; font-weight: 700; color: var(--color-teal-light); text-transform: uppercase; letter-spacing: 0.05em;">${isCliente ? 'Tu empresa' : 'Cliente Seleccionado'}</span>
           </div>
           <div>
             <div style="font-size: 13.5px; font-weight: 700; color: var(--color-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 190px;" title="${activeCompany.razon_social}">
@@ -158,9 +164,9 @@ export function renderDashboardLayout(childHTML, activeRoute) {
 
       <div class="db-sidebar-footer">
         <div class="user-info">
-          <span class="user-name">Estudio Contable Comahue</span>
+          <span class="user-name">${isCliente ? activeCompany.razon_social : studioName}</span>
           <span class="user-role" style="display: flex; align-items: center; gap: 4px;">
-            Administrador
+            ${isCliente ? 'Cliente' : 'Administrador'}
             ${isAdminUnlocked ? `
               <span id="vmp-admin-lock-btn" title="Re-bloquear funciones Premium (Volver a Modo Demo)" style="cursor: pointer; color: #f59e0b; display: inline-flex; align-items: center; margin-left: 4px;">
                 <i data-lucide="unlock" style="width: 12px; height: 12px;"></i>

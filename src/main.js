@@ -1,7 +1,7 @@
 /* -------------------------------------------------------------
    VMP Studio Contable - Front Controller & Routing Orchestrator
    ------------------------------------------------------------- */
-import { initMockDB, getActiveCompany, setActiveCompanyId } from './db/mockdb.js';
+import { initMockDB, getActiveCompany, setActiveCompanyId, getActiveCompanyAsync, syncClienteCompanyCache } from './db/mockdb.js';
 import { supabase, isSupabaseConfigured, getCachedSession, getCachedRole } from './db/supabase.js';
 
 // Import Views
@@ -239,6 +239,15 @@ class Application {
     const rootEl = document.getElementById('view-root');
     if (!rootEl) return;
 
+    // 0. Con backend real, el layout (que lee el cache local de forma sincrona)
+    // tiene que reflejar SOLO datos reales de esta sesion, segun el rol.
+    let role = null;
+    if (isSupabaseConfigured && supabase) {
+      role = await getCachedRole();
+      if (role === 'cliente') await syncClienteCompanyCache();
+      else if (role === 'estudio') await getActiveCompanyAsync();
+    }
+
     // 1. Get active company
     let activeCompany;
     try {
@@ -274,7 +283,7 @@ class Application {
     // 3. Render and inject Layout
     let layoutHTML = '';
     try {
-      layoutHTML = renderDashboardLayout(viewHTML, activeRouteKey);
+      layoutHTML = renderDashboardLayout(viewHTML, activeRouteKey, role);
     } catch (layoutErr) {
       console.error("Layout rendering failed:", layoutErr);
       throw layoutErr;

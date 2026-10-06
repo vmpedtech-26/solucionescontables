@@ -2,7 +2,7 @@
    VMP Studio Contable - Portal Cliente View Component
    ------------------------------------------------------------- */
 import { getActiveCompanyAsync, getClienteFinalAsync, addTransactionAsync } from '../db/mockdb.js';
-import { supabase, isSupabaseConfigured } from '../db/supabase.js';
+import { supabase, isSupabaseConfigured, getCachedRole } from '../db/supabase.js';
 import { fmt, fmtDate } from '../utils.js';
 
 // Pre-loaded digital documents (tickets & invoices)
@@ -43,8 +43,20 @@ async function getComprobantesAsync(companyId) {
   return JSON.parse(localStorage.getItem(`vmp_tickets_${companyId}`)) || [];
 }
 
+// Un cliente final no escribe en el libro del estudio (RLS lo impide): su
+// comprobante queda "Recibido" en comprobantes_digitales y el estudio lo procesa.
+async function isClienteSession() {
+  return isSupabaseConfigured && !!supabase && (await getCachedRole()) === 'cliente';
+}
+
+async function addLedgerEntryAsync(companyId, type, item) {
+  if (await isClienteSession()) return;
+  return addTransactionAsync(companyId, type, item);
+}
+
 async function addComprobanteAsync(companyId, ticket) {
   if (isSupabaseConfigured && supabase) {
+    if (await isClienteSession()) ticket = { ...ticket, estado: 'Recibido' };
     const { error } = await supabase.from('comprobantes_digitales').insert({ ...ticket, empresa_id: companyId });
     if (error) throw error;
     return;
@@ -1491,7 +1503,7 @@ export async function initPortalCliente(mainApp) {
         iva: lastEmittedIva,
         total: lastEmittedTotal
       };
-      await addTransactionAsync(activeCompany.id, 'ventas', newSale);
+      await addLedgerEntryAsync(activeCompany.id, 'ventas', newSale);
 
       // 2. ADD TO DIGITALIZED DOCUMENTS LIST FOR RE-RENDER
       const newDoc = {
@@ -1858,7 +1870,7 @@ export async function initPortalCliente(mainApp) {
         categoria: parsedData.categoria || "Otros"
       };
 
-      await addTransactionAsync(activeCompany.id, 'compras', newPurchase);
+      await addLedgerEntryAsync(activeCompany.id, 'compras', newPurchase);
 
       // Increment scans count
       const updatedScans = scansCount + 1;
@@ -1947,7 +1959,7 @@ export async function initPortalCliente(mainApp) {
           es_activo: false,
           categoria: "Combustibles"
         };
-        await addTransactionAsync(activeCompany.id, 'compras', newPurchase);
+        await addLedgerEntryAsync(activeCompany.id, 'compras', newPurchase);
 
         // Increment scans count
         const updatedScans = scansCount + 1;
@@ -2348,7 +2360,7 @@ Sabor digital, VMP Studio.
         categoria: category
       };
 
-      await addTransactionAsync(activeCompany.id, 'compras', newPurchase);
+      await addLedgerEntryAsync(activeCompany.id, 'compras', newPurchase);
 
       // Agregar a la lista de documentos digitalizados
       const newTicket = {

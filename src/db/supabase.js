@@ -42,6 +42,7 @@ export async function getCachedSession() {
 // cachedSession, evita una consulta extra en cada navegación de #/studio/*.
 // -------------------------------------------------------------
 let cachedRole = null;
+let cachedStudioName = '';
 let roleReady = false;
 
 export async function getCachedRole() {
@@ -51,9 +52,10 @@ export async function getCachedRole() {
   const session = await getCachedSession();
   if (!session) return null;
 
-  const { data: estudio } = await supabase.from('estudios').select('id').eq('id', session.user.id).maybeSingle();
+  const { data: estudio } = await supabase.from('estudios').select('id,razon_social').eq('id', session.user.id).maybeSingle();
   if (estudio) {
     cachedRole = 'estudio';
+    cachedStudioName = estudio.razon_social || '';
   } else {
     const { data: cliente } = await supabase.from('clientes_finales').select('id').eq('id', session.user.id).maybeSingle();
     cachedRole = cliente ? 'cliente' : null;
@@ -62,11 +64,16 @@ export async function getCachedRole() {
   return cachedRole;
 }
 
+export function getCachedStudioName() {
+  return cachedStudioName;
+}
+
 if (isSupabaseConfigured && supabase) {
   supabase.auth.onAuthStateChange((_event, session) => {
     cachedSession = session;
     sessionReady = true;
     cachedRole = null;
+    cachedStudioName = '';
     roleReady = false;
   });
 }

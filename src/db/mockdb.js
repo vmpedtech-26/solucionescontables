@@ -44,6 +44,13 @@ const DEFAULT_COMPANIES = [
   }
 ];
 
+// Placeholder neutro para el layout cuando una sesion real todavia no tiene
+// ninguna empresa cargada (nunca se muestra una empresa demo en modo real).
+const EMPTY_COMPANY = {
+  id: "", razon_social: "Sin empresa seleccionada", cuit: "-", color: "#94a3b8",
+  condicion_iva: "Responsable Inscripto", tipo: "", actividad: "", inicio_actividades: "2000-01-01"
+};
+
 const DEFAULT_TRANSACTIONS = {
   "co-1": {
     ventas: [
@@ -223,14 +230,17 @@ export async function processSyncQueue() {
 // 2. INICIALIZACIÓN Y SINCRONIZACIÓN DE PULL (DESDE LA NUBE)
 // -------------------------------------------------------------
 export function initMockDB() {
+  // Con backend real nunca se siembran empresas/comprobantes demo: la unica
+  // fuente de verdad es Supabase y el cache local arranca vacio.
+  const realMode = isSupabaseConfigured && !!supabase;
   if (!localStorage.getItem("vmp_studio_companies")) {
-    localStorage.setItem("vmp_studio_companies", JSON.stringify(DEFAULT_COMPANIES));
+    localStorage.setItem("vmp_studio_companies", JSON.stringify(realMode ? [] : DEFAULT_COMPANIES));
   }
   if (!localStorage.getItem("vmp_studio_transactions")) {
-    localStorage.setItem("vmp_studio_transactions", JSON.stringify(DEFAULT_TRANSACTIONS));
+    localStorage.setItem("vmp_studio_transactions", JSON.stringify(realMode ? {} : DEFAULT_TRANSACTIONS));
   }
   if (!localStorage.getItem("vmp_studio_active_co")) {
-    localStorage.setItem("vmp_studio_active_co", "co-1");
+    localStorage.setItem("vmp_studio_active_co", realMode ? "" : "co-1");
   }
   if (!localStorage.getItem("vmp_studio_sync_queue")) {
     localStorage.setItem("vmp_studio_sync_queue", "[]");
@@ -467,6 +477,18 @@ export async function updateEmpresaFieldsAsync(companyId, fields) {
   }
 }
 
+// Deja en el cache local solo la empresa vinculada al cliente final logueado,
+// para que el layout (que lee el cache de forma sincrona) no muestre otra.
+export async function syncClienteCompanyCache() {
+  const cliente = await getClienteFinalAsync();
+  if (!cliente) return null;
+  const { data } = await supabase.from('empresas').select('*').eq('id', cliente.empresa_id).single();
+  if (!data) return null;
+  localStorage.setItem("vmp_studio_companies", JSON.stringify([data]));
+  localStorage.setItem("vmp_studio_active_co", data.id);
+  return data;
+}
+
 // Lee la fila del estudio logueado (perfil ARCA, checklist de onboarding).
 // Devuelve null en modo sandbox o si todavía no hay sesión real.
 export async function getEstudioAsync() {
@@ -524,7 +546,7 @@ async function pushCompanyToSupabase(company, isNew) {
 
 export function getActiveCompanyId() {
   initMockDB();
-  return localStorage.getItem("vmp_studio_active_co") || 'co-1';
+  return localStorage.getItem("vmp_studio_active_co") || ((isSupabaseConfigured && supabase) ? '' : 'co-1');
 }
 
 export function getActiveCompany() {
@@ -541,6 +563,7 @@ export function getActiveCompany() {
   } catch (e) {
     console.error("Error cargando empresa activa, reintentando...", e);
   }
+  if (isSupabaseConfigured && supabase) return EMPTY_COMPANY;
   return DEFAULT_COMPANIES[0];
 }
 
