@@ -29,13 +29,13 @@
   <link rel="preload" as="image" href="/corporate_bg.jpg">
 
   <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://unpkg.com/lucide@1.52.0/dist/umd/lucide.min.js" integrity="sha384-SSRIJfpvnhji4rCcULgpNXRJjQ9P/odU9OaWxSumsZiokvJ7zAu4PGQVWyWxTG3u" crossorigin="anonymous"></script>
   
   <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js" integrity="sha384-jb8JQMbMoBUzgWatfe6COACi2ljcDdZQ2OxczGA3bGNeWe+6DChMTBJemed7ZnvJ" crossorigin="anonymous"></script>
   
   <!-- Supabase Client -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2" integrity="sha384-WgXwGL6fUsYJWNaKJgVbrJKGRQwc1vieh2oy4kw9nXqpNDz3tdSsqEYUgeHD/NuF" crossorigin="anonymous"></script>
   
   <!-- Stylesheets -->
   <link rel="stylesheet" href="./css/landing.css">
@@ -594,6 +594,10 @@
                   <label class="form-label" style="font-size:11.5px;">Contraseña de Acceso</label>
                   <input type="password" class="form-input" id="lead-password" placeholder="••••••••" required style="padding: 10px 12px; font-size: 13px;">
                 </div>
+                <label style="display: flex; gap: 8px; align-items: flex-start; font-size: 11.5px; line-height: 1.4; color: var(--text-secondary); margin-bottom: 14px; cursor: pointer;">
+                  <input type="checkbox" id="lead-acepta" required style="margin-top: 2px; flex-shrink: 0;">
+                  <span>Leí y acepto los <a href="#/terminos" target="_blank" rel="noopener" style="color: var(--color-accent); font-weight: 600;">Términos y Condiciones</a> y la <a href="#/privacidad" target="_blank" rel="noopener" style="color: var(--color-accent); font-weight: 600;">Política de Privacidad</a>.</span>
+                </label>
                 <button type="submit" class="btn btn-primary w-full" style="padding: 12px; font-weight: 700;">
                   Registrar e Ingresar al Studio
                 </button>
@@ -612,6 +616,8 @@
             <a href="#partners" class="lp-footer-link">Partners</a>
             <a href="#contact" class="lp-footer-link">Contacto</a>
             <a href="#contact" class="lp-footer-link" style="color: var(--color-accent); font-weight: 700;">Solicitar Demo →</a>
+            <a href="#/terminos" class="lp-footer-link">Términos</a>
+            <a href="#/privacidad" class="lp-footer-link">Privacidad</a>
           </div>
           <div style="display: flex; gap: 20px; align-items: center;">
             <a href="https://wa.me/5492996731487" target="_blank" rel="noopener" aria-label="WhatsApp" style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: #25d366; font-weight: 700; text-decoration: none;">
