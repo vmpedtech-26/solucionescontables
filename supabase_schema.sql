@@ -568,8 +568,11 @@ BEGIN
     FROM public.empresas
     WHERE empresas.id = NEW.empresa_id;
 
-    -- Si la empresa no pertenece al estudio logueado, levantar alerta de intrusión impositiva
-    IF owner_id != auth.uid() THEN
+    -- Si la empresa no pertenece al estudio logueado, levantar alerta de intrusión impositiva.
+    -- Excepción: un cliente final vinculado puede cargar sus propios comprobantes
+    -- (la política RLS de INSERT de comprobantes_digitales ya lo acota a su empresa).
+    IF owner_id != auth.uid()
+       AND NOT (TG_TABLE_NAME = 'comprobantes_digitales' AND public.is_cliente_of_empresa(NEW.empresa_id)) THEN
         INSERT INTO public.seguridad_logs (estudio_id, evento, tabla, registro_id, detalles)
         VALUES (
             auth.uid(),
