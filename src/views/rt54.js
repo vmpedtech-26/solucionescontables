@@ -269,8 +269,11 @@ export async function renderRT54() {
       }))
   ];
 
-  let totalHistoricAssets = 200000; // Caja y Bancos starts at 200,000
-  let totalAdjustedAssets = 200000;
+  // Con datos reales no se conoce el saldo de Caja y Bancos: no se inventa uno.
+  // (el sandbox conserva el saldo de ejemplo de $ 200.000)
+  const CAJA_INICIAL = isSupabaseConfigured ? 0 : 200000;
+  let totalHistoricAssets = CAJA_INICIAL;
+  let totalAdjustedAssets = CAJA_INICIAL;
   
   let totalHistoricEquity = 0;
   let totalAdjustedEquity = 0;
@@ -411,7 +414,7 @@ export async function renderRT54() {
             <span class="font-mono font-bold">$ ${fmt(ultimaCompra.total)}</span>
           </div>
           <div style="display:flex;justify-content:space-between;font-size:13px;">
-            <span class="text-secondary">Costo unitario estimado:</span>
+            <span class="text-secondary" title="Supuesto de trabajo: el sistema no registra unidades por compra, asume 10.">Costo unitario estimado (neto ÷ 10 unidades, supuesto):</span>
             <span class="font-mono font-bold text-emerald">$ ${fmt(costoUltimaCompra)}</span>
           </div>
         </div>
@@ -433,8 +436,9 @@ export async function renderRT54() {
 
         <div style="border:1px solid var(--border-color);border-radius:var(--radius-md);padding:16px;display:flex;flex-direction:column;gap:8px;">
           <p style="font-size:11px;font-weight:700;color:var(--text-secondary);margin-bottom:4px;">FÓRMULA RT 54: CV = EI + C − EF</p>
+          <p style="font-size:10.5px;line-height:1.45;color:#b45309;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);border-radius:6px;padding:8px 10px;margin:0 0 6px;"><strong>Estimación orientativa.</strong> El costo unitario se aproxima como neto de la última compra ÷ 10 y la existencia inicial como existencia final × ${EI_FACTOR}: ambos son supuestos de trabajo que <strong>no surgen de la RT 54</strong>. Reemplazalos por las unidades y la existencia inicial reales del ejercicio anterior antes de usar este resultado.</p>
           <div style="display:flex;justify-content:space-between;font-size:13px;">
-            <span class="text-secondary">Existencia Inicial (EI <span style="font-size:10px;">= EF × ${EI_FACTOR})</span></span>
+            <span class="text-secondary">Existencia Inicial (EI <span style="font-size:10px;">= EF × ${EI_FACTOR}, supuesto no normativo)</span></span>
             <span class="font-mono">$ ${fmt(costoUltimaCompra * existenciaInicial)}</span>
           </div>
           <div style="display:flex;justify-content:space-between;font-size:13px;">
@@ -688,8 +692,8 @@ export async function renderRT54() {
           <h5 style="font-size:11.5px; font-weight:700; color:var(--text-secondary); text-transform:uppercase; border-bottom:1px solid var(--border-color); padding-bottom:6px; margin-bottom:8px;">Balance Histórico</h5>
           <div style="display:flex; flex-direction:column; gap:6px; font-size:11.5px;">
             <div style="display:flex; justify-content:space-between;">
-              <span class="text-secondary">Caja y Bancos (Monetario):</span>
-              <span class="font-mono">$ 200.000</span>
+              <span class="text-secondary">Caja y Bancos (Monetario)${isSupabaseConfigured ? ' — sin datos cargados' : ''}:</span>
+              <span class="font-mono">$ ${CAJA_INICIAL.toLocaleString('es-AR')}</span>
             </div>
             ${axiItems.filter(i => i.tipo === 'activo').map(i => `
               <div style="display:flex; justify-content:space-between;">
@@ -720,8 +724,8 @@ export async function renderRT54() {
           <h5 style="font-size:11.5px; font-weight:700; color:var(--color-accent-light); text-transform:uppercase; border-bottom:1px solid rgba(22,163,74,0.15); padding-bottom:6px; margin-bottom:8px;">Balance Reexpresado (RT 54) a ${formatPeriodName(latestPeriod)}</h5>
           <div style="display:flex; flex-direction:column; gap:6px; font-size:11.5px;">
             <div style="display:flex; justify-content:space-between;">
-              <span class="text-secondary">Caja y Bancos (Monetario):</span>
-              <span class="font-mono">$ 200.000</span>
+              <span class="text-secondary">Caja y Bancos (Monetario)${isSupabaseConfigured ? ' — sin datos cargados' : ''}:</span>
+              <span class="font-mono">$ ${CAJA_INICIAL.toLocaleString('es-AR')}</span>
             </div>
             ${axiItems.filter(i => i.tipo === 'activo').map(i => {
               const ipcOrig = IPC_INDICES[i.origen] || 1500.0;
@@ -753,12 +757,12 @@ export async function renderRT54() {
             
             <!-- RECPAM balancing row -->
             <div style="display:flex; justify-content:space-between; font-weight:700; color: #fbbf24;">
-              <span title="RECPAM (Resultado por Exposición al Cambio en el Poder Adquisitivo de la Moneda): Es la contrapartida de la reexpresión de partidas no monetarias. Representa la ganancia o pérdida real por la pérdida de poder de compra de la moneda." style="cursor:help; border-bottom:1px dashed #fbbf24;">RECPAM (Resultado Inflacionario) ℹ️:</span>
+              <span title="RECPAM (Resultado por Exposición al Cambio en el Poder Adquisitivo de la Moneda): Es la contrapartida de la reexpresión de partidas no monetarias. Representa la ganancia o pérdida real por la pérdida de poder de compra de la moneda." style="cursor:help; border-bottom:1px dashed #fbbf24;">Diferencia de reexpresión (referencial, no es el RECPAM contable) ℹ️:</span>
               <span class="font-mono">$ ${Math.round(recpam).toLocaleString('es-AR')}</span>
             </div>
 
             <div style="display:flex; justify-content:space-between; font-weight:800; border-top:1px solid rgba(22,163,74,0.15); padding-top:4px; color: var(--color-accent-light);">
-              <span>TOTAL PASIVO + PN + RECPAM:</span>
+              <span>TOTAL PASIVO + PN + DIFERENCIA:</span>
               <span class="font-mono">$ ${Math.round(totalAdjustedLiabEquity).toLocaleString('es-AR')}</span>
             </div>
           </div>

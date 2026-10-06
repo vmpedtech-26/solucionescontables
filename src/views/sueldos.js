@@ -114,6 +114,10 @@ export async function renderSueldos() {
     </div>
   </div>
 
+  <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.4); color: #92400e; border-radius: 8px; padding: 12px 16px; margin-bottom: 20px; font-size: 0.85rem; line-height: 1.5;">
+    <strong>Liquidación orientativa.</strong> Este simulador calcula aportes y Ganancias de 4ta categoría de forma simplificada: no aplica topes de base imponible, SAC, ART, adicionales ni convenios colectivos, y prorratea la escala anual de Ganancias en 12. Los importes deben ser validados por un Contador Público antes de emitir recibos o presentar F.931.
+  </div>
+
   <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px;">
     <!-- Calculadora / Formulario de Carga -->
     <div class="card" style="backdrop-filter: blur(10px); background: rgba(255, 255, 255, 0.8);">

@@ -342,7 +342,7 @@ const TabContents = {
         <div style="padding: 16px; font-size: 12px; line-height: 1.5; color: var(--text-secondary);">
           Implementación de la nueva norma técnica unificada de contabilidad para micro y pequeñas entidades (RT 54).
           <ul style="margin-top: 8px; padding-left: 16px; display: flex; flex-direction: column; gap: 6px;">
-            <li>**Existencia Inicial Inteligente:** El sistema documenta el cálculo multiplicando por un factor de seguridad normativo de 1.2x (EI = Inventario Físico × Coeficiente de Ajuste) para proteger el balance de distorsiones inflacionarias.</li>
+            <li>**Existencia Inicial (supuesto de trabajo):** el panel estima la existencia inicial como existencia final × 1,2. Es un supuesto interno que **no surge de la RT 54**: reemplazalo por la existencia inicial real del ejercicio anterior.</li>
             <li>**Fórmula de Costo de Ventas:** Visualización directa y matemática de <code>CV = EI + C - EF</code> (Existencia Inicial + Compras - Existencia Final) para un desglose rápido ante auditorías.</li>
             <li>**Categorización Automática:** El sistema evalúa el tamaño de la empresa en base a sus ingresos y clasifica automáticamente si encuadra en "Micro Entidad" o "Pequeña Entidad" según los umbrales de facturación vigentes de la FACPCE.</li>
           </ul>
