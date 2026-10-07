@@ -703,6 +703,7 @@ export async function initIVASimple(mainApp) {
   // Generar CSV Percepciones
   btnGenerarCSV?.addEventListener('click', (e) => {
     e.stopPropagation();
+    if (blockSimulated(mainApp, 'La generación del archivo SIRE', 'El archivo SIRE todavía no se genera con datos reales. Cargá las percepciones en la web de ARCA.')) return;
     const retVal = parseFloat(inpRet.value) || 0;
     const csvContent = `Fecha;Código Impuesto;Régimen;Tipo Comprobante;Número Comprobante;CUIT Agente;Monto Sufrido\n24/05/2026;767;217;01;0003-00000850;30-58930219-4;${retVal.toFixed(2)}`;
     downloadFile(`SIRE-PERCEPCIONES-IVA-${company.cuit}-${new Date().toISOString().slice(0,10)}.csv`, csvContent, 'text/csv');

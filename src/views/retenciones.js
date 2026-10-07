@@ -4,7 +4,7 @@
    ------------------------------------------------------------- */
 import { getActiveCompanyAsync, getTransactionsAsync } from '../db/mockdb.js';
 import { supabase, isSupabaseConfigured } from '../db/supabase.js';
-import { renderPremiumTeaser } from '../utils.js';
+import { renderPremiumTeaser, getActivePeriod } from '../utils.js';
 import { resumenRetenciones, coeficienteUnificado, calcularConvenioMultilateral } from '../domain/fiscal.js';
 import { sanitizeInput as esc } from '../utils.js';
 
@@ -154,7 +154,7 @@ export async function renderRetenciones() {
   let cmTotalSircreb = 0;
   let cmTotalSaldo = 0;
   if (jurisdicciones && jurisdicciones.length > 1) {
-    const activePeriod = localStorage.getItem('vmp_active_period') || '2026-05';
+    const activePeriod = getActivePeriod();
     const txs = await getTransactionsAsync(company.id);
     const ventasPeriodo = txs.ventas.filter(v => v.fecha.startsWith(activePeriod)).reduce((s, v) => s + v.neto, 0);
     // El banco retiene SIRCREB en una unica cuenta, pero ARCA lo distribuye entre

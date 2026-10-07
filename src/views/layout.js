@@ -3,7 +3,7 @@
    ------------------------------------------------------------- */
 import { getCompanies, getActiveCompany, getSyncStatus } from '../db/mockdb.js';
 import { supabase, isSupabaseConfigured, getCachedStudioName } from '../db/supabase.js';
-import { sanitizeInput as esc } from '../utils.js';
+import { sanitizeInput as esc, getActivePeriod, periodOptions, periodLabel } from '../utils.js';
 
 export function renderDashboardLayout(childHTML, activeRoute, role = null) {
   const isCliente = role === 'cliente';
@@ -207,12 +207,7 @@ export function renderDashboardLayout(childHTML, activeRoute, role = null) {
             <i data-lucide="calendar" style="width: 14px; height: 14px; color: var(--text-secondary);"></i>
             <span style="font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Período Fiscal:</span>
             <select id="global-fiscal-period" style="border: none; background: transparent; font-size: 13px; font-weight: 700; color: var(--text-primary); cursor: pointer; outline: none; padding: 0 4px; font-family: inherit;">
-              <option value="2026-05" ${localStorage.getItem('vmp_active_period') === '2026-05' || !localStorage.getItem('vmp_active_period') ? 'selected' : ''}>Mayo 2026</option>
-              <option value="2026-04" ${localStorage.getItem('vmp_active_period') === '2026-04' ? 'selected' : ''}>Abril 2026</option>
-              <option value="2026-03" ${localStorage.getItem('vmp_active_period') === '2026-03' ? 'selected' : ''}>Marzo 2026</option>
-              <option value="2026-02" ${localStorage.getItem('vmp_active_period') === '2026-02' ? 'selected' : ''}>Febrero 2026</option>
-              <option value="2026-01" ${localStorage.getItem('vmp_active_period') === '2026-01' ? 'selected' : ''}>Enero 2026</option>
-              <option value="2025-12" ${localStorage.getItem('vmp_active_period') === '2025-12' ? 'selected' : ''}>Diciembre 2025</option>
+              ${periodOptions().map(p => `<option value="${p}" ${p === getActivePeriod() ? 'selected' : ''}>${periodLabel(p)}</option>`).join('')}
             </select>
           </div>
 
@@ -339,16 +334,7 @@ export function initDashboardLayout(mainApp) {
     const newPeriod = e.target.value;
     localStorage.setItem('vmp_active_period', newPeriod);
     
-    const periodNames = {
-      '2026-05': 'Mayo 2026',
-      '2026-04': 'Abril 2026',
-      '2026-03': 'Marzo 2026',
-      '2026-02': 'Febrero 2026',
-      '2026-01': 'Enero 2026',
-      '2025-12': 'Diciembre 2025'
-    };
-    
-    mainApp.showToast(`Cambiando período fiscal a: ${periodNames[newPeriod] || newPeriod}`, 'success');
+    mainApp.showToast(`Cambiando período fiscal a: ${periodLabel(newPeriod)}`, 'success');
     mainApp.router(); 
   });
 

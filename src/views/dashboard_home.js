@@ -2,12 +2,24 @@
    VMP Studio Contable - Dashboard Home View (Charts & KPI)
    ------------------------------------------------------------- */
 import { getActiveCompany, getTransactions, getCompanies } from '../db/mockdb.js';
-import { sanitizeInput as esc } from '../utils.js';
+import { sanitizeInput as esc, getActivePeriod, periodLabel, validarCUIT, getVencimientos } from '../utils.js';
+import { isSupabaseConfigured } from '../db/supabase.js';
+import { MONOTRIBUTO_CATEGORIAS_2026, ventasMoviles12Meses, letraCategoria } from '../domain/fiscal.js';
+
+const REAL = isSupabaseConfigured;
+
+// Vencen el mes siguiente al periodo; si cae fin de semana pasa al lunes. No contempla feriados ni prorrogas.
+function fechaVencimiento(periodo, dia) {
+  const [y, m] = periodo.split('-').map(Number);
+  const d = new Date(y, m, dia); // mes siguiente (m es 1-based => indice m)
+  while (d.getDay() === 0 || d.getDay() === 6) d.setDate(d.getDate() + 1);
+  return d.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+}
 
 export function renderDashboardHome() {
   const activeCompany = getActiveCompany();
   const txs = getTransactions(activeCompany.id);
-  const activePeriod = localStorage.getItem('vmp_active_period') || '2026-05';
+  const activePeriod = getActivePeriod();
   const companies = getCompanies();
 
   // Estado real del Ticket de Acceso (TA) emitido por WSAA: vigente 12hs desde
@@ -21,47 +33,19 @@ export function renderDashboardHome() {
   const wsaaRemainingH = Math.floor(wsaaRemainingMs / 3600000);
   const wsaaRemainingM = Math.floor((wsaaRemainingMs % 3600000) / 60000);
 
-  // Helper dynamic dates generator by CUIT & Condition
+  // Fechas por terminación de CUIT para las DDJJ del período activo (orientativas).
   const getVencimientoDates = (cuit, cond) => {
-    const clean = cuit.replace(/-/g, '').trim();
-    const lastChar = clean.slice(-1);
-    const lastDigit = isNaN(lastChar) ? 0 : parseInt(lastChar);
-    
-    // IVA
-    let ivaDate = '—';
-    if (!cond.toLowerCase().includes('monotributo')) {
-      if (lastDigit === 0 || lastDigit === 1) ivaDate = '18/06/2026';
-      else if (lastDigit === 2 || lastDigit === 3) ivaDate = '19/06/2026';
-      else if (lastDigit === 4 || lastDigit === 5) ivaDate = '20/06/2026';
-      else if (lastDigit === 6 || lastDigit === 7) ivaDate = '21/06/2026';
-      else ivaDate = '22/06/2026';
-    }
-
-    // SUSS F.931
-    let sussDate = '—';
-    if (!cond.toLowerCase().includes('monotributo')) {
-      if (lastDigit >= 0 && lastDigit <= 3) sussDate = '09/06/2026';
-      else if (lastDigit >= 4 && lastDigit <= 6) sussDate = '10/06/2026';
-      else sussDate = '11/06/2026';
-    }
-
-    // Monotributo / Autónomos
-    let monoDate = '—';
-    if (cond.toLowerCase().includes('monotributo')) {
-      monoDate = '20/06/2026';
-    } else {
-      if (lastDigit === 0 || lastDigit === 1) monoDate = '05/06/2026';
-      else if (lastDigit === 2 || lastDigit === 3) monoDate = '05/06/2026';
-      else if (lastDigit === 4 || lastDigit === 5) monoDate = '06/06/2026';
-      else if (lastDigit === 6 || lastDigit === 7) monoDate = '06/06/2026';
-      else monoDate = '07/06/2026';
-    }
-
-    return { ivaDate, sussDate, monoDate };
+    const v = getVencimientos(cuit);
+    const esMono = cond.toLowerCase().includes('monotributo');
+    return {
+      ivaDate: esMono ? '—' : fechaVencimiento(activePeriod, v.iva.dia),
+      sussDate: esMono ? '—' : fechaVencimiento(activePeriod, v.suss.dia),
+      monoDate: fechaVencimiento(activePeriod, esMono ? v.monotributo.dia : v.autonomos.dia)
+    };
   };
 
   const getTaxStatus = (coId, taxName) => {
-    return localStorage.getItem(`vmp_venc_status_${coId}_${taxName}`) || 'Pendiente';
+    return localStorage.getItem(`vmp_venc_status_${coId}_${taxName}_${activePeriod}`) || 'Pendiente';
   };
 
   const getStatusClass = (status) => {
@@ -71,14 +55,7 @@ export function renderDashboardHome() {
     return 'inactive';
   };
 
-  const periodNames = {
-    '2026-05': 'Mayo 2026',
-    '2026-04': 'Abril 2026',
-    '2026-03': 'Marzo 2026',
-    '2026-02': 'Febrero 2026',
-    '2026-01': 'Enero 2026',
-    '2025-12': 'Diciembre 2025'
-  };
+  const periodNames = { [activePeriod]: periodLabel(activePeriod) };
 
   // Filtrar transacciones por período fiscal activo
   const filteredVentas = txs.ventas.filter(v => v.fecha.startsWith(activePeriod));
@@ -106,8 +83,13 @@ export function renderDashboardHome() {
 
   const isMonotributo = activeCompany.condicion_iva.includes('Monotributo');
   // Para demostración, si es Monotributista acumulado anual
-  const accumMonotributoSales = activeCompany.id === 'co-2' ? 29800000 + totalSales : totalSales;
-  const maxCategoryLimit = 35000000; // Cat H límite legal
+  const catLetter = letraCategoria(activeCompany.condicion_iva);
+  const accumMonotributoSales = REAL
+    ? ventasMoviles12Meses(txs.ventas)
+    : (activeCompany.id === 'co-2' ? 29800000 + totalSales : totalSales);
+  const maxCategoryLimit = REAL
+    ? (MONOTRIBUTO_CATEGORIAS_2026[catLetter] || MONOTRIBUTO_CATEGORIAS_2026['H']).maxIngresos
+    : 35000000; // Cat H límite legal (demo)
   const consumptionPercent = Math.round((accumMonotributoSales / maxCategoryLimit) * 100);
 
   // Generar alertas del Centro de Control Preventivo (AI Guard) [Pilar 4]
@@ -167,6 +149,28 @@ export function renderDashboardHome() {
     `;
   }
 
+
+  if (REAL) {
+    const delPeriodo = [...filteredVentas, ...filteredCompras];
+    const cuitInvalidos = delPeriodo.filter(t => {
+      const c = String(t.cuit || '').replace(/[^0-9]/g, '');
+      return c.length === 11 && !validarCUIT(c);
+    }).length;
+    const vistos = new Set();
+    let duplicados = 0;
+    delPeriodo.forEach(t => {
+      if (!t.numero) return;
+      const k = `${t.tipo_comprobante}|${t.numero}|${String(t.cuit || '').replace(/[^0-9]/g, '')}`;
+      if (vistos.has(k)) duplicados++; else vistos.add(k);
+    });
+    const alertas = [];
+    if (cuitInvalidos) alertas.push(`${cuitInvalidos} comprobante(s) con CUIT de dígito verificador incorrecto.`);
+    if (duplicados) alertas.push(`${duplicados} comprobante(s) repetido(s) (mismo tipo, número y CUIT).`);
+    aiGuardHTML = alertas.length
+      ? alertas.map(a => `<div style="background: #fffbeb; border: 1px solid #fef3c7; border-left: 4px solid #f59e0b; padding: 10px 14px; border-radius: 4px; font-size: 12px; color: #92400e;"><i data-lucide="alert-triangle" style="width:14px;height:14px;vertical-align:-2px;"></i> ${a} Revisalos en <a href="#/studio/ventas">Libro de Comprobantes</a>.</div>`).join('')
+      : `<div style="background: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid var(--text-secondary); padding: 10px 14px; border-radius: 4px; font-size: 12px; color: var(--text-secondary);"><i data-lucide="info" style="width:14px;height:14px;vertical-align:-2px;"></i> Los controles automáticos (dígito verificador de CUIT y comprobantes repetidos) no encontraron observaciones en este período. No reemplazan la revisión del contador.</div>`;
+  }
+
   return `
   <div class="view-header">
     <div>
@@ -178,6 +182,15 @@ export function renderDashboardHome() {
     </div>
   </div>
 
+  ${REAL ? `  <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: 10px; padding: 16px 20px; margin-bottom: 24px; display:flex; gap:12px; align-items:flex-start;">
+    <i data-lucide="info" style="width:18px;height:18px;color:var(--text-secondary);flex-shrink:0;margin-top:2px;"></i>
+    <div>
+      <h4 style="font-size: 13.5px; font-weight: 800; color: var(--color-primary); margin: 0 0 3px 0;">Enlace con ARCA: no conectado</h4>
+      <p style="font-size: 12px; color: var(--text-secondary); margin: 0; line-height: 1.5;">La conexión automática con ARCA todavía no está disponible. Cargá los comprobantes a mano o importá los archivos de Mis Comprobantes / Libro IVA desde <a href="#/studio/importacion">Importación</a>.</p>
+    </div>
+  </div>
+
+  ` : `
   <!-- Consola de Enlace ARCA Live -->
   <div style="background: linear-gradient(135deg, rgba(13, 148, 136, 0.04) 0%, rgba(22, 163, 74, 0.04) 100%); border: 1px solid rgba(13, 148, 136, 0.2); border-radius: var(--radius-md); padding: 18px 24px; margin-bottom: 24px;">
     <div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 16px;">
@@ -246,6 +259,7 @@ export function renderDashboardHome() {
 
     </div>
   </div>
+  `}
 
   <!-- Centro de Control Preventivo (AI Guard Hub) [NEW PILAR 4] -->
   <div class="card" style="margin-bottom: 28px; border-color: rgba(129, 140, 248, 0.25); background: linear-gradient(135deg, rgba(22, 163, 74, 0.01) 0%, rgba(13, 148, 136, 0.01) 100%);">
@@ -265,8 +279,8 @@ export function renderDashboardHome() {
       <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; flex-wrap: wrap; gap: 12px;">
         <div>
           <span class="badge" style="background: rgba(22, 163, 74, 0.05); color: var(--color-accent); border-color: rgba(22, 163, 74, 0.15); font-weight: 700; margin: 0; padding: 4px 10px; font-size: 10.5px;">MONOTRIBUTO SAFE-GUARD</span>
-          <h3 style="font-size: 15px; font-weight: 750; color: var(--color-primary); margin-top: 8px; margin-bottom: 4px;">Alerta de Control de Categoría H (Servicios)</h3>
-          <p style="font-size: 12px; color: var(--text-secondary); margin: 0;">Límite anual acumulado antes de la exclusión automática de oficio de ARCA.</p>
+          <h3 style="font-size: 15px; font-weight: 750; color: var(--color-primary); margin-top: 8px; margin-bottom: 4px;">Control de Categoría ${REAL ? catLetter : 'H'}</h3>
+          <p style="font-size: 12px; color: var(--text-secondary); margin: 0;">Facturación de los últimos 12 meses contra el tope de la categoría. Escala cargada en el sistema: confirmala en ARCA.</p>
         </div>
         <div style="text-align: right;">
           <span class="font-mono" style="font-size: 17px; font-weight: 800; color: ${consumptionPercent >= 85 ? '#dc2626' : '#d97706'}">${consumptionPercent}% Consumido</span>
@@ -360,7 +374,7 @@ export function renderDashboardHome() {
       </div>
       <div class="kpi-val">$ ${totalNetSales.toLocaleString('es-AR')}</div>
       <div class="kpi-trend up">
-        <i data-lucide="arrow-up-right"></i> +14.2% <span style="color: var(--text-muted)">este mes</span>
+        <span style="color: var(--text-muted)">${periodNames[activePeriod]}</span>
       </div>
     </div>
 
@@ -371,7 +385,7 @@ export function renderDashboardHome() {
       </div>
       <div class="kpi-val">$ ${totalNetPurchases.toLocaleString('es-AR')}</div>
       <div class="kpi-trend down">
-        <i data-lucide="arrow-down-right"></i> -3.8% <span style="color: var(--text-muted)">este mes</span>
+        <span style="color: var(--text-muted)">${periodNames[activePeriod]}</span>
       </div>
     </div>
 
@@ -467,7 +481,7 @@ export function renderDashboardHome() {
     </div>
     <div class="card-body">
       <p class="text-secondary" style="font-size: 13px; margin-bottom: 16px;">
-        Esta agenda inteligente calcula matemáticamente los plazos de vencimiento del período para cada cliente registrado, basándose en la **resolución de último dígito de CUIT impositivo de la ARCA**. Hacé clic sobre el estado para conmutar su presentación.
+        Fechas <strong>orientativas</strong> de las DDJJ del período ${periodNames[activePeriod]} (vencen el mes siguiente), calculadas por terminación de CUIT. No contemplan feriados ni prórrogas: confirmalas en el calendario oficial de ARCA. El estado (Pendiente / Presentado) se guarda en este navegador; hacé clic para cambiarlo.
       </p>
 
       <div class="table-responsive">
@@ -571,16 +585,14 @@ export function initDashboardHome(mainApp) {
   const activeCompany = getActiveCompany();
   const txs = getTransactions(activeCompany.id);
 
-  // Agrupar Ventas y Compras de los últimos meses o por días
-  // Como demo estática pero reactiva, mapeamos días ficticios de Mayo
-  const dates = ["05 May", "10 May", "15 May", "20 May", "25 May"];
-  
-  // Distribuir el total neto aproximado para hacerlo ver realista
-  const totalSales = txs.ventas.reduce((sum, v) => sum + v.neto, 0);
-  const totalPurchases = txs.compras.reduce((sum, c) => sum + c.neto, 0);
-
-  const salesData = [totalSales * 0.1, totalSales * 0.2, totalSales * 0.35, totalSales * 0.2, totalSales * 0.15];
-  const purchasesData = [totalPurchases * 0.15, totalPurchases * 0.3, totalPurchases * 0.25, totalPurchases * 0.1, totalPurchases * 0.2];
+  // Ventas y compras netas del período activo, agrupadas por semana del mes.
+  const periodoActivo = getActivePeriod();
+  const dates = ['Días 1-7', 'Días 8-14', 'Días 15-21', 'Días 22-28', 'Días 29+'];
+  const bucket = (fecha) => Math.min(4, Math.floor((parseInt(fecha.slice(8, 10), 10) - 1) / 7));
+  const salesData = [0, 0, 0, 0, 0];
+  const purchasesData = [0, 0, 0, 0, 0];
+  txs.ventas.filter(v => v.fecha.startsWith(periodoActivo)).forEach(v => { salesData[bucket(v.fecha)] += v.neto; });
+  txs.compras.filter(c => c.fecha.startsWith(periodoActivo)).forEach(c => { purchasesData[bucket(c.fecha)] += c.neto; });
 
   // Si Chart está cargado de forma global en window.Chart
   if (window.Chart) {
@@ -654,14 +666,14 @@ export function initDashboardHome(mainApp) {
       const coId = btn.dataset.co;
       const taxName = btn.dataset.tax;
 
-      const current = localStorage.getItem(`vmp_venc_status_${coId}_${taxName}`) || 'Pendiente';
+      const current = localStorage.getItem(`vmp_venc_status_${coId}_${taxName}_${getActivePeriod()}`) || 'Pendiente';
       
       // Cycle: Pendiente -> Presentado -> Vencido -> Pendiente
       let next = 'Presentado';
       if (current === 'Presentado') next = 'Vencido';
       else if (current === 'Vencido') next = 'Pendiente';
 
-      localStorage.setItem(`vmp_venc_status_${coId}_${taxName}`, next);
+      localStorage.setItem(`vmp_venc_status_${coId}_${taxName}_${getActivePeriod()}`, next);
 
       // Re-trigger layout router to update views in real time!
       mainApp.showToast(`¡Vencimiento: CUIT cliente actualizado a [${next}]!`, 'success');

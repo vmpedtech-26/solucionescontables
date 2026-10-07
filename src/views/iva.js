@@ -2,21 +2,15 @@
    VMP Studio Contable - Libro IVA Digital View Component
    ------------------------------------------------------------- */
 import { getActiveCompany, getTransactions } from '../db/mockdb.js';
-import { sanitizeInput as esc } from '../utils.js';
+import { ventasComprobantes, ventasAlicuotas, comprasComprobantes, comprasAlicuotas } from '../domain/libroiva.js';
+import { sanitizeInput as esc, getActivePeriod, periodLabel } from '../utils.js';
 
 export function renderIVA() {
   const activeCompany = getActiveCompany();
   const txs = getTransactions(activeCompany.id);
-  const activePeriod = localStorage.getItem('vmp_active_period') || '2026-05';
+  const activePeriod = getActivePeriod();
 
-  const periodNames = {
-    '2026-05': 'Mayo 2026',
-    '2026-04': 'Abril 2026',
-    '2026-03': 'Marzo 2026',
-    '2026-02': 'Febrero 2026',
-    '2026-01': 'Enero 2026',
-    '2025-12': 'Diciembre 2025'
-  };
+  const periodNames = { [activePeriod]: periodLabel(activePeriod) };
 
   // Filtrar transacciones por período fiscal activo
   const filteredVentas = txs.ventas.filter(v => v.fecha.startsWith(activePeriod));
@@ -72,7 +66,7 @@ export function renderIVA() {
     </div>
     <div class="card-body">
       <p class="text-secondary" style="font-size: 13.5px; margin-bottom: 20px;">
-        Descargá los archivos de texto delimitados oficiales para subirlos directamente al portal de <strong>ARCA (Libro IVA Digital / IVA Simple F.2051)</strong> sin tipear una sola factura manualmente.
+        Archivos de ancho fijo con el diseño de registro del <strong>Libro IVA Digital (RG 4597)</strong> para importar en ARCA. <strong>Importante:</strong> validá cada archivo con el importador de ARCA antes de presentar; el sistema no se conecta con ARCA ni garantiza su aceptación.
       </p>
       <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px;">
         <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 20px; border-radius: var(--radius-md); text-align: center; display: flex; flex-direction: column; justify-content: space-between;">
@@ -308,7 +302,7 @@ export function initIVA(mainApp) {
   const btnExcel = document.getElementById('btn-export-excel-iva');
   btnExcel?.addEventListener('click', () => {
     const txs = getTransactions(activeCompany.id);
-    const activePeriod = localStorage.getItem('vmp_active_period') || '2026-05';
+    const activePeriod = getActivePeriod();
     const filteredVentas = txs.ventas.filter(v => v.fecha.startsWith(activePeriod));
     const filteredCompras = txs.compras.filter(c => c.fecha.startsWith(activePeriod));
 
@@ -365,10 +359,10 @@ export function initIVA(mainApp) {
     setTimeout(() => URL.revokeObjectURL(url), 2000);
   };
 
-  // RE.CO. Ventas (Comprobantes) TXT structure simulation
+  // Ventas (Comprobantes) (RG 4597)
   document.getElementById('btn-export-ventas-txt')?.addEventListener('click', () => {
     const txs = getTransactions(activeCompany.id).ventas;
-    const activePeriod = localStorage.getItem('vmp_active_period') || '2026-05';
+    const activePeriod = getActivePeriod();
     const filteredVentas = txs.filter(v => v.fecha.startsWith(activePeriod));
 
     if (filteredVentas.length === 0) {
@@ -376,28 +370,16 @@ export function initIVA(mainApp) {
       return;
     }
 
-    let output = "";
-    filteredVentas.forEach(v => {
-      const dateStr = v.fecha.replace(/-/g, ''); // AAAAMMDD
-      const typeCode = v.tipo_comprobante.includes('A') ? '001' : '006';
-      const pv = v.numero.split('-')[0].padStart(5, '0');
-      const num = v.numero.split('-')[1].padStart(8, '0');
-      const docType = v.cuit.startsWith('00') ? '99' : '80'; // CUIT o Sin identificar
-      const cleanCuit = v.cuit.replace(/-/g, '').padEnd(11, '0');
-      const name = v.cliente.padEnd(30, ' ').substring(0, 30);
-      const totalStr = Math.round(v.total * 100).toString().padStart(15, '0');
-      
-      output += `${dateStr}${typeCode}${pv}${num}${num}${docType}${cleanCuit}${name}${totalStr}\r\n`;
-    });
+    const output = ventasComprobantes(filteredVentas);
 
     downloadTXT(`arca-ventas-comprobantes-${activeCompany.razon_social.toLowerCase().replace(/ /g, '-')}-${activePeriod}.txt`, output);
     mainApp.showToast('¡Archivo de Comprobantes descargado con éxito!', 'success');
   });
 
-  // RE.CO. Ventas (Alícuotas) TXT structure simulation
+  // Ventas (Alícuotas) (RG 4597)
   document.getElementById('btn-export-ventas-ali-txt')?.addEventListener('click', () => {
     const txs = getTransactions(activeCompany.id).ventas;
-    const activePeriod = localStorage.getItem('vmp_active_period') || '2026-05';
+    const activePeriod = getActivePeriod();
     const filteredVentas = txs.filter(v => v.fecha.startsWith(activePeriod));
 
     if (filteredVentas.length === 0) {
@@ -405,32 +387,16 @@ export function initIVA(mainApp) {
       return;
     }
 
-    let output = "";
-    filteredVentas.forEach(v => {
-      const typeCode = v.tipo_comprobante.includes('A') ? '001' : '006';
-      const pv = v.numero.split('-')[0].padStart(5, '0');
-      const num = v.numero.split('-')[1].padStart(8, '0');
-      const netStr = Math.round(v.neto * 100).toString().padStart(15, '0');
-      // Código de alícuota real según la relación IVA/Neto de cada venta
-      // (RG 3685): 0003 exento/no gravado, 0004 10,5%, 0005 21%, 0006 27%.
-      let ivaCode = '0005';
-      const aliquotRatio = v.neto > 0 ? (v.iva / v.neto) : 0;
-      if (v.iva === 0) ivaCode = '0003';
-      else if (Math.abs(aliquotRatio - 0.105) < 0.02) ivaCode = '0004';
-      else if (Math.abs(aliquotRatio - 0.27) < 0.02) ivaCode = '0006';
-      const ivaStr = Math.round(v.iva * 100).toString().padStart(15, '0');
-      
-      output += `${typeCode}${pv}${num}${netStr}${ivaCode}${ivaStr}\r\n`;
-    });
+    const output = ventasAlicuotas(filteredVentas);
 
     downloadTXT(`arca-ventas-alicuotas-${activeCompany.razon_social.toLowerCase().replace(/ /g, '-')}-${activePeriod}.txt`, output);
     mainApp.showToast('¡Archivo de Alícuotas descargado con éxito!', 'success');
   });
 
-  // RE.CO. Compras (Comprobantes) TXT structure simulation
+  // Compras (Comprobantes) (RG 4597)
   document.getElementById('btn-export-compras-txt')?.addEventListener('click', () => {
     const txs = getTransactions(activeCompany.id).compras;
-    const activePeriod = localStorage.getItem('vmp_active_period') || '2026-05';
+    const activePeriod = getActivePeriod();
     const filteredCompras = txs.filter(c => c.fecha.startsWith(activePeriod));
 
     if (filteredCompras.length === 0) {
@@ -438,33 +404,16 @@ export function initIVA(mainApp) {
       return;
     }
 
-    let output = "";
-    filteredCompras.forEach(c => {
-      const dateStr = c.fecha.replace(/-/g, ''); // AAAAMMDD
-      const typeCode = c.tipo_comprobante.includes('A') ? '001' : (c.tipo_comprobante.includes('B') ? '006' : '011');
-      const pv = c.numero.split('-')[0].padStart(5, '0');
-      const num = c.numero.split('-')[1].padStart(20, '0');
-      const docType = '80'; // CUIT
-      const cleanCuit = c.cuit.replace(/-/g, '').padStart(20, '0');
-      const name = (c.proveedor || '').padEnd(30, ' ').substring(0, 30);
-      const totalStr = Math.round(c.total * 100).toString().padStart(15, '0');
-      const zeroField = "".padStart(15, '0');
-      const currency = 'PES';
-      const exchangeRate = '0001000000'; // 1.000000 (10 chars)
-      const countAli = '1';
-      const compIva = Math.round(c.iva * 100).toString().padStart(15, '0');
-      
-      output += `${dateStr}${typeCode}${pv}${num}${"".padStart(16, ' ')}${docType}${cleanCuit}${name}${totalStr}${zeroField}${zeroField}${zeroField}${zeroField}${zeroField}${zeroField}${zeroField}${currency}${exchangeRate}${countAli}${" "}${compIva}${zeroField}\r\n`;
-    });
+    const output = comprasComprobantes(filteredCompras);
 
     downloadTXT(`arca-compras-comprobantes-${activeCompany.razon_social.toLowerCase().replace(/ /g, '-')}-${activePeriod}.txt`, output);
     mainApp.showToast('¡Libro de Compras (Comprobantes) descargado con éxito!', 'success');
   });
 
-  // RE.CO. Compras (Alícuotas) TXT structure simulation
+  // Compras (Alícuotas) (RG 4597)
   document.getElementById('btn-export-compras-ali-txt')?.addEventListener('click', () => {
     const txs = getTransactions(activeCompany.id).compras;
-    const activePeriod = localStorage.getItem('vmp_active_period') || '2026-05';
+    const activePeriod = getActivePeriod();
     const filteredCompras = txs.filter(c => c.fecha.startsWith(activePeriod));
 
     if (filteredCompras.length === 0) {
@@ -472,24 +421,7 @@ export function initIVA(mainApp) {
       return;
     }
 
-    let output = "";
-    filteredCompras.forEach(c => {
-      const typeCode = c.tipo_comprobante.includes('A') ? '001' : (c.tipo_comprobante.includes('B') ? '006' : '011');
-      const pv = c.numero.split('-')[0].padStart(5, '0');
-      const num = c.numero.split('-')[1].padStart(20, '0');
-      const docType = '80'; // CUIT
-      const cleanCuit = c.cuit.replace(/-/g, '').padStart(20, '0');
-      const netStr = Math.round(c.neto * 100).toString().padStart(15, '0');
-      
-      let ivaCode = '0005'; // 21%
-      if (c.iva === 0) ivaCode = '0003';
-      else if (Math.abs((c.iva / c.neto) - 0.105) < 0.02) ivaCode = '0004';
-      else if (Math.abs((c.iva / c.neto) - 0.27) < 0.02) ivaCode = '0006';
-
-      const ivaStr = Math.round(c.iva * 100).toString().padStart(15, '0');
-      
-      output += `${typeCode}${pv}${num}${docType}${cleanCuit}${netStr}${ivaCode}${ivaStr}\r\n`;
-    });
+    const output = comprasAlicuotas(filteredCompras);
 
     downloadTXT(`arca-compras-alicuotas-${activeCompany.razon_social.toLowerCase().replace(/ /g, '-')}-${activePeriod}.txt`, output);
     mainApp.showToast('¡Libro de Compras (Alícuotas) descargado con éxito!', 'success');

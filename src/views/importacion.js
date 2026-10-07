@@ -514,7 +514,7 @@ export function initImportacion(mainApp) {
       if (percent === 30) {
         progTitle.textContent = 'Procesando e indexando comprobantes...';
       } else if (percent === 60) {
-        progTitle.textContent = 'Validando firmas y consistencia de CUITs en base APOC...';
+        progTitle.textContent = 'Validando dígito verificador de CUITs...';
       } else if (percent === 90) {
         progTitle.textContent = 'Liquidando alícuotas e insertando en base offline-first...';
       } else if (percent === 100) {

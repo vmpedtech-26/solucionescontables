@@ -6,7 +6,7 @@ import {
   getTransactionsAsync as getTransactions,
   addTransactionAsync as addTransaction
 } from '../db/mockdb.js';
-import { sanitizeInput as esc } from '../utils.js';
+import { sanitizeInput as esc, getActivePeriod, defaultDateForPeriod, validarCUIT } from '../utils.js';
 
 function renderNoCompanyState() {
   return `
@@ -32,7 +32,7 @@ export async function renderVentas() {
   if (!activeCompany) return renderNoCompanyState();
 
   const txs = await getTransactions(activeCompany.id);
-  const activePeriod = localStorage.getItem('vmp_active_period') || '2026-05';
+  const activePeriod = getActivePeriod();
 
   const filteredVentas = txs.ventas.filter(v => v.fecha.startsWith(activePeriod));
   const filteredCompras = txs.compras.filter(c => c.fecha.startsWith(activePeriod));
@@ -65,7 +65,7 @@ export async function renderVentas() {
         </div>
         <div class="form-group">
           <label class="form-label">Fecha *</label>
-          <input type="date" id="tx-date" class="form-input" value="2026-05-25" required>
+          <input type="date" id="tx-date" class="form-input" value="${defaultDateForPeriod()}" required>
         </div>
         <div class="form-group">
           <label class="form-label">Tipo de Comprobante *</label>
@@ -277,19 +277,12 @@ function renderTransactionsTable(transactions, type) {
       <tbody>
         ${transactions.map(t => {
           const cleanCuit = t.cuit.replace(/[^0-9]/g, '');
-          const lastDigit = cleanCuit.slice(-1);
           let cuitStatusBadge = '';
-          
-          if (lastDigit === '0') {
+
+          if (cleanCuit.length === 11 && !validarCUIT(cleanCuit)) {
             cuitStatusBadge = `
-              <div title="Consumidor Final con riesgo fiscal. Posible emisor o receptor apócrifo detectado en base de datos ARCA (Riesgo APOC)." style="font-size: 10px; color: #ef4444; background: rgba(239, 68, 68, 0.08); padding: 2px 6px; border-radius: var(--radius-sm); border: 1px solid rgba(239,68,68,0.2); font-weight: 600; display: inline-flex; align-items: center; gap: 4px; margin-top: 4px; cursor: help;">
-                <i data-lucide="alert-triangle" style="width: 10px; height: 10px;"></i> RIESGO APOC
-              </div>
-            `;
-          } else if (lastDigit === '9') {
-            cuitStatusBadge = `
-              <div title="La CUIT del contribuyente se encuentra INACTIVA / SUSPENDIDA en el padrón de ARCA. No computa Crédito Fiscal para el Libro IVA Digital o F.2051 hasta regularizar." style="font-size: 10px; color: #f59e0b; background: rgba(245, 158, 11, 0.08); padding: 2px 6px; border-radius: var(--radius-sm); border: 1px solid rgba(245,158,11,0.2); font-weight: 600; display: inline-flex; align-items: center; gap: 4px; margin-top: 4px; cursor: help;">
-                <i data-lucide="shield-alert" style="width: 10px; height: 10px;"></i> CUIT INACTIVA
+              <div title="El dígito verificador del CUIT no coincide (algoritmo módulo 11). Revisá que esté bien cargado." style="font-size: 10px; color: #b45309; background: rgba(245, 158, 11, 0.1); padding: 2px 6px; border-radius: var(--radius-sm); border: 1px solid rgba(245,158,11,0.3); font-weight: 600; display: inline-flex; align-items: center; gap: 4px; margin-top: 4px; cursor: help;">
+                <i data-lucide="alert-triangle" style="width: 10px; height: 10px;"></i> CUIT INVÁLIDO
               </div>
             `;
           }
@@ -368,7 +361,7 @@ export async function initVentas(mainApp) {
   // Renders the active list with filters
   const updateList = async () => {
     const txs = await getTransactions(activeCompany.id);
-    const activePeriod = localStorage.getItem('vmp_active_period') || '2026-05';
+    const activePeriod = getActivePeriod();
     let list = txs[activeTab].filter(t => t.fecha.startsWith(activePeriod));
 
     // Apply date from filter
@@ -533,26 +526,18 @@ export async function initVentas(mainApp) {
       return;
     }
 
-    const lastDigit = clean.slice(-1);
-    if (lastDigit === '0') {
+    if (validarCUIT(clean)) {
       cuitFeedback.innerHTML = `
-        <span style="color: #ef4444; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
-          <i data-lucide="alert-triangle" style="width: 12px; height: 12px;"></i> 
-          ⚠ RIESGO APOC (Listado en Base de Facturación Apócrifa)
-        </span>
-      `;
-    } else if (lastDigit === '9') {
-      cuitFeedback.innerHTML = `
-        <span style="color: #f59e0b; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
-          <i data-lucide="shield-alert" style="width: 12px; height: 12px;"></i> 
-          ⚠ CUIT Inactivo / Suspendido en ARCA
+        <span style="color: var(--color-accent-light); font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
+          <i data-lucide="check-circle" style="width: 12px; height: 12px;"></i>
+          ✓ Dígito verificador correcto (no consulta el padrón de ARCA)
         </span>
       `;
     } else {
       cuitFeedback.innerHTML = `
-        <span style="color: var(--color-accent-light); font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
-          <i data-lucide="check-circle" style="width: 12px; height: 12px;"></i> 
-          ✓ CUIT en estado activo / regular
+        <span style="color: #b45309; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
+          <i data-lucide="alert-triangle" style="width: 12px; height: 12px;"></i>
+          ⚠ Dígito verificador incorrecto: revisá el CUIT
         </span>
       `;
     }

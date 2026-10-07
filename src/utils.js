@@ -274,6 +274,53 @@ export async function fetchAndCompileIPC() {
 
 
 // -------------------------------------------------------------
+// Periodo fiscal activo (selector global). En modo real arranca en el mes
+// corriente; el sandbox conserva mayo 2026 porque sus datos de muestra son de ese mes.
+// -------------------------------------------------------------
+const MESES_ES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+export function periodoActual() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+}
+
+export function periodLabel(period) {
+  const m = /^(\d{4})-(\d{2})$/.exec(period || '');
+  if (!m || +m[2] < 1 || +m[2] > 12) return period || '';
+  return `${MESES_ES[+m[2] - 1]} ${m[1]}`;
+}
+
+export function getActivePeriod() {
+  let stored = null;
+  try { stored = localStorage.getItem('vmp_active_period'); } catch (e) { /* storage no disponible */ }
+  if (stored && /^\d{4}-(0[1-9]|1[0-2])$/.test(stored)) return stored;
+  return isSupabaseConfigured ? periodoActual() : '2026-05';
+}
+
+/** Ultimos 36 meses (desde el corriente) mas el periodo activo si quedo fuera. */
+export function periodOptions() {
+  const out = [];
+  const d = new Date();
+  let y = d.getFullYear();
+  let m = d.getMonth() + 1;
+  for (let i = 0; i < 36; i++) {
+    out.push(`${y}-${String(m).padStart(2, '0')}`);
+    m--; if (m === 0) { m = 12; y--; }
+  }
+  const active = getActivePeriod();
+  if (!out.includes(active)) out.push(active);
+  return out;
+}
+
+/** Fecha por defecto para cargar un comprobante: hoy si cae en el periodo activo, si no el dia 1. */
+export function defaultDateForPeriod() {
+  const active = getActivePeriod();
+  const today = new Date();
+  const todayStr = `${periodoActual()}-${String(today.getDate()).padStart(2, '0')}`;
+  return todayStr.startsWith(active) ? todayStr : `${active}-01`;
+}
+
+// -------------------------------------------------------------
 // Funciones simuladas: con backend real nunca deben parecer reales
 // -------------------------------------------------------------
 export function isRealMode() {

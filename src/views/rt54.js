@@ -619,6 +619,7 @@ export async function renderRT54() {
       </div>
     </div>
     <div class="card-body">
+      ${IPC_INDICES === FALLBACK_INDICES ? `<div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.4); color: #92400e; border-radius: 8px; padding: 10px 14px; margin-bottom: 14px; font-size: 12px; line-height: 1.5;"><strong>Índices de ejemplo.</strong> Todavía no se descargaron los índices reales del INDEC: los coeficientes de abajo no son válidos. Tocá <em>Sincronizar Índices IPC</em> (necesita conexión a internet).</div>` : ''}
       <p class="text-secondary" style="font-size: 13px; margin-bottom: 16px;">
         RT 54 FACPCE exige que los balances del ejercicio se expresen en **moneda homogénea de cierre**. Este simulador utiliza los coeficientes oficiales del IPC del INDEC para reexpresar partidas no monetarias del activo y patrimonio, calculando automáticamente la contrapartida de **RECPAM**.
       </p>
@@ -1113,6 +1114,14 @@ export async function initRT54(mainApp) {
       }
     });
   });
+
+  // Con datos reales, descarga los indices la primera vez (una sola vez por sesion)
+  try {
+    if (isSupabaseConfigured && !localStorage.getItem('vmp_ipc_indices') && !sessionStorage.getItem('vmp_ipc_autosync')) {
+      sessionStorage.setItem('vmp_ipc_autosync', '1');
+      setTimeout(() => document.getElementById('btn-sync-ipc')?.click(), 0);
+    }
+  } catch (e) { /* storage no disponible */ }
 
   // Sincronizar Índices IPC desde API INDEC (ArgentinaDatos)
   document.getElementById('btn-sync-ipc')?.addEventListener('click', async (e) => {
