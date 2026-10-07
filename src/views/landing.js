@@ -192,7 +192,7 @@ export function renderLanding() {
               </div>
             </div>
             <h3 style="font-size: 18px; font-weight: 700; color: var(--color-primary); font-family: var(--font-heading);">Portal de Clientes</h3>
-            <p style="margin-top: 8px; font-size: 13.5px; color: var(--text-secondary); line-height: 1.6;">Recolección de comprobantes. Cada cliente entra con su propia cuenta desde el móvil y carga sus tickets y facturas; vos los revisás y aprobás. La lectura automática con IA es opcional y requiere configurar una clave de Gemini.</p>
+            <p style="margin-top: 8px; font-size: 13.5px; color: var(--text-secondary); line-height: 1.6;">Recolección de comprobantes. Cada cliente entra con su propia cuenta desde el móvil y carga sus tickets y facturas; vos los revisás y aprobás. La lectura automática con IA llegará próximamente.</p>
           </div>
           
         </div>
@@ -315,7 +315,7 @@ export function renderLanding() {
               <ul class="price-features" style="text-align: left; margin-bottom: 24px; font-size: 13.5px;">
                 <li><i data-lucide="check"></i> <strong>Todos los beneficios del plan Inicial</strong></li>
                 <li><i data-lucide="check"></i> Robots RPA en la nube (en desarrollo)</li>
-                <li><i data-lucide="check"></i> Portal de Clientes móvil (lectura con IA opcional)</li>
+                <li><i data-lucide="check"></i> Portal de Clientes móvil</li>
                 <li><i data-lucide="check"></i> Soporte prioritario vía WhatsApp</li>
                 <li><i data-lucide="check"></i> Colaboradores del estudio ilimitados</li>
               </ul>
@@ -553,7 +553,7 @@ export function renderLanding() {
               </div>
               <div class="form-group" style="margin-bottom: 18px;">
                 <label class="form-label" style="font-size:11.5px;">Contraseña de Acceso</label>
-                <input type="password" class="form-input" id="lead-password" placeholder="••••••••" required style="padding: 10px 12px; font-size: 13px;">
+                <input type="password" class="form-input" id="lead-password" placeholder="Mínimo 8 caracteres" required minlength="8" style="padding: 10px 12px; font-size: 13px;">
               </div>
 <label style="display: flex; gap: 8px; align-items: flex-start; font-size: 11.5px; line-height: 1.4; color: var(--text-secondary); margin-bottom: 14px; cursor: pointer;">
                 <input type="checkbox" id="lead-acepta" required style="margin-top: 2px; flex-shrink: 0;">
@@ -651,7 +651,7 @@ export function renderLanding() {
           </div>
           <div style="margin-bottom: 24px;">
             <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Contraseña</label>
-            <input type="password" id="client-signup-password" placeholder="••••••••" required minlength="6" style="width: 100%; border: 1px solid rgba(15, 23, 42, 0.15); border-radius: 8px; padding: 12px 16px; font-size: 14px; font-family: var(--font-primary); color: var(--text-primary); outline: none;">
+            <input type="password" id="client-signup-password" placeholder="Mínimo 8 caracteres" required minlength="8" style="width: 100%; border: 1px solid rgba(15, 23, 42, 0.15); border-radius: 8px; padding: 12px 16px; font-size: 14px; font-family: var(--font-primary); color: var(--text-primary); outline: none;">
           </div>
 <label style="display: flex; gap: 8px; align-items: flex-start; font-size: 11.5px; line-height: 1.4; color: var(--text-secondary); margin-bottom: 18px; cursor: pointer;">
                 <input type="checkbox" id="client-signup-acepta" required style="margin-top: 2px; flex-shrink: 0;">
@@ -827,6 +827,14 @@ export function initLanding(mainApp) {
     // 1. Validar CUIT con algoritmo Módulo 11
     const cleanCuit = cuit.replace(/[^0-9]/g, '');
     const isCuitValid = validarCUIT(cuit);
+    if (isSupabaseConfigured && !isCuitValid) {
+      mainApp.showToast('El CUIT ingresado no es válido (dígito verificador). Revisalo y volvé a intentar.', 'error');
+      return;
+    }
+    if (isSupabaseConfigured && password.length < 8) {
+      mainApp.showToast('La contraseña debe tener al menos 8 caracteres.', 'error');
+      return;
+    }
     if (!isCuitValid) {
       mainApp.showToast('Advertencia: El CUIT ingresado no es válido bajo el algoritmo fiscal (Módulo 11), pero se permite registrar para pruebas.', 'warning');
     }
@@ -1171,6 +1179,10 @@ export function initLanding(mainApp) {
         const email = document.getElementById('client-signup-email').value;
         const password = document.getElementById('client-signup-password').value;
 
+        if (password.length < 8) {
+          mainApp.showToast('La contraseña debe tener al menos 8 caracteres.', 'error');
+          return;
+        }
         mainApp.showToast('Creando tu cuenta...', 'info');
         try {
           const { data, error } = await supabase.auth.signUp({

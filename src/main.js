@@ -13,6 +13,7 @@ import { renderDashboardHome, initDashboardHome } from './views/dashboard_home.j
 import { renderEmpresas, initEmpresas } from './views/empresas.js';
 import { renderVentas, initVentas } from './views/ventas.js';
 import { renderImportacion, initImportacion } from './views/importacion.js';
+import { renderBandeja, initBandeja } from './views/bandeja.js';
 import { renderIVA, initIVA } from './views/iva.js';
 import { renderPortalCliente, initPortalCliente } from './views/portal_cliente.js';
 import { renderConfiguracion, initConfiguracion } from './views/configuracion.js';
@@ -177,6 +178,9 @@ class Application {
         }
         else if (subRoute === '/importacion') {
           await this.safeRoute(renderImportacion, initImportacion, 'importacion', "Importación ARCA");
+        }
+        else if (subRoute === '/bandeja') {
+          await this.safeRoute(renderBandeja, initBandeja, 'bandeja', "Bandeja de clientes");
         }
         else if (subRoute === '/iva') {
           await this.safeRoute(renderIVA, initIVA, 'iva', "Libro IVA Digital Digitalizado");

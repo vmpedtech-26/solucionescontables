@@ -147,6 +147,16 @@ export async function renderConfiguracion() {
         </div>
       </div>
 
+      ${isSupabaseConfigured ? `
+      <div class="card">
+        <div class="card-header"><h3><i data-lucide="sparkles" style="color: var(--color-accent);"></i> Lectura de comprobantes con IA</h3></div>
+        <div class="card-body">
+          <p class="text-secondary" style="font-size: 13px; line-height: 1.5; margin: 0;">
+            Próximamente. La lectura automática de tickets y facturas con IA todavía no está disponible para los clientes. Mientras tanto, cargan sus comprobantes desde el Portal y vos los revisás y aprobás.
+          </p>
+        </div>
+      </div>
+      ` : `
       <!-- Gemini API Key configuration card for the Studio -->
       <div class="card" style="border-color: rgba(22, 163, 74, 0.3); background: rgba(22, 163, 74, 0.01);">
         <div class="card-header" style="border-bottom-color: rgba(22, 163, 74, 0.1);">
@@ -172,6 +182,8 @@ export async function renderConfiguracion() {
           </div>
         </div>
       </div>
+
+      `}
 
       <!-- Supabase Sync configuration card -->
       <div class="card" style="border-color: rgba(34, 197, 94, 0.3); background: rgba(34, 197, 94, 0.01);">

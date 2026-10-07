@@ -2,7 +2,7 @@
    Derechos del titular de datos (Ley 25.326): exportar y eliminar la propia
    cuenta. Solo en modo real: el sandbox no guarda datos personales en servidor.
    ------------------------------------------------------------- */
-import { supabase, isSupabaseConfigured } from '../db/supabase.js';
+import { supabase, isSupabaseConfigured, getCachedRole } from '../db/supabase.js';
 import { LEGAL } from '../legal-config.js';
 import { sanitizeInput as esc } from '../utils.js';
 
@@ -55,6 +55,18 @@ export function initDatosCard(mainApp) {
     if (typed.trim() !== 'ELIMINAR') {
       mainApp.showToast('Confirmación incorrecta: no se eliminó nada.', 'info');
       return;
+    }
+    // Un estudio borra tambien los archivos de comprobantes de sus empresas (Storage no cascada desde la base).
+    try {
+      if ((await getCachedRole()) === 'estudio') {
+        const { data: filas } = await supabase.from('comprobantes_digitales').select('archivo');
+        const rutas = (filas || []).map((f) => f.archivo).filter((a) => a && a.includes('/'));
+        for (let i = 0; i < rutas.length; i += 100) {
+          await supabase.storage.from('comprobantes').remove(rutas.slice(i, i + 100));
+        }
+      }
+    } catch (e) {
+      console.error('No se pudieron borrar todos los archivos:', e);
     }
     const { error } = await supabase.rpc('delete_my_account');
     if (error) {

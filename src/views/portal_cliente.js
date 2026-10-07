@@ -158,6 +158,8 @@ export async function renderPortalCliente() {
     `;
   }
 
+  if (isSupabaseConfigured) proactiveQuotaAlert = '';
+
   const isMonotributo = activeCompany.condicion_iva.includes('Monotributo');
   const allowedComprobante = isMonotributo 
     ? '<option value="Factura C" selected>Factura C (Monotributo)</option><option value="Factura E">Factura E (Exportación de Servicios)</option>' 
@@ -167,7 +169,7 @@ export async function renderPortalCliente() {
   <div class="view-header">
     <div>
       <h1 class="view-title">Portal del Cliente (Suite Operativa)</h1>
-      <p class="view-subtitle">Consola de facturación y digitalización de comprobantes para la empresa activa.</p>
+      <p class="view-subtitle">${isSupabaseConfigured ? 'Enviá tus comprobantes a tu contador y seguí su estado.' : 'Consola de facturación y digitalización de comprobantes para la empresa activa.'}</p>
     </div>
     <div style="background: rgba(22, 163, 74, 0.08); border: 1px solid rgba(22, 163, 74, 0.2); padding: 8px 16px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; color: var(--color-accent-light);">
       Acceso: Cliente Final (${esc(activeCompany.razon_social)})
@@ -179,6 +181,7 @@ export async function renderPortalCliente() {
     <!-- Left Column: Operations (Upload OR Bill) -->
     <div style="display: flex; flex-direction: column; gap: 20px;">
       
+      ${isSupabaseConfigured ? `` : `
       <!-- Solapas (Tabs) Selector -->
       <div style="display: flex; background: #ffffff; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 4px; gap: 4px;">
         <button class="btn btn-sm portal-tab-btn active" data-tab="upload" style="flex: 1; border: none; font-size: 12.5px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 10px; border-radius: 4px;">
@@ -190,7 +193,9 @@ export async function renderPortalCliente() {
           Emitir Factura Electrónica (ARCA Live)
         </button>
       </div>
+      `}
 
+      ${isSupabaseConfigured ? `` : `
       <!-- Gemini API Status Card (Inherited from the Studio) -->
       <div id="gemini-status-card" class="card" style="border-color: rgba(22, 163, 74, 0.2); background: rgba(22, 163, 74, 0.01); margin-bottom: 0;">
         <div class="card-body" style="padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
@@ -218,6 +223,7 @@ export async function renderPortalCliente() {
           </div>
         </div>
       </div>
+      `}
 
       <!-- PANEL 1: DIGITALIZACIÓN (UPLOAD) -->
       <div id="portal-panel-upload" class="card">
@@ -227,7 +233,7 @@ export async function renderPortalCliente() {
         <div class="card-body">
           ${proactiveQuotaAlert}
           <p class="text-secondary" style="font-size: 13.5px; margin-bottom: 20px;">
-            Subí una foto del ticket impreso, arrastrá un PDF de gastos o usá la cámara de tu celular. El bot contable extraerá los montos y CUITs de forma automática.
+            ${isSupabaseConfigured ? 'Subí una foto del ticket o un PDF y completá los datos. Tu contador lo revisa y lo carga a tu libro de compras.' : 'Subí una foto del ticket impreso, arrastrá un PDF de gastos o usá la cámara de tu celular. El bot contable extraerá los montos y CUITs de forma automática.'}
           </p>
 
           <!-- Dynamic Dropzone -->
@@ -243,7 +249,7 @@ export async function renderPortalCliente() {
               <input type="file" id="ticket-file-input" style="display: none;" accept="image/*,application/pdf">
             </label>
 
-            <div class="demo-afip-pills" style="margin-top: 16px; display: flex; gap: 8px; justify-content: center;">
+            ${isSupabaseConfigured ? '' : `<div class="demo-afip-pills" style="margin-top: 16px; display: flex; gap: 8px; justify-content: center;">
               <div class="afip-sample-pill" id="btn-simulate-ticket" data-simulated="1" title="Simulación: no disponible todavía" style="border-color: rgba(22, 163, 74, 0.25);">
                 <i data-lucide="refresh-cw" style="width: 12px; height: 12px; display: inline; vertical-align: middle; margin-right: 4px; color:var(--color-accent-light);"></i>
                 Digitalizar Gasto de Combustible
@@ -252,8 +258,10 @@ export async function renderPortalCliente() {
                 <i data-lucide="refresh-cw" style="width: 12px; height: 12px; display: inline; vertical-align: middle; margin-right: 4px; color:var(--color-accent-light);"></i>
                 Digitalizar Compra de Notebook
               </div>
-            </div>
+            </div>`}
 
+            ${isSupabaseConfigured ? `<div style="margin-top: 20px;"><button type="button" id="btn-portal-manual-entry" class="btn btn-primary" style="padding: 10px 18px; font-size: 13px;"><i data-lucide="send"></i> Enviar un comprobante</button></div>
+            ` : `
             <!-- Quota meter/status -->
             <div id="ocr-quota-container" style="margin-top: 24px; width: 100%; max-width: 320px; margin-left: auto; margin-right: auto; padding: 12px; border-radius: 8px; background: rgba(22, 163, 74, 0.03); border: 1px solid rgba(22, 163, 74, 0.1);">
               <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11.5px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px;">
@@ -277,6 +285,7 @@ export async function renderPortalCliente() {
                 </div>
               </div>
             </div>
+            `}
           </div>
 
           <!-- Progress animation -->
@@ -566,8 +575,8 @@ export async function renderPortalCliente() {
                       ${t.tipo === 'Venta' ? '+' : '-'} $ ${t.monto.toLocaleString('es-AR')}
                     </td>
                     <td>
-                      <span class="badge-status ${t.estado === 'Aprobado' ? 'active' : (t.estado === 'Procesado' ? 'pending' : 'inactive')}" style="font-size: 10px; padding: 1px 6px;">
-                        ${esc(t.estado)}
+                      <span class="badge-status ${(t.estado === 'Aprobado' || (isSupabaseConfigured && t.estado === 'Procesado')) ? 'active' : ((t.estado === 'Procesado' || t.estado === 'Recibido') ? 'pending' : 'inactive')}" style="font-size: 10px; padding: 1px 6px;">
+                        ${esc(isSupabaseConfigured ? ({ Recibido: 'En revisión', Procesado: 'Cargado al libro', Rechazado: 'Rechazado' }[t.estado] || t.estado) : t.estado)}${isSupabaseConfigured && t.nota_estudio ? ` · ${esc(t.nota_estudio)}` : ''}
                       </span>
                     </td>
                     <td class="text-center">
@@ -1758,8 +1767,8 @@ export async function initPortalCliente(mainApp) {
           ${t.tipo === 'Venta' ? '+' : '-'} $ ${t.monto.toLocaleString('es-AR')}
         </td>
         <td>
-          <span class="badge-status ${t.estado === 'Aprobado' ? 'active' : (t.estado === 'Procesado' ? 'pending' : 'inactive')}" style="font-size: 10px; padding: 1px 6px;">
-            ${esc(t.estado)}
+          <span class="badge-status ${(t.estado === 'Aprobado' || (isSupabaseConfigured && t.estado === 'Procesado')) ? 'active' : ((t.estado === 'Procesado' || t.estado === 'Recibido') ? 'pending' : 'inactive')}" style="font-size: 10px; padding: 1px 6px;">
+            ${esc(isSupabaseConfigured ? ({ Recibido: 'En revisión', Procesado: 'Cargado al libro', Rechazado: 'Rechazado' }[t.estado] || t.estado) : t.estado)}${isSupabaseConfigured && t.nota_estudio ? ` · ${esc(t.nota_estudio)}` : ''}
           </span>
         </td>
       </tr>
@@ -1984,6 +1993,7 @@ export async function initPortalCliente(mainApp) {
 
   const handleFileProcess = (file) => {
     if (!file) return;
+    if (isSupabaseConfigured) { openEnvioModal(file); return; }
     const apiKey = localStorage.getItem('vmp_gemini_api_key');
     if (apiKey) {
       processRealTicketWithGemini(file);
@@ -1994,7 +2004,7 @@ export async function initPortalCliente(mainApp) {
                          file.name.toLowerCase().includes('dell') ||
                          file.name.toLowerCase().includes('laptop') ||
                          file.name.toLowerCase().includes('pc');
-      if (blockSimulated(mainApp, 'La digitalización con IA', 'La digitalización automática requiere configurar la clave de Gemini. Mientras tanto, cargá el comprobante con "Carga manual".')) return;
+      if (blockSimulated(mainApp, 'La digitalización con IA', 'La lectura automática con IA todavía no está disponible. Cargá el comprobante con "Carga manual".')) return;
       startUploadSimulation(isAssetSim);
     }
   };
@@ -2255,7 +2265,94 @@ Sabor digital, VMP Studio.
     mainApp.router();
   };
 
+
+  // Envio real de un comprobante al estudio (foto/PDF a Storage privado + fila "Recibido").
+  const MIME_EXT = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'application/pdf': 'pdf' };
+  const openEnvioModal = (archivoInicial = null) => {
+    const hoy = new Date().toISOString().slice(0, 10);
+    const modal = document.createElement('div');
+    modal.className = 'vmp-modal-overlay';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;';
+    const inp = 'width:100%;border:1px solid var(--border-color);border-radius:6px;padding:9px 10px;font-size:13px;box-sizing:border-box;background:#fff;';
+    const lab = 'display:block;font-size:11px;font-weight:700;color:var(--text-secondary);margin:10px 0 4px;text-transform:uppercase;';
+    modal.innerHTML = `
+      <div style="background:#fff;border-radius:14px;padding:24px;max-width:460px;width:100%;max-height:92vh;overflow:auto;">
+        <h3 style="margin:0 0 4px;">Enviar comprobante a mi contador</h3>
+        <p style="margin:0 0 6px;font-size:12px;color:var(--text-secondary);">Completá lo que sepas: tu contador revisa y completa el resto.</p>
+        <form id="envio-form">
+          <label style="${lab}">Foto o PDF (máx. 5 MB)</label>
+          <input type="file" id="e-file" accept="image/jpeg,image/png,image/webp,application/pdf" style="${inp}">
+          <label style="${lab}">Fecha del comprobante *</label>
+          <input type="date" id="e-fecha" required value="${hoy}" max="${hoy}" style="${inp}">
+          <label style="${lab}">Proveedor / emisor *</label>
+          <input type="text" id="e-prov" required maxlength="160" placeholder="Ej: Distribuidora Comahue" style="${inp}">
+          <label style="${lab}">CUIT del emisor</label>
+          <input type="text" id="e-cuit" maxlength="13" placeholder="30-12345678-9" style="${inp}">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div><label style="${lab}">Tipo</label><select id="e-tipo" style="${inp}"><option value="">No sé / ticket</option><option>Factura A</option><option>Factura B</option><option>Factura C</option><option>Nota de Crédito</option></select></div>
+            <div><label style="${lab}">Número</label><input type="text" id="e-num" maxlength="20" placeholder="0001-00001234" style="${inp}"></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div><label style="${lab}">Monto total ($) *</label><input type="number" id="e-total" step="0.01" min="0" required style="${inp}"></div>
+            <div><label style="${lab}">Categoría</label><select id="e-cat" style="${inp}"><option>General</option><option>Combustibles</option><option>Servicios</option><option>Mantenimiento</option><option>Librería</option><option>Computación</option></select></div>
+          </div>
+          <label style="display:flex;align-items:center;gap:8px;margin-top:12px;font-size:12px;"><input type="checkbox" id="e-activo"> Es un bien de uso (equipamiento, maquinaria, etc.)</label>
+          <div style="display:flex;gap:10px;margin-top:16px;">
+            <button type="button" id="e-cancel" class="btn btn-outline" style="flex:1;">Cancelar</button>
+            <button type="submit" id="e-submit" class="btn btn-primary" style="flex:1;">Enviar</button>
+          </div>
+        </form>
+      </div>`;
+    document.body.appendChild(modal);
+    const $ = (id) => modal.querySelector(id);
+    const cerrar = () => modal.remove();
+    $('#e-cancel').addEventListener('click', cerrar);
+    if (archivoInicial) {
+      try { const dt = new DataTransfer(); dt.items.add(archivoInicial); $('#e-file').files = dt.files; } catch (e) { /* el usuario lo elige a mano */ }
+    }
+    $('#envio-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const file = $('#e-file').files[0] || null;
+      if (file && !MIME_EXT[file.type]) { mainApp.showToast('El archivo debe ser una imagen (JPG, PNG, WebP) o un PDF.', 'error'); return; }
+      if (file && file.size > 5 * 1024 * 1024) { mainApp.showToast('El archivo supera los 5 MB.', 'error'); return; }
+      const cuit = $('#e-cuit').value.trim();
+      if (cuit && !/^[0-9-]{11,13}$/.test(cuit)) { mainApp.showToast('El CUIT solo lleva números y guiones.', 'error'); return; }
+      const total = parseFloat($('#e-total').value);
+      if (!(total >= 0)) { mainApp.showToast('Ingresá el monto total.', 'error'); return; }
+      const prov = $('#e-prov').value.trim();
+      const tipo = $('#e-tipo').value;
+      const id = 't-' + Date.now() + Math.floor(Math.random() * 1000);
+      const btn = $('#e-submit');
+      btn.disabled = true; btn.textContent = 'Enviando...';
+      let ruta = null;
+      try {
+        if (file) {
+          ruta = `${activeCompany.id}/${id}.${MIME_EXT[file.type]}`;
+          const { error: upErr } = await supabase.storage.from('comprobantes').upload(ruta, file, { contentType: file.type, upsert: false });
+          if (upErr) throw upErr;
+        }
+        await addComprobanteAsync(activeCompany.id, {
+          id, fecha: $('#e-fecha').value,
+          detalle: `${tipo || 'Comprobante'} - ${prov}`.slice(0, 300),
+          archivo: ruta || 'sin archivo',
+          tipo: 'Compra', monto: total, estado: 'Recibido',
+          es_activo: $('#e-activo').checked, categoria: $('#e-cat').value,
+          proveedor: prov, cuit: cuit || null, tipo_comprobante: tipo || null, numero: $('#e-num').value.trim() || null
+        });
+        mainApp.showToast('Comprobante enviado a tu contador.', 'success');
+        cerrar();
+        mainApp.router();
+      } catch (err) {
+        console.error('Envio de comprobante:', err);
+        if (ruta) { try { await supabase.storage.from('comprobantes').remove([ruta]); } catch (e2) { /* huérfano inofensivo */ } }
+        mainApp.showToast('No se pudo enviar el comprobante. Reintentá.', 'error');
+        btn.disabled = false; btn.textContent = 'Enviar';
+      }
+    });
+  };
+
   const openManualEntryModal = () => {
+    if (isSupabaseConfigured) { openEnvioModal(); return; }
     if (quotaModal) quotaModal.style.display = 'none'; // Cerrar modal de cuota si está abierto
 
     const modal = document.createElement('div');

@@ -102,11 +102,11 @@ export function renderDashboardLayout(childHTML, activeRoute, role = null) {
         </a>
         <a href="#/studio/configuracion" class="db-nav-item ${activeRoute === 'configuracion' ? 'active' : ''}" data-route="configuracion">
           <i data-lucide="cpu"></i>
-          <span>Robots RPA & Scheduler</span>
+          <span>${isSupabaseConfigured ? 'Configuración y mis datos' : 'Robots RPA & Scheduler'}</span>
         </a>
         <a href="#/studio/migrador" class="db-nav-item ${activeRoute === 'migrador' ? 'active' : ''}" data-route="migrador">
           <i data-lucide="upload-cloud"></i>
-          <span>Migrador de Sistemas</span>
+          <span>Migrador de Sistemas${isSupabaseConfigured ? ' (pronto)' : ''}</span>
         </a>
 
         <div class="db-nav-label">Operaciones</div>
@@ -116,7 +116,11 @@ export function renderDashboardLayout(childHTML, activeRoute, role = null) {
         </a>
         <a href="#/studio/importacion" class="db-nav-item ${activeRoute === 'importacion' ? 'active' : ''}" data-route="importacion">
           <i data-lucide="refresh-cw"></i>
-          <span>Conciliador "Mis Comprobantes"</span>
+          <span>Importar "Mis Comprobantes"</span>
+        </a>
+        <a href="#/studio/bandeja" class="db-nav-item ${activeRoute === 'bandeja' ? 'active' : ''}" data-route="bandeja">
+          <i data-lucide="inbox"></i>
+          <span>Bandeja de clientes</span>
         </a>
         <a href="#/studio/portal" class="db-nav-item ${activeRoute === 'portal' ? 'active' : ''}" data-route="portal">
           <i data-lucide="users"></i>
@@ -124,7 +128,7 @@ export function renderDashboardLayout(childHTML, activeRoute, role = null) {
         </a>
         <a href="#/studio/whatsapp" class="db-nav-item ${activeRoute === 'whatsapp' ? 'active' : ''}" data-route="whatsapp">
           <i data-lucide="message-square"></i>
-          <span>Inbox de WhatsApp</span>
+          <span>Inbox de WhatsApp${isSupabaseConfigured ? ' (pronto)' : ''}</span>
         </a>
 
         <div class="db-nav-label">Fiscal & Contable</div>
