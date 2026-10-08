@@ -8,6 +8,7 @@ import { renderTerminos, renderPrivacidad } from './views/legal.js';
 
 // Import Views
 import { renderLanding, initLanding } from './views/landing.js';
+import { animarVista } from './app-motion.js';
 import { renderDashboardLayout, initDashboardLayout } from './views/layout.js';
 import { renderDashboardHome, initDashboardHome } from './views/dashboard_home.js';
 import { renderEmpresas, initEmpresas } from './views/empresas.js';
@@ -378,6 +379,9 @@ class Application {
         }
       }
     }
+
+    // 7. Movimiento de entrada de la vista
+    try { animarVista(); } catch (e) { /* decorativo: nunca rompe la vista */ }
   }
 
   setActiveCompany(companyId) {

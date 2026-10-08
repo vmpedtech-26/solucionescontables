@@ -1,0 +1,67 @@
+/* =============================================================
+   Movimiento del sistema (mismo diseño, mas vida).
+   ============================================================= */
+@keyframes appIn { from { opacity: 0; transform: translateY(12px); } }
+@keyframes appRowIn { from { opacity: 0; transform: translateX(-6px); } }
+.app-enter { animation: appIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: var(--d, 0ms); }
+.app-row-enter { animation: appRowIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: var(--d, 0ms); }
+
+/* Barra lateral: indicador del item activo y respuesta al pasar */
+.db-nav-item { position: relative; transition: background 0.2s ease, color 0.2s ease, padding-left 0.25s cubic-bezier(0.16, 1, 0.3, 1); }
+.db-nav-item::before {
+  content: ""; position: absolute; left: 0; top: 7px; bottom: 7px; width: 3px; border-radius: 0 3px 3px 0;
+  background: var(--color-accent); transform: scaleY(0); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.db-nav-item.active::before { transform: scaleY(1); }
+.db-nav-item:hover { padding-left: 15px; }
+.db-nav-item i, .db-nav-item svg { transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.2s ease; }
+.db-nav-item:hover i, .db-nav-item:hover svg { transform: scale(1.12); color: var(--color-accent); }
+
+/* Tarjetas e indicadores */
+.card { transition: box-shadow 0.3s ease, border-color 0.3s ease; }
+.card:hover { box-shadow: 0 12px 28px -18px rgba(15, 23, 42, 0.25); }
+.kpi-card { position: relative; overflow: hidden; transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease, border-color 0.3s ease; }
+.kpi-card::after {
+  content: ""; position: absolute; left: 0; right: 0; top: 0; height: 3px;
+  background: linear-gradient(90deg, var(--color-accent), var(--color-accent-light));
+  transform: scaleX(0); transform-origin: left; transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.kpi-card:hover { transform: translateY(-3px); box-shadow: 0 16px 30px -18px rgba(15, 23, 42, 0.3); }
+.kpi-card:hover::after { transform: scaleX(1); }
+.kpi-card:hover .kpi-icon { transform: rotate(-8deg) scale(1.08); }
+.kpi-icon { transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.kpi-val { font-variant-numeric: tabular-nums; }
+
+/* Tablas */
+.table tbody tr { transition: background 0.18s ease; }
+.table tbody tr:hover td:first-child { box-shadow: inset 3px 0 0 var(--color-accent-light); }
+
+/* Botones: respuesta tactil y destello en los principales */
+.db-wrapper .btn { transition: transform 0.15s ease, box-shadow 0.25s ease, background 0.2s ease, border-color 0.2s ease, color 0.2s ease; }
+.db-wrapper .btn:active { transform: scale(0.97); }
+.db-wrapper .btn-primary { position: relative; overflow: hidden; }
+.db-wrapper .btn-primary::after {
+  content: ""; position: absolute; top: 0; bottom: 0; left: -60%; width: 40%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transform: skewX(-20deg); transition: left 0.7s ease; pointer-events: none;
+}
+.db-wrapper .btn-primary:hover::after { left: 130%; }
+
+/* Indicador de sincronizacion que late */
+.sync-dot { animation: appPulse 2.2s ease-in-out infinite; }
+@keyframes appPulse { 50% { opacity: 0.45; transform: scale(0.8); } }
+
+/* Selector de empresa y desplegable */
+.company-selector-container { transition: border-color 0.2s ease, box-shadow 0.25s ease, transform 0.2s ease; }
+.company-selector-container:hover { box-shadow: 0 6px 16px -10px rgba(15, 23, 42, 0.35); }
+.company-dropdown.show, #company-selector-dropdown[style*="flex"], #company-selector-dropdown[style*="block"] { animation: appDrop 0.22s cubic-bezier(0.16, 1, 0.3, 1); }
+@keyframes appDrop { from { opacity: 0; transform: translateY(-6px) scale(0.98); } }
+
+/* Zona de carga */
+.import-area { transition: border-color 0.25s ease, background 0.25s ease, transform 0.25s ease; }
+.import-area:hover, .import-area.dragover { transform: translateY(-2px); border-color: var(--color-accent-light); }
+
+@media (prefers-reduced-motion: reduce) {
+  .app-enter, .app-row-enter, .sync-dot { animation: none !important; }
+  .kpi-card:hover, .import-area:hover { transform: none; }
+}

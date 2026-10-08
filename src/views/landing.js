@@ -668,6 +668,7 @@ export function renderLanding() {
 }
 
 import { validarCUIT } from '../utils.js';
+import { initLandingMotion } from './landing-motion.js';
 import { LEGAL } from '../legal-config.js';
 import { supabase, isSupabaseConfigured } from '../db/supabase.js';
 import { getCompanies, getClienteFinalAsync } from '../db/mockdb.js';
@@ -1275,4 +1276,6 @@ export function initLanding(mainApp) {
       }, 3200);
     }
   }
+
+  initLandingMotion();
 }
