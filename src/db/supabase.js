@@ -7,6 +7,8 @@ const supabaseUrl = localStorage.getItem('vmp_supabase_url') || import.meta.env.
 const supabaseKey = localStorage.getItem('vmp_supabase_anon_key') || import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
 export const isSupabaseConfigured = supabaseUrl !== '' && supabaseKey !== '';
+export const SUPABASE_URL = supabaseUrl;
+export const SUPABASE_KEY = supabaseKey;
 
 export const supabase = isSupabaseConfigured && window.supabase
   ? window.supabase.createClient(supabaseUrl, supabaseKey)

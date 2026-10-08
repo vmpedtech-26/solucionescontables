@@ -14,6 +14,7 @@ import { renderEmpresas, initEmpresas } from './views/empresas.js';
 import { renderVentas, initVentas } from './views/ventas.js';
 import { renderImportacion, initImportacion } from './views/importacion.js';
 import { renderBandeja, initBandeja } from './views/bandeja.js';
+import { renderFacturar, initFacturar } from './views/facturar.js';
 import { renderIVA, initIVA } from './views/iva.js';
 import { renderPortalCliente, initPortalCliente } from './views/portal_cliente.js';
 import { renderConfiguracion, initConfiguracion } from './views/configuracion.js';
@@ -134,7 +135,7 @@ class Application {
         const role = await getCachedRole();
         const subRoutePreview = hash.substring(8).split('?')[0];
         if (role === 'cliente') {
-          if (subRoutePreview !== '/portal') {
+          if (subRoutePreview !== '/portal' && subRoutePreview !== '/facturar') {
             window.location.hash = '#/studio/portal';
             return;
           }
@@ -178,6 +179,9 @@ class Application {
         }
         else if (subRoute === '/importacion') {
           await this.safeRoute(renderImportacion, initImportacion, 'importacion', "Importación ARCA");
+        }
+        else if (subRoute === '/facturar') {
+          await this.safeRoute(renderFacturar, initFacturar, 'facturar', "Factura electrónica");
         }
         else if (subRoute === '/bandeja') {
           await this.safeRoute(renderBandeja, initBandeja, 'bandeja', "Bandeja de clientes");

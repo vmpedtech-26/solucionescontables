@@ -181,7 +181,7 @@ export async function renderPortalCliente() {
     <!-- Left Column: Operations (Upload OR Bill) -->
     <div style="display: flex; flex-direction: column; gap: 20px;">
       
-      ${isSupabaseConfigured ? `` : `
+      ${isSupabaseConfigured ? `<a href="#/studio/facturar" class="btn btn-outline" style="display:inline-flex;align-items:center;gap:6px;align-self:flex-start;"><i data-lucide="receipt"></i> Emitir factura electrónica</a>` : `
       <!-- Solapas (Tabs) Selector -->
       <div style="display: flex; background: #ffffff; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 4px; gap: 4px;">
         <button class="btn btn-sm portal-tab-btn active" data-tab="upload" style="flex: 1; border: none; font-size: 12.5px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 10px; border-radius: 4px;">

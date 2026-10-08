@@ -3,7 +3,8 @@
    ------------------------------------------------------------- */
 import { getCompaniesAsync, saveCompanyAsync } from '../db/mockdb.js';
 import { supabase, isSupabaseConfigured } from '../db/supabase.js';
-import { sanitizeInput as esc } from '../utils.js';
+import { sanitizeInput as esc, validarCUIT } from '../utils.js';
+import { arca } from '../arca.js';
 
 export async function renderEmpresas() {
   const companies = await getCompaniesAsync();
@@ -33,7 +34,12 @@ export async function renderEmpresas() {
         </div>
         <div class="form-group">
           <label class="form-label">CUIT *</label>
-          <input type="text" id="co-cuit" class="form-input" placeholder="30-12345678-9" required>
+          <div style="display:flex;gap:8px;">
+            <input type="text" id="co-cuit" class="form-input" placeholder="30-12345678-9" required style="flex:1;">
+            ${isSupabaseConfigured ? '<button type="button" class="btn btn-outline btn-sm" id="co-padron" title="Trae los datos del padrón de ARCA">Completar desde ARCA</button>' : ''}
+          </div>
+          <div id="co-padron-info" style="font-size:11.5px;margin-top:4px;"></div>
+          <input type="hidden" id="co-domicilio">
         </div>
         <div class="form-group">
           <label class="form-label">Tipo de Entidad</label>
@@ -168,6 +174,29 @@ export async function initEmpresas(mainApp) {
   btnCancelAdd?.addEventListener('click', hideForm);
   btnFormCancel?.addEventListener('click', hideForm);
 
+  // Datos desde el padron de ARCA (requiere certificado del estudio)
+  document.getElementById('co-padron')?.addEventListener('click', async (e) => {
+    const btn = e.currentTarget;
+    const info = document.getElementById('co-padron-info');
+    const cuit = document.getElementById('co-cuit').value;
+    if (!validarCUIT(cuit)) { info.innerHTML = '<span style="color:#b91c1c;">Ingresá un CUIT válido.</span>'; return; }
+    btn.disabled = true; btn.textContent = 'Consultando…';
+    try {
+      const p = await arca('padron', { cuit });
+      if (p.nombre) document.getElementById('co-name').value = p.nombre;
+      const sel = document.getElementById('co-iva');
+      if ([...sel.options].some((o) => o.value === p.condicionIva)) sel.value = p.condicionIva;
+      const dom = [p.domicilio.direccion, p.domicilio.localidad, p.domicilio.provincia].filter(Boolean).join(', ');
+      document.getElementById('co-domicilio').value = dom;
+      if (p.actividades[0]) document.getElementById('co-activity').value = p.actividades[0].descripcion || '';
+      info.innerHTML = `<span style="color:${p.estadoClave === 'ACTIVO' ? '#15803d' : '#b91c1c'};">Clave fiscal ${esc(p.estadoClave || '—')}</span> · ${esc(p.condicionIva)}${dom ? ' · ' + esc(dom) : ''}${p.ambiente === 'homologacion' ? ' <em>(datos de homologación)</em>' : ''}${p.errores.length ? '<br><span style="color:#b45309;">' + esc(p.errores.join(' | ')) + '</span>' : ''}`;
+    } catch (err) {
+      info.innerHTML = `<span style="color:#b91c1c;">${esc(err.message)}</span>`;
+    } finally {
+      btn.disabled = false; btn.textContent = 'Completar desde ARCA';
+    }
+  });
+
   // Procesar Formulario
   form?.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -179,6 +208,7 @@ export async function initEmpresas(mainApp) {
     const activity = document.getElementById('co-activity').value;
     const start = document.getElementById('co-start').value;
     const color = document.getElementById('co-color').value;
+    const domicilio = document.getElementById('co-domicilio')?.value || '';
 
     const newCompany = {
       razon_social: name,
@@ -187,7 +217,8 @@ export async function initEmpresas(mainApp) {
       condicion_iva: iva,
       actividad: activity,
       inicio_actividades: start,
-      color
+      color,
+      domicilio
     };
 
     try {

@@ -55,7 +55,7 @@ export function renderDashboardLayout(childHTML, activeRoute, role = null) {
 
   return `
   <style>
-      .role-cliente .db-nav-label, .role-cliente .db-nav-item:not([data-route="portal"]), .role-cliente #company-selector-dropdown, .role-cliente #topbar-company-selector i[data-lucide="chevron-down"], .role-cliente .mobile-bottom-nav .mb-nav-item { display: none !important; }
+      .role-cliente .db-nav-label, .role-cliente .db-nav-item:not([data-route="portal"]):not([data-route="facturar"]), .role-cliente #company-selector-dropdown, .role-cliente #topbar-company-selector i[data-lucide="chevron-down"], .role-cliente .mobile-bottom-nav .mb-nav-item { display: none !important; }
       .role-cliente #topbar-company-selector { cursor: default; }
       ${isSupabaseConfigured ? '.db-wrapper [data-simulated] { opacity: .5; cursor: not-allowed; }' : ''}
     </style>
@@ -118,6 +118,10 @@ export function renderDashboardLayout(childHTML, activeRoute, role = null) {
           <i data-lucide="refresh-cw"></i>
           <span>Importar "Mis Comprobantes"</span>
         </a>
+        ${isSupabaseConfigured ? `<a href="#/studio/facturar" class="db-nav-item ${activeRoute === 'facturar' ? 'active' : ''}" data-route="facturar">
+          <i data-lucide="receipt"></i>
+          <span>Factura electrónica</span>
+        </a>` : ''}
         <a href="#/studio/bandeja" class="db-nav-item ${activeRoute === 'bandeja' ? 'active' : ''}" data-route="bandeja">
           <i data-lucide="inbox"></i>
           <span>Bandeja de clientes</span>

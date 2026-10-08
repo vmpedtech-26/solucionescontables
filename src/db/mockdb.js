@@ -418,6 +418,8 @@ export async function saveCompanyAsync(company) {
     color: company.color,
     delegation_active: company.delegation_active || false
   };
+  if (company.domicilio) payload.domicilio = String(company.domicilio).slice(0, 200);
+  if (company.iibb) payload.iibb = String(company.iibb).slice(0, 30);
 
   const { data, error } = await supabase.from('empresas').upsert(payload).select().single();
   if (error) throw error;

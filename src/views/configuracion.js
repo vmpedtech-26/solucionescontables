@@ -6,6 +6,7 @@ import { isSupabaseConfigured, supabase } from '../db/supabase.js';
 import { sanitizeInput as esc } from '../utils.js';
 import { blockSimulated } from '../utils.js';
 import { renderDatosCard, initDatosCard } from './datos.js';
+import { renderArcaPanel, initArcaPanel } from './arca_config.js';
 
 function getDelegationActive(company) {
   if (isSupabaseConfigured && supabase) return !!company.delegation_active;
@@ -89,6 +90,7 @@ export async function renderConfiguracion() {
         </div>
       </div>
 
+      ${isSupabaseConfigured ? renderArcaPanel() : `
       <!-- Certificate Upload Card -->
       <div class="card" id="cert-upload-panel">
         <div class="card-header">
@@ -146,6 +148,7 @@ export async function renderConfiguracion() {
           `}
         </div>
       </div>
+      `}
 
       ${isSupabaseConfigured ? `
       <div class="card">
@@ -373,6 +376,7 @@ export async function renderConfiguracion() {
 export async function initConfiguracion(mainApp) {
   if (window.lucide) window.lucide.createIcons();
   initDatosCard(mainApp);
+  if (isSupabaseConfigured) initArcaPanel(mainApp);
 
   const activeCompany = await getActiveCompanyAsync();
   if (!activeCompany) return;
