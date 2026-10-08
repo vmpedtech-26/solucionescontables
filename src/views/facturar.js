@@ -98,6 +98,18 @@ export async function renderFacturar() {
       </div>
     </div>
     <div style="display:flex;flex-direction:column;gap:16px;">
+      <details class="card" id="fac-guia-pv" style="padding:14px 18px;font-size:12.5px;line-height:1.55;">
+        <summary style="cursor:pointer;font-weight:700;color:var(--color-primary);">¿Cómo creo un punto de venta?</summary>
+        <p style="margin:10px 0 6px;color:var(--text-secondary);">Para emitir desde el sistema hace falta un punto de venta de tipo <strong>Web Services</strong>. Los de "Factura en línea" (los que se usan desde la web de ARCA) no sirven. Es gratis y queda activo al instante:</p>
+        <ol style="padding-left:18px;margin:0;color:var(--text-secondary);">
+          <li>Entrá a <strong>arca.gob.ar</strong> con la Clave Fiscal de ${esc(emp.razon_social)}.</li>
+          <li>Abrí <strong>Administración de puntos de venta y domicilios</strong> y elegí la empresa.</li>
+          <li>Tocá <strong>Agregar</strong> y elegí el sistema <strong>${esMono ? 'Factura Electrónica – Monotributo – Web Services' : 'RECE para aplicativo y web services'}</strong>.</li>
+          <li>Poné un número que no esté usado (por ejemplo 2, si el 1 es de Factura en línea) y el domicilio.</li>
+          <li>Volvé a esta pantalla: el punto de venta nuevo aparece en el selector.</li>
+        </ol>
+        ${esEstudio ? '<p style="margin:8px 0 0;color:var(--text-secondary);"><strong>Si factura el estudio en nombre del cliente:</strong> el cliente también tiene que delegar el servicio <em>Facturación Electrónica</em> al CUIT del estudio (Administrador de Relaciones de Clave Fiscal → Nueva Relación).</p>' : ''}
+      </details>
       <div class="card"><div class="card-body" id="fac-resultado" style="font-size:12.5px;color:var(--text-secondary);">El comprobante se autoriza en ARCA y se obtiene el CAE al instante. En producción, la factura se registra sola en el Libro IVA Ventas.</div></div>
       ${esEstudio ? `<div class="card"><div class="card-header"><h3>Últimas emitidas (producción)</h3></div><div class="card-body p-0">
         ${emitidas.length ? `<table class="table" style="font-size:12px;"><tbody>${emitidas.map((v) => `<tr><td>${esc(v.tipo_comprobante)} ${esc(v.numero)}<br><span class="text-muted">${esc(v.cliente || '')}</span></td><td class="r font-mono">${esc(pesos(v.total))}</td><td><button class="btn btn-outline btn-xs fac-reimprimir" data-id="${esc(v.id)}">Imprimir</button></td></tr>`).join('')}</tbody></table>` : '<p class="text-secondary" style="padding:16px;font-size:12px;">Todavía no hay facturas emitidas en producción.</p>'}
@@ -135,7 +147,8 @@ export async function initFacturar(mainApp) {
       : `<option value="1">00001 (homologación)</option>`;
     if (!activos.length && ambiente === 'produccion') {
       $('fac-pv').innerHTML = '';
-      $('fac-resultado').innerHTML = '<span style="color:#b91c1c;">La empresa no tiene puntos de venta para Web Services. Dalo de alta en ARCA (Administración de puntos de venta y domicilios → tipo "RECE para aplicativo y web services").</span>';
+      $('fac-resultado').innerHTML = '<span style="color:#b91c1c;">La empresa no tiene puntos de venta para Web Services. Abajo te explicamos cómo crearlo en ARCA.</span>';
+      $('fac-guia-pv').open = true;
     } else $('fac-emitir').disabled = false;
   } catch (e) {
     $('fac-ambiente').textContent = 'Sin conexión con ARCA';
