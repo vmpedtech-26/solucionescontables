@@ -242,7 +242,7 @@ export function renderLanding() {
       <div class="container">
         <div class="section-header">
           <h2>Un plan para cada tamaño de estudio</h2>
-          <p>Según la cantidad de clientes (CUITs) que administrás. En la demo te ayudamos a elegir.</p>
+          <p>Según la cantidad de clientes (CUITs) que administrás. Precios en pesos, más IVA. En la demo te ayudamos a elegir.</p>
         </div>
         <div class="pricing-grid">
           
@@ -257,11 +257,11 @@ export function renderLanding() {
               <div class="price-amount" style="margin: 20px 0 24px; min-height: 100px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
                 <div style="margin-bottom: 8px;">
                   <span style="font-size: 11px; font-weight: 750; color: var(--color-accent); text-transform: uppercase; letter-spacing: 0.05em; background: rgba(22,163,74,0.06); padding: 4px 10px; border-radius: 12px; border: 1px solid rgba(22,163,74,0.12);">Setup Inicial</span>
-                  <div style="font-size: 24px; font-weight: 850; color: var(--color-primary); font-family: var(--font-heading); margin-top: 4px;">$ 150.000 <span style="font-size: 12px; font-weight: 500; color: var(--text-secondary);">ARS</span></div>
+                  <div style="font-size: 24px; font-weight: 850; color: var(--color-primary); font-family: var(--font-heading); margin-top: 4px;">$ 150.000 <span style="font-size: 12px; font-weight: 500; color: var(--text-secondary);">ARS + IVA</span></div>
                   <span style="font-size: 10.5px; color: var(--text-muted);">pago único de instalación</span>
                 </div>
                 <div style="border-top: 1px dashed var(--border-color); width: 80%; padding-top: 8px; margin-top: 4px;">
-                  <div style="font-size: 18px; font-weight: 800; color: var(--color-accent);">$ 39.000 <span style="font-size: 11px; font-weight: 500; color: var(--text-secondary);">/ mes</span></div>
+                  <div style="font-size: 18px; font-weight: 800; color: var(--color-accent);">$ 59.000 <span style="font-size: 11px; font-weight: 500; color: var(--text-secondary);">/ mes + IVA</span></div>
                   <span style="font-size: 10.5px; color: var(--text-muted);">abono de soporte y hosting</span>
                 </div>
               </div>
@@ -289,11 +289,11 @@ export function renderLanding() {
               <div class="price-amount" style="margin: 20px 0 24px; min-height: 100px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
                 <div style="margin-bottom: 8px;">
                   <span style="font-size: 11px; font-weight: 750; color: var(--color-accent); text-transform: uppercase; letter-spacing: 0.05em; background: rgba(22,163,74,0.06); padding: 4px 10px; border-radius: 12px; border: 1px solid rgba(22,163,74,0.12);">Setup Inicial</span>
-                  <div style="font-size: 26px; font-weight: 850; color: var(--color-primary); font-family: var(--font-heading); margin-top: 4px;">$ 290.000 <span style="font-size: 12px; font-weight: 500; color: var(--text-secondary);">ARS</span></div>
+                  <div style="font-size: 26px; font-weight: 850; color: var(--color-primary); font-family: var(--font-heading); margin-top: 4px;">$ 290.000 <span style="font-size: 12px; font-weight: 500; color: var(--text-secondary);">ARS + IVA</span></div>
                   <span style="font-size: 10.5px; color: var(--text-muted);">pago único de instalación</span>
                 </div>
                 <div style="border-top: 1px dashed var(--border-color); width: 80%; padding-top: 8px; margin-top: 4px;">
-                  <div style="font-size: 20px; font-weight: 850; color: var(--color-accent);">$ 79.000 <span style="font-size: 11px; font-weight: 500; color: var(--text-secondary);">/ mes</span></div>
+                  <div style="font-size: 20px; font-weight: 850; color: var(--color-accent);">$ 119.000 <span style="font-size: 11px; font-weight: 500; color: var(--text-secondary);">/ mes + IVA</span></div>
                   <span style="font-size: 10.5px; color: var(--text-muted);">abono de soporte y hosting</span>
                 </div>
               </div>
@@ -320,11 +320,11 @@ export function renderLanding() {
               <div class="price-amount" style="margin: 20px 0 24px; min-height: 100px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
                 <div style="margin-bottom: 8px;">
                   <span style="font-size: 11px; font-weight: 750; color: var(--color-accent); text-transform: uppercase; letter-spacing: 0.05em; background: rgba(22,163,74,0.06); padding: 4px 10px; border-radius: 12px; border: 1px solid rgba(22,163,74,0.12);">Setup Inicial</span>
-                  <div style="font-size: 24px; font-weight: 850; color: var(--color-primary); font-family: var(--font-heading); margin-top: 4px;">$ 490.000 <span style="font-size: 12px; font-weight: 500; color: var(--text-secondary);">ARS</span></div>
+                  <div style="font-size: 24px; font-weight: 850; color: var(--color-primary); font-family: var(--font-heading); margin-top: 4px;">$ 490.000 <span style="font-size: 12px; font-weight: 500; color: var(--text-secondary);">ARS + IVA</span></div>
                   <span style="font-size: 10.5px; color: var(--text-muted);">pago único de instalación</span>
                 </div>
                 <div style="border-top: 1px dashed var(--border-color); width: 80%; padding-top: 8px; margin-top: 4px;">
-                  <div style="font-size: 18px; font-weight: 800; color: var(--color-accent);">$ 149.000 <span style="font-size: 11px; font-weight: 500; color: var(--text-secondary);">/ mes</span></div>
+                  <div style="font-size: 18px; font-weight: 800; color: var(--color-accent);">$ 229.000 <span style="font-size: 11px; font-weight: 500; color: var(--text-secondary);">/ mes + IVA</span></div>
                   <span style="font-size: 10.5px; color: var(--text-muted);">abono de soporte y hosting</span>
                 </div>
               </div>
