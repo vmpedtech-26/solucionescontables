@@ -126,6 +126,9 @@ class Application {
       if (isSupabaseConfigured) {
         const session = await getCachedSession();
         if (!session) {
+          // Sin sesion real: se borra la marca local de "ya ingreso" para que
+          // el boton Ingresar de la portada vuelva a abrir el formulario.
+          localStorage.removeItem('vmp_premium_unlocked');
           window.location.hash = '#/';
           return;
         }

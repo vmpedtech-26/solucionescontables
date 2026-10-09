@@ -933,11 +933,18 @@ export function initLanding(mainApp) {
   const loginPasswordInput = document.getElementById('login-password');
   const loginSignupLink = document.getElementById('login-signup-link');
 
-  const openLoginModal = (e) => {
+  const openLoginModal = async (e) => {
     if (e) e.preventDefault();
-    const isUnlocked = localStorage.getItem('vmp_premium_unlocked') === 'true';
-    if (isUnlocked) {
-      // If already unlocked, enter directly
+    if (isSupabaseConfigured && supabase) {
+      // Con backend real manda la sesion de Supabase, no la marca local:
+      // una marca vieja sin sesion dejaba el boton sin efecto.
+      const { data } = await supabase.auth.getSession().catch(() => ({ data: {} }));
+      if (data?.session) {
+        window.location.hash = '#/studio';
+        return;
+      }
+      localStorage.removeItem('vmp_premium_unlocked');
+    } else if (localStorage.getItem('vmp_premium_unlocked') === 'true') {
       window.location.hash = '#/studio';
       return;
     }
