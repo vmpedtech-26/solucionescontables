@@ -1275,3 +1275,61 @@ h1, h2, h3, h4, h5, h6 {
     padding: 28px 20px !important;
   }
 }
+
+/* -------------------------------------------------------------
+   Conversion: demo, pasos, preguntas y WhatsApp flotante
+   ------------------------------------------------------------- */
+.lp-hero-micro { margin-top: 14px; font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+.lp-hero-micro a { color: var(--color-accent); font-weight: 700; text-decoration: none; }
+.lp-hero-micro a:hover { text-decoration: underline; }
+
+.lp-section-cta { display: flex; justify-content: center; margin-top: 40px; }
+
+.lp-step-card { position: relative; }
+.lp-step-num {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 44px; height: 44px; border-radius: 12px;
+  background: rgba(22, 163, 74, 0.08); border: 1px solid rgba(22, 163, 74, 0.2);
+  color: var(--color-accent); font-family: var(--font-heading); font-weight: 800; font-size: 20px;
+}
+
+.lp-faq { max-width: 820px; margin: 0 auto; display: grid; gap: 12px; }
+.lp-faq-item {
+  background: #fff; border: 1px solid var(--border-color); border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm); transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+.lp-faq-item[open] { border-color: rgba(22, 163, 74, 0.35); box-shadow: var(--shadow-md); }
+.lp-faq-item summary {
+  list-style: none; cursor: pointer; padding: 18px 22px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  font-family: var(--font-heading); font-weight: 700; font-size: 16px; color: var(--color-primary);
+}
+.lp-faq-item summary::-webkit-details-marker { display: none; }
+.lp-faq-item summary i, .lp-faq-item summary svg { width: 18px; height: 18px; flex-shrink: 0; color: var(--color-accent); transition: transform 0.3s ease; }
+.lp-faq-item[open] summary i, .lp-faq-item[open] summary svg { transform: rotate(45deg); }
+.lp-faq-item p { padding: 0 22px 20px; color: var(--text-secondary); font-size: 14.5px; line-height: 1.65; }
+
+.lp-form-sub { font-size: 13px; color: var(--text-secondary); margin: -6px 0 18px; }
+#demo-form { display: flex; flex-direction: column; gap: 14px; }
+#demo-form textarea { resize: vertical; min-height: 64px; font-family: inherit; }
+.lp-self-signup { margin-top: 18px; border-top: 1px dashed var(--border-color); padding-top: 14px; }
+.lp-self-signup summary { cursor: pointer; font-size: 13px; font-weight: 600; color: var(--color-accent); }
+.lp-self-signup[open] summary { margin-bottom: 14px; }
+.lp-self-signup #lead-form { display: flex; flex-direction: column; gap: 14px; }
+
+.lp-wa-float {
+  position: fixed; right: 20px; bottom: 20px; z-index: 400;
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 12px 18px 12px 14px; border-radius: 999px;
+  background: #25d366; color: #fff; text-decoration: none; font-weight: 700; font-size: 14px;
+  box-shadow: 0 12px 28px -10px rgba(37, 211, 102, 0.7);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  animation: lpWaIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) 1.5s both;
+}
+.lp-wa-float i, .lp-wa-float svg { width: 20px; height: 20px; }
+.lp-wa-float:hover { transform: translateY(-3px); box-shadow: 0 16px 34px -10px rgba(37, 211, 102, 0.8); }
+@keyframes lpWaIn { from { opacity: 0; transform: translateY(20px) scale(0.9); } }
+@media (max-width: 640px) {
+  .lp-wa-float span { display: none; }
+  .lp-wa-float { padding: 14px; right: 16px; bottom: 16px; }
+}

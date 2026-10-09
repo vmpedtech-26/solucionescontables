@@ -124,3 +124,8 @@
   .lp-motion .mockup-floating-card, .lp-motion .price-card.featured::before { animation: none !important; }
   .lp-w > span { transform: none !important; }
 }
+
+/* Con fotos de atardecer y noche en el fondo, las secciones necesitan mas
+   cuerpo para que el texto se lea siempre (la foto se sigue intuyendo). */
+.lp-wrapper section:not(.hero-section) { background-color: rgba(248, 250, 252, 0.86) !important; }
+.lp-wrapper .section-header p { color: var(--text-secondary); }

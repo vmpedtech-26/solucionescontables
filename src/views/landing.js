@@ -26,13 +26,12 @@ export function renderLanding() {
           <span class="bar"></span>
         </button>
         <nav class="lp-menu" id="lp-menu-nav">
-          <a href="#dashboard-showcase" class="lp-menu-link">Beneficios</a>
-          <a href="#pricing" class="lp-menu-link">Inversión</a>
-          <a href="#partners" class="lp-menu-link">Partners</a>
-          <a href="#contact" class="lp-menu-link">Contacto</a>
-          <a href="#" class="lp-menu-link" id="nav-login-btn" style="font-weight: 700; color: var(--color-accent); display: flex; align-items: center; gap: 4px;"><i data-lucide="log-in" style="width: 14px; height: 14px;"></i>Iniciar Sesión</a>
-          <a href="#contact" class="btn btn-outline btn-sm">Solicitar Demo</a>
-        </nav>
+            <a href="#problemas" class="lp-menu-link">Cómo funciona</a>
+            <a href="#pricing" class="lp-menu-link">Planes</a>
+            <a href="#preguntas" class="lp-menu-link">Preguntas</a>
+            <a href="#" class="lp-menu-link" id="nav-login-btn" style="font-weight: 700; color: var(--color-accent); display: flex; align-items: center; gap: 4px;"><i data-lucide="log-in" style="width: 14px; height: 14px;"></i> Ingresar</a>
+            <a href="#contact" class="btn btn-primary btn-sm">Solicitar demo</a>
+          </nav>
       </div>
     </header>
 
@@ -40,33 +39,34 @@ export function renderLanding() {
     <section class="hero-section">
       <div class="container hero-grid">
         <div class="hero-content">
-          <span class="badge"><i data-lucide="shield-check" style="width:12px; height:12px;"></i> El colaborador digital de tu Estudio Contable &middot; Desarrollado por VMP</span>
-          <h1 class="hero-title">El integrante virtual que <span class="gradient-text">elimina la carga manual</span> de tu estudio.</h1>
-          <p class="hero-subtitle">Automatizá la importación de comprobantes, liquidá el IVA en segundos y vigilá el límite de tus monotributistas de forma autónoma. Evitá el tipeo repetitivo, los errores y las exclusiones sorpresa de ARCA.</p>
-          <div class="hero-actions">
-            <a href="#" class="btn btn-primary" id="hero-login-btn">
-              Ingresar al Studio <i data-lucide="log-in"></i>
-            </a>
-            <a href="#contact" class="btn btn-outline">Solicitar Demo</a>
-          </div>
-          
-          <div class="hero-stats">
-            <div class="stat-item">
-              <span class="stat-val">10x</span>
-              <span class="stat-label">Menos carga manual</span>
+            <span class="badge"><i data-lucide="shield-check" style="width:12px; height:12px; margin-right:4px;"></i> El colaborador digital de tu estudio contable &middot; Desarrollado por VMP</span>
+            <h1 class="hero-title">Recuperá las horas que hoy se van en <span class="gradient-text">tipear comprobantes</span>.</h1>
+            <p class="hero-subtitle">Tus clientes te mandan sus comprobantes desde el celular, el sistema los ordena y vos liquidás, facturás y controlás a cada cliente desde un solo lugar. Menos carga manual, más tiempo para asesorar.</p>
+            <div class="hero-actions">
+              <a href="#contact" class="btn btn-primary">
+                Solicitar demo gratuita <i data-lucide="arrow-right"></i>
+              </a>
+              <a href="https://wa.me/5492996731487?text=Hola!%20Quiero%20ver%20una%20demo%20de%20Soluciones%20Contables" target="_blank" rel="noopener" class="btn btn-outline"><i data-lucide="message-circle"></i> Hablar por WhatsApp</a>
             </div>
-            <div class="stat-item">
-              <span class="stat-val">100%</span>
-              <span class="stat-label">Resguardo en la nube</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-val">0%</span>
-              <span class="stat-label">Complicaciones de ARCA</span>
-            </div>
-          </div>
-        </div>
+            <p class="lp-hero-micro">Demo de 20 minutos por videollamada &middot; sin compromiso &middot; con casos de tu estudio. ¿Ya sos cliente? <a href="#" id="hero-login-btn">Ingresá acá</a></p>
 
-        <div class="hero-visual">
+            <div class="hero-stats">
+              <div class="stat-item">
+                <span class="stat-val">100%</span>
+                <span class="stat-label">Online: sin instalar nada</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-val">CAE</span>
+                <span class="stat-label">Facturas autorizadas por ARCA</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-val">1 a 1</span>
+                <span class="stat-label">Te acompañamos en la puesta en marcha</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="hero-visual">
           <div class="mockup-container">
             <div class="mockup-header">
               <div class="mockup-dots">
@@ -113,93 +113,79 @@ export function renderLanding() {
     </section>
 
 
-    <!-- Dashboard Suite / Modules Showcase Section -->
-    <section id="dashboard-showcase" class="showcase-section" style="padding: 100px 0; border-top: 1px solid rgba(226, 232, 240, 0.4); background: rgba(248, 250, 252, 0.5); position: relative; overflow: hidden;">
-      <div class="container">
-        <div class="section-header">
-          <h2>Una suite completa diseñada para la gestión diaria</h2>
-          <p>Olvidate de saltar entre múltiples sistemas lentos y planillas propensas a errores. Reclutá un colaborador virtual de élite en una interfaz moderna y veloz.</p>
+    <!-- Problemas que resuelve -->
+      <section id="problemas" class="showcase-section" style="padding: 100px 0; border-top: 1px solid rgba(226, 232, 240, 0.4); background: rgba(248, 250, 252, 0.5); position: relative; overflow: hidden;">
+        <div class="container">
+          <div class="section-header">
+            <h2>¿Te suena alguna de estas?</h2>
+            <p>Son las tareas que más tiempo le sacan a un estudio contable. Las resolvimos para que vos te dediques a asesorar.</p>
+          </div>
+          <div class="features-grid">
+            <div class="feature-card" style="padding: 24px; overflow: hidden;">
+              <div class="feature-image-wrapper" style="width: 100%; height: 180px; border-radius: var(--radius-md); overflow: hidden; margin-bottom: 20px; border: 1px solid rgba(15, 23, 42, 0.06); position: relative;">
+                <img src="/client_portal_benefit.png" alt="Clientes enviando comprobantes desde el celular" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; display: block;" loading="lazy" class="benefit-img">
+                <div class="feature-icon" style="position: absolute; bottom: 12px; left: 12px; margin-bottom: 0; background: #ffffff; box-shadow: var(--shadow-sm); width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; z-index: 10; border: 1px solid rgba(15, 23, 42, 0.08);">
+                  <i data-lucide="smartphone" style="width: 18px; height: 18px;"></i>
+                </div>
+              </div>
+              <h3 style="font-size: 18px; font-weight: 700; color: var(--color-primary); font-family: var(--font-heading);">“Te lo mando el día del vencimiento”</h3>
+              <p style="margin-top: 8px; font-size: 13.5px; color: var(--text-secondary); line-height: 1.6;">Tus clientes suben tickets y facturas desde el celular apenas los reciben. Vos los revisás en una bandeja y los pasás al libro con un clic.</p>
+            </div>
+            <div class="feature-card" style="padding: 24px; overflow: hidden;">
+              <div class="feature-image-wrapper" style="width: 100%; height: 180px; border-radius: var(--radius-md); overflow: hidden; margin-bottom: 20px; border: 1px solid rgba(15, 23, 42, 0.06); position: relative;">
+                <img src="/monitoreo_monotributo_benefit.png" alt="Control de topes de Monotributo" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; display: block;" loading="lazy" class="benefit-img">
+                <div class="feature-icon" style="position: absolute; bottom: 12px; left: 12px; margin-bottom: 0; background: #ffffff; box-shadow: var(--shadow-sm); width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; z-index: 10; border: 1px solid rgba(15, 23, 42, 0.08);">
+                  <i data-lucide="bell-ring" style="width: 18px; height: 18px;"></i>
+                </div>
+              </div>
+              <h3 style="font-size: 18px; font-weight: 700; color: var(--color-primary); font-family: var(--font-heading);">El monotributista que se pasó del tope</h3>
+              <p style="margin-top: 8px; font-size: 13.5px; color: var(--text-secondary); line-height: 1.6;">El sistema sigue la facturación de los últimos 12 meses de cada cliente y te avisa antes de que llegue la exclusión.</p>
+            </div>
+            <div class="feature-card" style="padding: 24px; overflow: hidden;">
+              <div class="feature-image-wrapper" style="width: 100%; height: 180px; border-radius: var(--radius-md); overflow: hidden; margin-bottom: 20px; border: 1px solid rgba(15, 23, 42, 0.06); position: relative;">
+                <img src="/libro_iva_benefit.png" alt="Libro IVA Digital" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; display: block;" loading="lazy" class="benefit-img">
+                <div class="feature-icon" style="position: absolute; bottom: 12px; left: 12px; margin-bottom: 0; background: #ffffff; box-shadow: var(--shadow-sm); width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; z-index: 10; border: 1px solid rgba(15, 23, 42, 0.08);">
+                  <i data-lucide="clock" style="width: 18px; height: 18px;"></i>
+                </div>
+              </div>
+              <h3 style="font-size: 18px; font-weight: 700; color: var(--color-primary); font-family: var(--font-heading);">Días enteros cargando el Libro IVA</h3>
+              <p style="margin-top: 8px; font-size: 13.5px; color: var(--text-secondary); line-height: 1.6;">Importás Mis Comprobantes, el sistema controla CUITs y repetidos, arma los archivos para ARCA y facturás con CAE desde el mismo lugar.</p>
+            </div>
+          </div>
+          <div class="lp-section-cta">
+            <a href="#contact" class="btn btn-primary">Quiero verlo funcionando <i data-lucide="arrow-right"></i></a>
+          </div>
         </div>
-        
-        <div class="features-grid">
-          
-          <!-- Module 1 -->
-          <div class="feature-card" style="padding: 24px; overflow: hidden;">
-            <div class="feature-image-wrapper" style="width: 100%; height: 180px; border-radius: var(--radius-md); overflow: hidden; margin-bottom: 20px; border: 1px solid rgba(15, 23, 42, 0.06); position: relative;">
-              <img src="/mis_comprobantes_benefit.png" alt="Conciliador Mis Comprobantes" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; display: block;" loading="lazy" class="benefit-img">
-              <div class="feature-icon" style="position: absolute; bottom: 12px; left: 12px; margin-bottom: 0; background: #ffffff; box-shadow: var(--shadow-sm); width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; z-index: 10; border: 1px solid rgba(15, 23, 42, 0.08);">
-                <i data-lucide="refresh-cw" style="width: 18px; height: 18px;"></i>
-              </div>
-            </div>
-            <h3 style="font-size: 18px; font-weight: 700; color: var(--color-primary); font-family: var(--font-heading);">Conciliador "Mis Comprobantes"</h3>
-            <p style="margin-top: 8px; font-size: 13.5px; color: var(--text-secondary); line-height: 1.6;">Importación de archivos. Cargá las planillas de Mis Comprobantes de ARCA (compras y ventas) o ingresá comprobantes a mano. El sistema controla el dígito verificador de cada CUIT y detecta comprobantes repetidos. La conexión automática con ARCA está en desarrollo.</p>
-          </div>
+      </section>
 
-          <!-- Module 2 -->
-          <div class="feature-card" style="padding: 24px; overflow: hidden;">
-            <div class="feature-image-wrapper" style="width: 100%; height: 180px; border-radius: var(--radius-md); overflow: hidden; margin-bottom: 20px; border: 1px solid rgba(15, 23, 42, 0.06); position: relative;">
-              <img src="/libro_iva_benefit.png" alt="Libro IVA Digital" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; display: block;" loading="lazy" class="benefit-img">
-              <div class="feature-icon" style="position: absolute; bottom: 12px; left: 12px; margin-bottom: 0; background: #ffffff; box-shadow: var(--shadow-sm); width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; z-index: 10; border: 1px solid rgba(15, 23, 42, 0.08);">
-                <i data-lucide="book-open" style="width: 18px; height: 18px;"></i>
-              </div>
-            </div>
-            <h3 style="font-size: 18px; font-weight: 700; color: var(--color-primary); font-family: var(--font-heading);">Libro IVA Digital</h3>
-            <p style="margin-top: 8px; font-size: 13.5px; color: var(--text-secondary); line-height: 1.6;">Libro IVA Digital. Generá los archivos de ventas y compras (comprobantes y alícuotas) en formato de ancho fijo para importar en ARCA, además del resumen de liquidación de IVA. Validá siempre el resultado en el aplicativo de ARCA antes de presentar.</p>
+      <!-- Como empezar -->
+      <section id="como-empezar" class="showcase-section" style="padding: 100px 0; border-top: 1px solid rgba(226, 232, 240, 0.4); position: relative; overflow: hidden;">
+        <div class="container">
+          <div class="section-header">
+            <h2>Empezar es simple</h2>
+            <p>Sin migraciones eternas ni manuales de 200 páginas: lo dejamos andando con vos.</p>
           </div>
-
-          <!-- Module 3 -->
-          <div class="feature-card" style="padding: 24px; overflow: hidden;">
-            <div class="feature-image-wrapper" style="width: 100%; height: 180px; border-radius: var(--radius-md); overflow: hidden; margin-bottom: 20px; border: 1px solid rgba(15, 23, 42, 0.06); position: relative;">
-              <img src="/ajuste_inflacion_benefit.png" alt="Ajuste por Inflacion RT 54" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; display: block;" loading="lazy" class="benefit-img">
-              <div class="feature-icon" style="position: absolute; bottom: 12px; left: 12px; margin-bottom: 0; background: #ffffff; box-shadow: var(--shadow-sm); width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; z-index: 10; border: 1px solid rgba(15, 23, 42, 0.08);">
-                <i data-lucide="calculator" style="width: 18px; height: 18px;"></i>
-              </div>
+          <div class="features-grid">
+            <div class="feature-card lp-step-card" style="padding: 28px;">
+              <span class="lp-step-num">1</span>
+              <h3 style="font-size: 18px; font-weight: 700; color: var(--color-primary); font-family: var(--font-heading); margin-top: 14px;">Pedís la demo</h3>
+              <p style="margin-top: 8px; font-size: 13.5px; color: var(--text-secondary); line-height: 1.6;">20 minutos por videollamada. Te mostramos el circuito completo con casos de tu estudio: del ticket del cliente al Libro IVA.</p>
             </div>
-            <h3 style="font-size: 18px; font-weight: 700; color: var(--color-primary); font-family: var(--font-heading);">Ajuste por Inflación (RT 54)</h3>
-            <p style="margin-top: 8px; font-size: 13.5px; color: var(--text-secondary); line-height: 1.6;">Apoyo para la RT 54. Estimación orientativa del ajuste por inflación y del panel contable simplificado, para que el contador la revise y complete. No reemplaza el criterio profesional.</p>
-          </div>
-
-          <!-- Module 4 -->
-          <div class="feature-card" style="padding: 24px; overflow: hidden;">
-            <div class="feature-image-wrapper" style="width: 100%; height: 180px; border-radius: var(--radius-md); overflow: hidden; margin-bottom: 20px; border: 1px solid rgba(15, 23, 42, 0.06); position: relative;">
-              <img src="/monitoreo_monotributo_benefit.png" alt="Monitoreo de Monotributo" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; display: block;" loading="lazy" class="benefit-img">
-              <div class="feature-icon" style="position: absolute; bottom: 12px; left: 12px; margin-bottom: 0; background: #ffffff; box-shadow: var(--shadow-sm); width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; z-index: 10; border: 1px solid rgba(15, 23, 42, 0.08);">
-                <i data-lucide="shield-alert" style="width: 18px; height: 18px;"></i>
-              </div>
+            <div class="feature-card lp-step-card" style="padding: 28px;">
+              <span class="lp-step-num">2</span>
+              <h3 style="font-size: 18px; font-weight: 700; color: var(--color-primary); font-family: var(--font-heading); margin-top: 14px;">Configuramos tu estudio</h3>
+              <p style="margin-top: 8px; font-size: 13.5px; color: var(--text-secondary); line-height: 1.6;">Cargamos tus primeras empresas y les mandamos a tus clientes la invitación al portal, juntos.</p>
             </div>
-            <h3 style="font-size: 18px; font-weight: 700; color: var(--color-primary); font-family: var(--font-heading);">Monitoreo de Monotributo</h3>
-            <p style="margin-top: 8px; font-size: 13.5px; color: var(--text-secondary); line-height: 1.6;">Vigilancia anti-exclusión. Control de la facturación de los últimos 12 meses de tus monotributistas contra el tope de su categoría, con alertas en pantalla cuando se acercan al límite.</p>
-          </div>
-
-          <!-- Module 5 -->
-          <div class="feature-card" style="padding: 24px; overflow: hidden;">
-            <div class="feature-image-wrapper" style="width: 100%; height: 180px; border-radius: var(--radius-md); overflow: hidden; margin-bottom: 20px; border: 1px solid rgba(15, 23, 42, 0.06); position: relative;">
-              <img src="/whatsapp_inbox_benefit.png" alt="WhatsApp Inbox (próximamente)" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; display: block;" loading="lazy" class="benefit-img">
-              <div class="feature-icon" style="position: absolute; bottom: 12px; left: 12px; margin-bottom: 0; background: #ffffff; box-shadow: var(--shadow-sm); width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; z-index: 10; border: 1px solid rgba(15, 23, 42, 0.08);">
-                <i data-lucide="message-square" style="width: 18px; height: 18px;"></i>
-              </div>
+            <div class="feature-card lp-step-card" style="padding: 28px;">
+              <span class="lp-step-num">3</span>
+              <h3 style="font-size: 18px; font-weight: 700; color: var(--color-primary); font-family: var(--font-heading); margin-top: 14px;">Empezás a trabajar</h3>
+              <p style="margin-top: 8px; font-size: 13.5px; color: var(--text-secondary); line-height: 1.6;">Tus clientes te envían sus comprobantes y vos liquidás y facturás desde el primer mes.</p>
             </div>
-            <h3 style="font-size: 18px; font-weight: 700; color: var(--color-primary); font-family: var(--font-heading);">WhatsApp Inbox (próximamente)</h3>
-            <p style="margin-top: 8px; font-size: 13.5px; color: var(--text-secondary); line-height: 1.6;">Próximamente. La recepción de comprobantes por WhatsApp todavía está en desarrollo. Mientras tanto, tus clientes los cargan desde el Portal de Clientes.</p>
           </div>
-
-          <!-- Module 6 -->
-          <div class="feature-card" style="padding: 24px; overflow: hidden;">
-            <div class="feature-image-wrapper" style="width: 100%; height: 180px; border-radius: var(--radius-md); overflow: hidden; margin-bottom: 20px; border: 1px solid rgba(15, 23, 42, 0.06); position: relative;">
-              <img src="/portal_ocr_benefit.png" alt="Portal de Clientes" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; display: block;" loading="lazy" class="benefit-img">
-              <div class="feature-icon" style="position: absolute; bottom: 12px; left: 12px; margin-bottom: 0; background: #ffffff; box-shadow: var(--shadow-sm); width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; z-index: 10; border: 1px solid rgba(15, 23, 42, 0.08);">
-                <i data-lucide="smartphone" style="width: 18px; height: 18px;"></i>
-              </div>
-            </div>
-            <h3 style="font-size: 18px; font-weight: 700; color: var(--color-primary); font-family: var(--font-heading);">Portal de Clientes</h3>
-            <p style="margin-top: 8px; font-size: 13.5px; color: var(--text-secondary); line-height: 1.6;">Recolección de comprobantes. Cada cliente entra con su propia cuenta desde el móvil y carga sus tickets y facturas; vos los revisás y aprobás. La lectura automática con IA llegará próximamente.</p>
-          </div>
-          
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- Institutional Prestige Section -->
+      <!-- Institutional Prestige Section -->
     <section id="prestige" class="prestige-section" style="padding: 100px 0; border-top: 1px solid rgba(226, 232, 240, 0.4); background: transparent; position: relative; overflow: hidden;">
       <div class="container">
         <div class="prestige-grid-layout" style="display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center;">
@@ -255,8 +241,8 @@ export function renderLanding() {
     <section id="pricing" class="pricing-section">
       <div class="container">
         <div class="section-header">
-          <h2>Planes adaptados a la escala de tu estudio</h2>
-          <p>Elegí la licencia indicada según la cantidad de clientes (CUITs) que administres.</p>
+          <h2>Un plan para cada tamaño de estudio</h2>
+          <p>Según la cantidad de clientes (CUITs) que administrás. En la demo te ayudamos a elegir.</p>
         </div>
         <div class="pricing-grid">
           
@@ -288,7 +274,7 @@ export function renderLanding() {
                 <li><i data-lucide="check"></i> Backups diarios automáticos</li>
               </ul>
             </div>
-            <a href="#contact" class="btn btn-outline w-full">Elegir Plan Inicial</a>
+            <a href="#contact" data-plan="Inicial" class="btn btn-outline w-full">Quiero el plan Inicial</a>
           </div>
 
           <!-- Plan Profesional (Featured) -->
@@ -320,7 +306,7 @@ export function renderLanding() {
                 <li><i data-lucide="check"></i> Colaboradores del estudio ilimitados</li>
               </ul>
             </div>
-            <a href="#contact" class="btn btn-primary w-full">Elegir Plan Profesional</a>
+            <a href="#contact" data-plan="Profesional" class="btn btn-primary w-full">Quiero el plan Profesional</a>
           </div>
 
           <!-- Plan Corporativo -->
@@ -351,7 +337,7 @@ export function renderLanding() {
                 <li><i data-lucide="check"></i> Integraciones personalizadas a medida</li>
               </ul>
             </div>
-            <a href="#contact" class="btn btn-outline w-full">Elegir Plan Corporativo</a>
+            <a href="#contact" data-plan="Corporativo" class="btn btn-outline w-full">Quiero el plan Corporativo</a>
           </div>
 
         </div>
@@ -364,7 +350,7 @@ export function renderLanding() {
               Simulador de Ahorro Operativo y ROI
             </h4>
             <p style="font-size: 12.5px; color: var(--text-secondary); margin-top:6px; margin-bottom:0; line-height: 1.5;">
-              Descubrí cuántas horas mensuales de trabajo manual y administrativo podés recuperar en tu estudio automatizando las tareas repetitivas.
+              Estimá cuántas horas de carga manual podrías recuperar (cálculo ilustrativo: supone un 85% menos de carga).
             </p>
           </div>
           
@@ -419,7 +405,152 @@ export function renderLanding() {
       </div>
     </section>
 
-    <!-- Partners / Affiliate Program Section -->
+    <!-- Preguntas frecuentes -->
+      <section id="preguntas" class="showcase-section" style="padding: 100px 0; border-top: 1px solid rgba(226, 232, 240, 0.4); background: rgba(248, 250, 252, 0.5); position: relative;">
+        <div class="container">
+          <div class="section-header">
+            <h2>Preguntas frecuentes</h2>
+            <p>Lo que nos preguntan todos los estudios antes de empezar.</p>
+          </div>
+          <div class="lp-faq">
+            <details class="lp-faq-item">
+              <summary>¿Mis datos y los de mis clientes están seguros?<i data-lucide="plus"></i></summary>
+              <p>Cada estudio accede únicamente a su información: el aislamiento se aplica en la base de datos y las conexiones viajan cifradas. La clave del certificado de ARCA se guarda en una bóveda cifrada y nunca se descarga. Además, podés exportar o eliminar tus datos cuando quieras.</p>
+            </details>
+            <details class="lp-faq-item">
+              <summary>¿Tengo que dejar el sistema que uso hoy?<i data-lucide="plus"></i></summary>
+              <p>No. Podés empezar con algunos clientes e importar los comprobantes desde ARCA. Convive con las herramientas que ya usás.</p>
+            </details>
+            <details class="lp-faq-item">
+              <summary>¿Mis clientes tienen que instalar algo?<i data-lucide="plus"></i></summary>
+              <p>No. Entran desde el navegador del celular o la computadora con el link de invitación que les mandás, y cada uno ve solo su empresa.</p>
+            </details>
+            <details class="lp-faq-item">
+              <summary>¿Puedo emitir facturas electrónicas?<i data-lucide="plus"></i></summary>
+              <p>Sí, con CAE de ARCA y usando el certificado de tu estudio. El sistema te guía paso a paso para obtenerlo y conectarlo.</p>
+            </details>
+            <details class="lp-faq-item">
+              <summary>¿Cuánto tarda la puesta en marcha?<i data-lucide="plus"></i></summary>
+              <p>Depende de la cantidad de clientes, pero la configuración inicial la hacemos juntos y podés empezar con tus primeras empresas enseguida.</p>
+            </details>
+            <details class="lp-faq-item">
+              <summary>¿Qué pasa si quiero dejar de usarlo?<i data-lucide="plus"></i></summary>
+              <p>Descargás todos tus datos en un archivo y eliminás la cuenta desde la configuración, cuando quieras.</p>
+            </details>
+          </div>
+        </div>
+      </section>
+
+      <!-- Contact & Demo -->
+      <section id="contact" class="contact-section">
+        <div class="container">
+          <div class="contact-card">
+            <div class="contact-info">
+              <h2>Mirá cómo funciona <span class="gradient-text">con tus propios clientes</span></h2>
+              <p>En 20 minutos te mostramos el circuito completo: del ticket que manda tu cliente al Libro IVA y la factura con CAE. Sin compromiso.</p>
+              <div class="contact-details">
+                <div class="cd-item">
+                  <div class="cd-icon" style="color: #25d366; background: rgba(37, 211, 102, 0.05); border: 1px solid rgba(37, 211, 102, 0.15); display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 8px;"><i data-lucide="message-circle"></i></div>
+                  <div class="cd-text">
+                    <h4>WhatsApp directo</h4>
+                    <a href="https://wa.me/5492996731487?text=Hola!%20Quiero%20ver%20una%20demo%20de%20Soluciones%20Contables" target="_blank" rel="noopener" style="font-size: 15px; font-weight: 800; color: #25d366; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; margin-top: 2px;">
+                      +54 299 673-1487 <span style="font-size: 10px; font-weight: 700; background: rgba(37,211,102,0.08); padding: 2px 8px; border-radius: 12px;">Respondemos en el día</span>
+                    </a>
+                  </div>
+                </div>
+                <div class="cd-item">
+                  <div class="cd-icon"><i data-lucide="mail"></i></div>
+                  <div class="cd-text">
+                    <h4>Email</h4>
+                    <p>administracion@vmp-edtech.com</p>
+                  </div>
+                </div>
+                <div class="cd-item">
+                  <div class="cd-icon"><i data-lucide="map-pin"></i></div>
+                  <div class="cd-text">
+                    <h4>Desarrollado y respaldado por</h4>
+                    <p>VMP S.A.S. — Neuquén, Argentina</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="contact-form">
+              <h3 class="form-title">Pedí tu demo gratuita</h3>
+              <p class="lp-form-sub">Completá estos datos y se abre WhatsApp con tu mensaje listo para enviar.</p>
+              <form id="demo-form">
+                <div class="form-group">
+                  <label class="form-label" for="demo-nombre">Nombre y apellido</label>
+                  <input type="text" class="form-input" id="demo-nombre" placeholder="Juan Pérez" required autocomplete="name">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="demo-estudio">Estudio contable</label>
+                  <input type="text" class="form-input" id="demo-estudio" placeholder="Estudio Pérez & Asociados" required autocomplete="organization">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="demo-clientes">¿Cuántos clientes administrás?</label>
+                  <select class="form-input" id="demo-clientes" required>
+                    <option value="">Elegí una opción</option>
+                    <option>Hasta 15</option>
+                    <option>Entre 16 y 50</option>
+                    <option>Entre 51 y 150</option>
+                    <option>Más de 150</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="demo-plan">Plan de interés</label>
+                  <select class="form-input" id="demo-plan">
+                    <option value="">Todavía no sé</option>
+                    <option>Inicial</option>
+                    <option>Profesional</option>
+                    <option>Corporativo</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="demo-mensaje">¿Algo que quieras ver en la demo? (opcional)</label>
+                  <textarea class="form-input" id="demo-mensaje" rows="2" maxlength="400" placeholder="Ej: cómo cargan los comprobantes mis clientes"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary w-full" style="background: #25d366; border-color: #25d366;">
+                  <i data-lucide="message-circle"></i> Solicitar demo por WhatsApp
+                </button>
+              </form>
+              <details class="lp-self-signup">
+                <summary>¿Preferís probarlo por tu cuenta? Registrá tu estudio</summary>
+                <form id="lead-form">
+              <div class="form-group" style="margin-bottom: 12px;">
+                <label class="form-label" style="font-size:11.5px;">Nombre y Apellido / Razón Social</label>
+                <input type="text" class="form-input" id="lead-name" placeholder="Juan Perez" required style="padding: 10px 12px; font-size: 13px;">
+              </div>
+              <div class="form-group" style="margin-bottom: 12px;">
+                <label class="form-label" style="font-size:11.5px;">Nombre del Estudio Contable</label>
+                <input type="text" class="form-input" id="lead-studio" placeholder="Estudio Perez & Asociados" required style="padding: 10px 12px; font-size: 13px;">
+              </div>
+              <div class="form-group" style="margin-bottom: 12px;">
+                <label class="form-label" style="font-size:11.5px;">CUIT (formato XX-XXXXXXXX-X)</label>
+                <input type="text" class="form-input" id="lead-cuit" placeholder="20-35849201-4" required style="padding: 10px 12px; font-size: 13px;">
+              </div>
+              <div class="form-group" style="margin-bottom: 12px;">
+                <label class="form-label" style="font-size:11.5px;">Email de Contacto</label>
+                <input type="email" class="form-input" id="lead-email" placeholder="juan@estudioperez.com.ar" required style="padding: 10px 12px; font-size: 13px;">
+              </div>
+              <div class="form-group" style="margin-bottom: 18px;">
+                <label class="form-label" style="font-size:11.5px;">Contraseña de Acceso</label>
+                <input type="password" class="form-input" id="lead-password" placeholder="Mínimo 8 caracteres" required minlength="8" style="padding: 10px 12px; font-size: 13px;">
+              </div>
+<label style="display: flex; gap: 8px; align-items: flex-start; font-size: 11.5px; line-height: 1.4; color: var(--text-secondary); margin-bottom: 14px; cursor: pointer;">
+                <input type="checkbox" id="lead-acepta" required style="margin-top: 2px; flex-shrink: 0;">
+                <span>Leí y acepto los <a href="#/terminos" target="_blank" rel="noopener" style="color: var(--color-accent); font-weight: 600;">Términos y Condiciones</a> y la <a href="#/privacidad" target="_blank" rel="noopener" style="color: var(--color-accent); font-weight: 600;">Política de Privacidad</a>.</span>
+              </label>
+              <button type="submit" class="btn btn-primary w-full" style="padding: 12px; font-weight: 700;">
+                Registrar e Ingresar al Studio
+              </button>
+            </form>
+              </details>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Partners / Affiliate Program Section -->
     <section id="partners" class="partners-section" style="padding: 80px 0; border-top: 1px solid rgba(226, 232, 240, 0.4); background: transparent;">
       <div class="container">
         <div class="partners-card" style="background: linear-gradient(135deg, rgba(22, 163, 74, 0.03) 0%, rgba(22, 163, 74, 0.03) 100%); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 48px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 32px; align-items: stretch;">
@@ -499,83 +630,14 @@ export function renderLanding() {
       </div>
     </section>
 
-    <!-- Contact & Lead Form -->
-    <section id="contact" class="contact-section">
-      <div class="container">
-        <div class="contact-card">
-          <div class="contact-info">
-            <h2>Hablemos sobre <span class="gradient-text">tu estudio contable</span></h2>
-            <p>Agendá una llamada con nuestro equipo técnico para configurar tus primeras empresas o consultanos tus inquietudes.</p>
-            <div class="contact-details">
-              <div class="cd-item">
-                <div class="cd-icon" style="color: #25d366; background: rgba(37, 211, 102, 0.05); border: 1px solid rgba(37, 211, 102, 0.15); display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 8px;"><i data-lucide="phone"></i></div>
-                <div class="cd-text">
-                  <h4>Solicitar Licencia (WhatsApp)</h4>
-                  <a href="https://wa.me/5492996731487?text=Hola!%20Me%20interesa%20solicitar%20la%20licencia%20de%20SolucionesContables" target="_blank" style="font-size: 15px; font-weight: 800; color: #25d366; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; margin-top: 2px;">
-                    +54 299 673-1487 <span style="font-size: 10px; font-weight: 700; background: rgba(37,211,102,0.08); padding: 2px 8px; border-radius: 12px;">Chat Directo</span>
-                  </a>
-                </div>
-              </div>
-              <div class="cd-item">
-                <div class="cd-icon"><i data-lucide="mail"></i></div>
-                <div class="cd-text">
-                  <h4>Email de Consultas</h4>
-                  <p>administracion@vmp-edtech.com</p>
-                </div>
-              </div>
-              <div class="cd-item">
-                <div class="cd-icon"><i data-lucide="map-pin"></i></div>
-                <div class="cd-text">
-                  <h4>Desarrollado y Respaldado por</h4>
-                  <p>VMP S.A.S. — Argentina</p>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="contact-form">
-            <h3 class="form-title">Registrar Estudio (Prueba Gratis)</h3>
-            <form id="lead-form">
-              <div class="form-group" style="margin-bottom: 12px;">
-                <label class="form-label" style="font-size:11.5px;">Nombre y Apellido / Razón Social</label>
-                <input type="text" class="form-input" id="lead-name" placeholder="Juan Perez" required style="padding: 10px 12px; font-size: 13px;">
-              </div>
-              <div class="form-group" style="margin-bottom: 12px;">
-                <label class="form-label" style="font-size:11.5px;">Nombre del Estudio Contable</label>
-                <input type="text" class="form-input" id="lead-studio" placeholder="Estudio Perez & Asociados" required style="padding: 10px 12px; font-size: 13px;">
-              </div>
-              <div class="form-group" style="margin-bottom: 12px;">
-                <label class="form-label" style="font-size:11.5px;">CUIT (formato XX-XXXXXXXX-X)</label>
-                <input type="text" class="form-input" id="lead-cuit" placeholder="20-35849201-4" required style="padding: 10px 12px; font-size: 13px;">
-              </div>
-              <div class="form-group" style="margin-bottom: 12px;">
-                <label class="form-label" style="font-size:11.5px;">Email de Contacto</label>
-                <input type="email" class="form-input" id="lead-email" placeholder="juan@estudioperez.com.ar" required style="padding: 10px 12px; font-size: 13px;">
-              </div>
-              <div class="form-group" style="margin-bottom: 18px;">
-                <label class="form-label" style="font-size:11.5px;">Contraseña de Acceso</label>
-                <input type="password" class="form-input" id="lead-password" placeholder="Mínimo 8 caracteres" required minlength="8" style="padding: 10px 12px; font-size: 13px;">
-              </div>
-<label style="display: flex; gap: 8px; align-items: flex-start; font-size: 11.5px; line-height: 1.4; color: var(--text-secondary); margin-bottom: 14px; cursor: pointer;">
-                <input type="checkbox" id="lead-acepta" required style="margin-top: 2px; flex-shrink: 0;">
-                <span>Leí y acepto los <a href="#/terminos" target="_blank" rel="noopener" style="color: var(--color-accent); font-weight: 600;">Términos y Condiciones</a> y la <a href="#/privacidad" target="_blank" rel="noopener" style="color: var(--color-accent); font-weight: 600;">Política de Privacidad</a>.</span>
-              </label>
-              <button type="submit" class="btn btn-primary w-full" style="padding: 12px; font-weight: 700;">
-                Registrar e Ingresar al Studio
-              </button>
-            </form>
-          </div>
-        </div>
-      </div>
-    </section>
-
     <!-- Footer -->
     <footer class="lp-footer">
       <div class="container" style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
         <div style="display: flex; gap: 32px; flex-wrap: wrap; justify-content: center; align-items: center;">
-          <a href="#dashboard-showcase" class="lp-footer-link">Beneficios</a>
-          <a href="#pricing" class="lp-footer-link">Inversión</a>
+          <a href="#problemas" class="lp-footer-link">Cómo funciona</a>
+          <a href="#pricing" class="lp-footer-link">Planes</a>
           <a href="#partners" class="lp-footer-link">Partners</a>
-          <a href="#contact" class="lp-footer-link">Contacto</a>
+          <a href="#preguntas" class="lp-footer-link">Preguntas</a>
           <a href="#contact" class="lp-footer-link" style="color: var(--color-accent); font-weight: 700;">Solicitar Demo →</a>
           <a href="#/terminos" class="lp-footer-link">Términos</a>
           <a href="#/privacidad" class="lp-footer-link">Privacidad</a>
@@ -591,7 +653,12 @@ export function renderLanding() {
       </div>
     </footer>
 
-    <!-- Login Modal Overlay -->
+    <!-- Boton flotante de WhatsApp -->
+      <a href="https://wa.me/5492996731487?text=Hola!%20Quiero%20ver%20una%20demo%20de%20Soluciones%20Contables" target="_blank" rel="noopener" class="lp-wa-float" aria-label="Escribinos por WhatsApp">
+        <i data-lucide="message-circle"></i><span>¿Hablamos?</span>
+      </a>
+
+      <!-- Login Modal Overlay -->
     <div id="login-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 2000; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease;">
       <div style="background: #ffffff; border: 1px solid rgba(15, 23, 42, 0.08); border-radius: 16px; padding: 36px; max-width: 400px; width: 100%; box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25); position: relative; transform: scale(0.95); transition: transform 0.3s ease;" id="login-modal-card">
         <!-- Close Button -->
@@ -669,6 +736,7 @@ export function renderLanding() {
 
 import { validarCUIT } from '../utils.js';
 import { initLandingMotion } from './landing-motion.js';
+import { initDemoForm } from './landing-demo.js';
 import { LEGAL } from '../legal-config.js';
 import { supabase, isSupabaseConfigured } from '../db/supabase.js';
 import { getCompanies, getClienteFinalAsync } from '../db/mockdb.js';
@@ -1278,4 +1346,5 @@ export function initLanding(mainApp) {
   }
 
   initLandingMotion();
+  initDemoForm();
 }

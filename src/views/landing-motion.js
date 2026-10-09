@@ -119,6 +119,7 @@ export function initLandingMotion() {
     if (!m) return;
     const fin = Number(m[1]);
     const suf = m[2];
+    if (!/^(%|x)?$/i.test(suf)) return;
     const ini = fin === 0 ? 100 : 0;
     const t0 = performance.now();
     const dur = 1600;
