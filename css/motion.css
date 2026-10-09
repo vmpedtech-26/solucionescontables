@@ -17,13 +17,9 @@
 .lp-header { transition: box-shadow 0.35s ease, background 0.35s ease, padding 0.35s ease; }
 .lp-header.is-scrolled { box-shadow: 0 10px 30px -18px rgba(15, 23, 42, 0.35); }
 
-/* Fondo: fundido entre fotos y zoom lento (Ken Burns) */
+/* Fondo: fundido entre fotos (sin zoom, para mantener la nitidez) */
 .lp-bg-slide { transition: opacity 1.6s ease-in-out; }
-.lp-bg-slide.active { animation: lpKenBurns 18s ease-out both; }
-@keyframes lpKenBurns {
-  from { transform: scale(1.0) translate3d(0, 0, 0); }
-  to { transform: scale(1.08) translate3d(-1.2%, -1%, 0); }
-}
+
 
 /* Titulo del hero: palabras que suben */
 .lp-w { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: 0.08em; margin-bottom: -0.08em; }
@@ -120,12 +116,18 @@
 .stat-val { font-variant-numeric: tabular-nums; }
 
 @media (prefers-reduced-motion: reduce) {
-  .lp-bg-slide.active, .lp-marquee-track,
+  .lp-marquee-track,
   .lp-motion .mockup-floating-card, .lp-motion .price-card.featured::before { animation: none !important; }
   .lp-w > span { transform: none !important; }
 }
 
-/* Con fotos de atardecer y noche en el fondo, las secciones necesitan mas
-   cuerpo para que el texto se lea siempre (la foto se sigue intuyendo). */
-.lp-wrapper section:not(.hero-section) { background-color: rgba(248, 250, 252, 0.86) !important; }
-.lp-wrapper .section-header p { color: var(--text-secondary); }
+/* Legibilidad sobre cualquier foto sin velar la imagen: el fondo claro va solo
+   detras del texto de los encabezados de seccion. */
+.lp-wrapper .section-header h2 { text-shadow: 0 1px 14px rgba(255, 255, 255, 0.95), 0 0 2px rgba(255, 255, 255, 0.8); }
+.lp-wrapper .section-header p {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.88);
+  padding: 8px 16px;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px -12px rgba(15, 23, 42, 0.35);
+}

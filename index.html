@@ -384,66 +384,7 @@
 
           </div>
 
-          <!-- Interactive ROI Calculator (Replaces BNA Converter) -->
-          <div style="margin-top: 50px; background: #ffffff; border: 1px solid rgba(15, 23, 42, 0.08); border-radius: var(--radius-lg); padding: 32px; max-width: 760px; margin-inline: auto; text-align: left; box-shadow: var(--shadow-md);">
-            <div style="border-bottom: 1px dashed var(--border-color); padding-bottom:18px; margin-bottom:20px;">
-              <h4 style="font-size: 17px; font-weight: 800; color: var(--color-primary); display:flex; align-items:center; gap:8px; margin:0; font-family: var(--font-heading);">
-                <i data-lucide="trending-up" style="color: var(--color-accent); width: 20px; height: 20px;"></i>
-                Simulador de Ahorro Operativo y ROI
-              </h4>
-              <p style="font-size: 12.5px; color: var(--text-secondary); margin-top:6px; margin-bottom:0; line-height: 1.5;">
-                Estimá cuántas horas de carga manual podrías recuperar (cálculo ilustrativo: supone un 85% menos de carga).
-              </p>
-            </div>
-            
-            <div class="roi-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:32px; align-items:center;">
-              <!-- Left inputs -->
-              <div style="display:flex; flex-direction:column; gap:20px;">
-                <div>
-                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                    <span style="font-size: 13px; color: var(--text-secondary); font-weight: 700;">Empresas Clientes (CUITs):</span>
-                    <span id="roi-cuit-label" style="font-family: var(--font-heading); font-size: 14.5px; font-weight: 800; color: var(--color-accent); background: rgba(22,163,74,0.06); padding: 2px 10px; border-radius: 12px; border: 1px solid rgba(22,163,74,0.15);">30</span>
-                  </div>
-                  <input type="range" id="roi-cuit-slider" min="5" max="100" value="30" aria-label="Cantidad de empresas clientes" style="width: 100%; accent-color: var(--color-accent); cursor: pointer; height: 6px; border-radius: 3px; background: var(--border-color); -webkit-appearance: none; outline: none;">
-                </div>
-                
-                <div>
-                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                    <span style="font-size: 13px; color: var(--text-secondary); font-weight: 700;">Horas de carga manual al mes por CUIT:</span>
-                    <span id="roi-hours-label" style="font-family: var(--font-heading); font-size: 14.5px; font-weight: 800; color: var(--color-accent); background: rgba(22,163,74,0.06); padding: 2px 10px; border-radius: 12px; border: 1px solid rgba(22,163,74,0.15);">8 hs</span>
-                  </div>
-                  <input type="range" id="roi-hours-slider" min="2" max="24" value="8" aria-label="Horas mensuales de carga manual por empresa" style="width: 100%; accent-color: var(--color-accent); cursor: pointer; height: 6px; border-radius: 3px; background: var(--border-color); -webkit-appearance: none; outline: none;">
-                </div>
-              </div>
-              
-              <!-- Right output stats -->
-              <div style="background:#ffffff; border:1px solid var(--border-color); border-radius:var(--radius-md); padding:24px; box-shadow: var(--shadow-sm); display:flex; flex-direction:column; gap:16px;">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                  <span style="font-size:12.5px; color:var(--text-secondary); font-weight:600;">Carga Manual sin el sistema:</span>
-                  <span id="roi-total-manual" style="font-family: var(--font-mono); font-size:14px; font-weight:700; color:#ef4444;">240 hs / mes</span>
-                </div>
-                
-                <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 1px dashed var(--border-color); padding-bottom:12px;">
-                  <span style="font-size:12.5px; color:var(--text-secondary); font-weight:600;">Tiempo con Soluciones Contables:</span>
-                  <span id="roi-total-virtual" style="font-family: var(--font-mono); font-size:14px; font-weight:700; color:var(--color-accent-light);">36 hs / mes</span>
-                </div>
-                
-                <div style="text-align:center; padding-top:4px;">
-                  <span style="font-size:10.5px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px; display:block;">TIEMPO LIBERADO MENSUAL</span>
-                  <div style="font-family: var(--font-heading); font-size: 30px; font-weight: 850; color:var(--color-accent-light); margin-top:4px; display:flex; align-items:center; justify-content:center; gap:8px;" id="roi-saved-hours">
-                    204 horas
-                    <span style="font-size: 11px; font-weight: 800; color: var(--color-accent-light); background: rgba(34,197,94,0.08); padding: 3px 8px; border-radius: 12px; border: 1px solid rgba(34,197,94,0.15); margin-left: 8px;">
-                      ¡85% de ahorro!
-                    </span>
-                  </div>
-                  <span style="font-size:11px; color:var(--text-secondary); display:block; margin-top:6px; line-height: 1.4;">
-                    Equivale a recuperar <strong>25 jornadas laborales completas</strong> al mes para enfocar a tu equipo en consultoría estratégica y captación de clientes.
-                  </span>
-                </div>
-              </div>
-            </div>
           </div>
-        </div>
       </section>
 
       <!-- Preguntas frecuentes -->
