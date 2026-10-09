@@ -9,6 +9,7 @@ import { renderTerminos, renderPrivacidad } from './views/legal.js';
 // Import Views
 import { renderLanding, initLanding } from './views/landing.js';
 import { animarVista } from './app-motion.js';
+import { renderRecuperar, initRecuperar } from './views/recuperar.js';
 import { renderDashboardLayout, initDashboardLayout } from './views/layout.js';
 import { renderDashboardHome, initDashboardHome } from './views/dashboard_home.js';
 import { renderEmpresas, initEmpresas } from './views/empresas.js';
@@ -35,6 +36,18 @@ class Application {
 
   async init() {
     console.log("Initializing VMP Studio Contable App...");
+
+    // 0. Link de recuperacion de contrasena: Supabase vuelve con
+    // #access_token=...&type=recovery (o #error_code=... si vencio). Se captura
+    // antes de rutear, porque el router reescribiria ese hash.
+    const frag = window.location.hash || '';
+    if (/[#&]type=recovery\b/.test(frag) || /[#&]error_code=/.test(frag)) {
+      const p = new URLSearchParams(frag.replace(/^#/, ''));
+      this.recovery = p.get('error_code')
+        ? { error: p.get('error_description') || p.get('error_code') }
+        : { access_token: p.get('access_token'), refresh_token: p.get('refresh_token') };
+      history.replaceState(null, '', window.location.pathname + window.location.search + '#/recuperar');
+    }
     
     // 1. Initialize Mock Database (localStorage)
     initMockDB();
@@ -45,6 +58,10 @@ class Application {
       supabase.auth.onAuthStateChange((event) => {
         if (event === 'SIGNED_OUT' && window.location.hash.startsWith('#/studio')) {
           window.location.hash = '#/';
+        }
+        // Si la libreria proceso el link de recuperacion antes que nosotros
+        if (event === 'PASSWORD_RECOVERY' && window.location.hash !== '#/recuperar') {
+          window.location.hash = '#/recuperar';
         }
       });
     }
@@ -104,6 +121,14 @@ class Application {
 
       // Update breadcrumb or titles if applicable
       document.title = "Soluciones Contables — El integrante virtual que elimina la carga manual de tu estudio.";
+    }
+    // Elegir contrasena nueva (link de recuperacion por email)
+    else if (hash === '#/recuperar') {
+      rootEl.innerHTML = renderRecuperar();
+      document.title = 'Nueva contraseña — Soluciones Contables';
+      const datos = this.recovery || null;
+      this.recovery = null;
+      await initRecuperar(this, datos);
     }
     // Paginas legales publicas
     else if (hash === '#/terminos' || hash === '#/privacidad') {

@@ -616,8 +616,8 @@ export function renderLanding() {
         <!-- Form -->
         <form id="login-form">
           <div style="margin-bottom: 18px;">
-            <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Usuario o CUIT</label>
-            <input type="text" id="login-username" placeholder="ej: admin@solucionescontables.site" required style="width: 100%; border: 1px solid rgba(15, 23, 42, 0.15); border-radius: 8px; padding: 12px 16px; font-size: 14px; font-family: var(--font-primary); color: var(--text-primary); outline: none; transition: border 0.2s;" onfocus="this.style.borderColor='var(--text-primary)'" onblur="this.style.borderColor='rgba(15, 23, 42, 0.15)'">
+            <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Email</label>
+            <input type="text" id="login-username" placeholder="tu@email.com" autocomplete="username" required style="width: 100%; border: 1px solid rgba(15, 23, 42, 0.15); border-radius: 8px; padding: 12px 16px; font-size: 14px; font-family: var(--font-primary); color: var(--text-primary); outline: none; transition: border 0.2s;" onfocus="this.style.borderColor='var(--text-primary)'" onblur="this.style.borderColor='rgba(15, 23, 42, 0.15)'">
           </div>
           
           <div style="margin-bottom: 24px;">
@@ -950,6 +950,9 @@ export function initLanding(mainApp) {
     }
     if (loginModal && loginModalCard) {
       loginModal.style.display = 'flex';
+      // Siempre abre en la vista de ingreso (no en la de recuperar contraseña)
+      const fForm = document.getElementById('forgot-form');
+      if (fForm) { fForm.style.display = 'none'; if (loginForm) loginForm.style.display = ''; }
       // Force reflow for animation transition
       loginModal.offsetHeight;
       loginModal.style.opacity = '1';
@@ -1290,6 +1293,60 @@ export function initLanding(mainApp) {
         ivaValueEl.textContent = `$ ${ivaBase.toLocaleString('es-AR')}`;
       }, 3200);
     }
+  }
+
+  // ¿Olvidaste tu contraseña? (se arma por JS para no duplicarlo en las dos copias del HTML)
+  if (isSupabaseConfigured && supabase && loginForm && loginPasswordInput && !document.getElementById('forgot-link')) {
+    const link = document.createElement('button');
+    link.type = 'button';
+    link.id = 'forgot-link';
+    link.textContent = '¿Olvidaste tu contraseña?';
+    link.style.cssText = 'background: none; border: none; padding: 0; margin-top: 8px; font-size: 12px; font-weight: 600; color: var(--color-accent); cursor: pointer; align-self: flex-end;';
+    const grupo = loginPasswordInput.parentElement;
+    grupo.style.display = 'flex';
+    grupo.style.flexDirection = 'column';
+    grupo.appendChild(link);
+
+    const panel = document.createElement('form');
+    panel.id = 'forgot-form';
+    panel.style.cssText = 'display: none; flex-direction: column; gap: 14px;';
+    panel.innerHTML = `
+      <p style="font-size: 13px; color: var(--text-secondary); margin: 0; line-height: 1.5;">Ingresá el email de tu cuenta y te mandamos un link para elegir una contraseña nueva.</p>
+      <input type="email" id="forgot-email" required autocomplete="email" placeholder="tu@email.com" style="width: 100%; padding: 11px 14px; border: 1px solid rgba(15, 23, 42, 0.15); border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+      <button type="submit" id="forgot-send" class="btn btn-primary w-full">Enviarme el link</button>
+      <button type="button" id="forgot-back" style="background: none; border: none; font-size: 12.5px; font-weight: 600; color: var(--text-secondary); cursor: pointer;">← Volver al ingreso</button>`;
+    loginForm.after(panel);
+
+    link.addEventListener('click', () => {
+      loginForm.style.display = 'none';
+      panel.style.display = 'flex';
+      const u = (loginUsernameInput?.value || '').trim();
+      const em = document.getElementById('forgot-email');
+      if (u.includes('@')) em.value = u;
+      em.focus();
+    });
+    panel.querySelector('#forgot-back').addEventListener('click', () => {
+      panel.style.display = 'none';
+      loginForm.style.display = '';
+    });
+    panel.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('forgot-email').value.trim();
+      const btn = document.getElementById('forgot-send');
+      btn.disabled = true;
+      btn.textContent = 'Enviando…';
+      const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin });
+      btn.disabled = false;
+      btn.textContent = 'Enviarme el link';
+      if (error && /rate|seconds|too many/i.test(error.message)) {
+        mainApp.showToast('Ya pediste un link hace muy poco. Esperá unos minutos y volvé a intentar.', 'warning');
+        return;
+      }
+      // Mismo mensaje exista o no la cuenta: no se revela que emails estan registrados.
+      mainApp.showToast('Si ese email tiene una cuenta, te llegó un link para elegir una contraseña nueva. Revisá también la carpeta de spam.', 'success');
+      panel.style.display = 'none';
+      loginForm.style.display = '';
+    });
   }
 
   initLandingMotion();
