@@ -6,7 +6,7 @@ import { getActiveCompanyAsync, getClienteFinalAsync, addTransactionAsync } from
 import { supabase, isSupabaseConfigured, getCachedRole } from '../db/supabase.js';
 import { fmt, fmtDate } from '../utils.js';
 import { sanitizeInput as esc } from '../utils.js';
-import { blockSimulated } from '../utils.js';
+import { blockSimulated, renderSinEmpresas } from '../utils.js';
 
 // Pre-loaded digital documents (tickets & invoices)
 const INITIAL_DIGITAL_TICKETS = [
@@ -107,7 +107,10 @@ const CUIT_PADRON_REGISTRY = {
 
 export async function renderPortalCliente() {
   const activeCompany = await resolveCompanyForPortal();
-  if (!activeCompany) {
+  if (activeCompany && !activeCompany.id && isSupabaseConfigured && (await getCachedRole()) === 'estudio') {
+    return renderSinEmpresas('el Portal del Cliente');
+  }
+  if (!activeCompany || !activeCompany.id) {
     return `
     <div class="view-header">
       <div>
@@ -720,7 +723,7 @@ export async function initPortalCliente(mainApp) {
   initDatosCard(mainApp);
 
   const activeCompany = await resolveCompanyForPortal();
-  if (!activeCompany) return;
+  if (!activeCompany || !activeCompany.id) return;
   const isMonotributo = activeCompany.condicion_iva.includes('Monotributo');
 
   // Inject styles for tab switching, split screen and invoice replica themes

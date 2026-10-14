@@ -4,9 +4,12 @@
 import { getActiveCompany, getTransactions } from '../db/mockdb.js';
 import { ventasComprobantes, ventasAlicuotas, comprasComprobantes, comprasAlicuotas } from '../domain/libroiva.js';
 import { sanitizeInput as esc, getActivePeriod, periodLabel } from '../utils.js';
+import { renderSinEmpresas } from '../utils.js';
+import { isSupabaseConfigured } from '../db/supabase.js';
 
 export function renderIVA() {
   const activeCompany = getActiveCompany();
+  if (isSupabaseConfigured && !activeCompany?.id) return renderSinEmpresas('el Libro IVA');
   const txs = getTransactions(activeCompany.id);
   const activePeriod = getActivePeriod();
 
@@ -283,6 +286,7 @@ export function renderIVA() {
 }
 
 export function initIVA(mainApp) {
+  if (isSupabaseConfigured && !getActiveCompany()?.id) { if (window.lucide) window.lucide.createIcons(); return; }
   if (window.lucide) window.lucide.createIcons();
 
   const activeCompany = getActiveCompany();

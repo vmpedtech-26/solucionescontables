@@ -3,6 +3,7 @@
    ------------------------------------------------------------- */
 import { getActiveCompany, getTransactions, getCompanies } from '../db/mockdb.js';
 import { sanitizeInput as esc, getActivePeriod, periodLabel, validarCUIT, getVencimientos } from '../utils.js';
+import { renderSinEmpresas } from '../utils.js';
 import { isSupabaseConfigured } from '../db/supabase.js';
 import { MONOTRIBUTO_CATEGORIAS_2026, ventasMoviles12Meses, letraCategoria } from '../domain/fiscal.js';
 
@@ -18,6 +19,7 @@ function fechaVencimiento(periodo, dia) {
 
 export function renderDashboardHome() {
   const activeCompany = getActiveCompany();
+  if (isSupabaseConfigured && !activeCompany?.id) return renderSinEmpresas('');
   const txs = getTransactions(activeCompany.id);
   const activePeriod = getActivePeriod();
   const companies = getCompanies();
@@ -564,6 +566,7 @@ export function renderDashboardHome() {
 }
 
 export function initDashboardHome(mainApp) {
+  if (isSupabaseConfigured && !getActiveCompany()?.id) { if (window.lucide) window.lucide.createIcons(); return; }
   // Inicializar Lucide Icons
   if (window.lucide) window.lucide.createIcons();
 

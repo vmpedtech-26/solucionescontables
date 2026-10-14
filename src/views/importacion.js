@@ -3,6 +3,8 @@
    ------------------------------------------------------------- */
 import { getActiveCompany, addTransaction, getTransactions } from '../db/mockdb.js';
 import { fmt } from '../utils.js';
+import { renderSinEmpresas } from '../utils.js';
+import { isSupabaseConfigured } from '../db/supabase.js';
 import { sanitizeInput as esc } from '../utils.js';
 import { blockSimulated } from '../utils.js';
 
@@ -25,6 +27,7 @@ const ARCA_MOCK_RECIBIDAS = [
 
 export function renderImportacion() {
   const activeCompany = getActiveCompany();
+  if (isSupabaseConfigured && !activeCompany?.id) return renderSinEmpresas('la importación de comprobantes');
 
   return `
   <div class="view-header">
@@ -428,6 +431,7 @@ export function renderImportacion() {
 }
 
 export function initImportacion(mainApp) {
+  if (isSupabaseConfigured && !getActiveCompany()?.id) { if (window.lucide) window.lucide.createIcons(); return; }
   if (window.lucide) window.lucide.createIcons();
 
   const activeCompany = getActiveCompany();

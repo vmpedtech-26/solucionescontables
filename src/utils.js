@@ -353,3 +353,36 @@ export function renderComingSoon(title, description) {
   </div>
   `;
 }
+
+/**
+ * Bienvenida para un estudio con cuenta real que todavia no cargo empresas.
+ * Reemplaza las vistas que necesitan una empresa activa.
+ */
+export function renderSinEmpresas(seccion = '') {
+  const paso = (n, titulo, texto, href, accion) => `
+    <a href="${href}" class="trial-action-btn" style="align-items:flex-start;">
+      <div class="ta-btn-icon" style="background: rgba(22, 163, 74, 0.08); color: var(--color-accent); font-weight: 800; font-family: var(--font-heading); font-size: 16px;">${n}</div>
+      <div class="ta-btn-content">
+        <h5>${titulo}</h5>
+        <p style="white-space: normal;">${texto}</p>
+        <span style="font-size: 11.5px; font-weight: 700; color: var(--color-accent);">${accion} →</span>
+      </div>
+    </a>`;
+  return `
+  <div class="view-header">
+    <div>
+      <h1 class="view-title">¡Bienvenido a Soluciones Contables!</h1>
+      <p class="view-subtitle">${seccion ? `Para usar ${seccion} primero cargá una empresa cliente.` : 'Dejemos tu estudio listo en tres pasos.'}</p>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom: 24px;">
+    <div class="card-body" style="padding: 24px;">
+      <div class="trial-actions-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+        ${paso(1, 'Cargá tu primera empresa', 'Con el CUIT podés completar los datos desde el padrón de ARCA.', '#/studio/empresas', 'Ir a Mis Clientes')}
+        ${paso(2, 'Invitá a tu cliente', 'Desde Mis Clientes generás el link para que suba sus comprobantes desde el celular.', '#/studio/empresas', 'Generar invitación')}
+        ${paso(3, 'Conectá ARCA', 'Generá el certificado del estudio para facturar con CAE y consultar el padrón.', '#/studio/configuracion', 'Ir a Configuración')}
+      </div>
+    </div>
+  </div>`;
+}
+
