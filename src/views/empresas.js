@@ -1,7 +1,7 @@
 /* -------------------------------------------------------------
    VMP Studio Contable - Empresas Clientes View Component
    ------------------------------------------------------------- */
-import { getCompaniesAsync, saveCompanyAsync } from '../db/mockdb.js';
+import { getCompaniesAsync, saveCompanyAsync, deleteCompanyAsync } from '../db/mockdb.js';
 import { supabase, isSupabaseConfigured } from '../db/supabase.js';
 import { sanitizeInput as esc, validarCUIT } from '../utils.js';
 import { arca } from '../arca.js';
@@ -23,7 +23,7 @@ export async function renderEmpresas() {
   <!-- Add Company Form (Collapsible/Hidden by default) -->
   <div class="card id-form-card" id="add-company-form-container" style="display: none; margin-bottom: 32px;">
     <div class="card-header">
-      <h3><i data-lucide="building"></i> Registrar Nueva Empresa Cliente</h3>
+      <h3 id="company-form-title"><i data-lucide="building"></i> Registrar Nueva Empresa Cliente</h3>
       <button class="btn-icon-sm" id="btn-cancel-add-company" title="Cancelar"><i data-lucide="x"></i></button>
     </div>
     <div class="card-body">
@@ -86,7 +86,7 @@ export async function renderEmpresas() {
         
         <div style="grid-column: span 2; display: flex; justify-content: flex-end; gap: 12px; margin-top: 10px;">
           <button type="button" class="btn btn-outline" id="btn-form-cancel">Cancelar</button>
-          <button type="submit" class="btn btn-primary">Registrar Empresa</button>
+          <button type="submit" class="btn btn-primary" id="company-form-submit">Registrar Empresa</button>
         </div>
       </form>
     </div>
@@ -105,7 +105,7 @@ export async function renderEmpresas() {
               <th>Actividad Principal</th>
               <th>Inicio Actividades</th>
               <th>Estado</th>
-              <th>Portal Cliente</th>
+              <th class="text-right">Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -134,9 +134,14 @@ export async function renderEmpresas() {
                   <span class="badge-status active">Activo</span>
                 </td>
                 <td>
-                  <button class="btn btn-outline btn-sm btn-invite-client" data-id="${esc(c.id)}" data-name="${esc(c.razon_social)}" style="font-size: 11px; padding: 4px 10px; white-space: nowrap;">
+                  <div style="display:flex; gap:6px; justify-content:flex-end; flex-wrap:wrap;">
+                    <button class="btn btn-outline btn-sm btn-edit-company" data-id="${esc(c.id)}" style="font-size: 11px; padding: 4px 10px;" title="Editar datos"><i data-lucide="pencil" style="width: 12px; height: 12px;"></i> Editar</button>
+                    ${isSupabaseConfigured ? `<button class="btn btn-outline btn-sm btn-clients-company" data-id="${esc(c.id)}" data-name="${esc(c.razon_social)}" style="font-size: 11px; padding: 4px 10px;" title="Clientes con acceso al portal"><i data-lucide="users" style="width: 12px; height: 12px;"></i> Portal</button>` : ''}
+<button class="btn btn-outline btn-sm btn-invite-client" data-id="${esc(c.id)}" data-name="${esc(c.razon_social)}" style="font-size: 11px; padding: 4px 10px; white-space: nowrap;">
                     <i data-lucide="user-plus" style="width: 12px; height: 12px;"></i> Invitar cliente
                   </button>
+                    <button class="btn btn-outline btn-sm btn-delete-company" data-id="${esc(c.id)}" data-name="${esc(c.razon_social)}" style="font-size: 11px; padding: 4px 10px; color:#ef4444; border-color: rgba(239,68,68,0.3);" title="Eliminar empresa"><i data-lucide="trash-2" style="width: 12px; height: 12px;"></i></button>
+                  </div>
                 </td>
               </tr>
             `).join('')}
@@ -169,7 +174,53 @@ export async function initEmpresas(mainApp) {
     container.style.display = 'none';
     btnShowAdd.style.display = 'flex';
     form.reset();
+    delete form.dataset.editId;
+    document.getElementById('company-form-title').innerHTML = '<i data-lucide="building"></i> Registrar Nueva Empresa Cliente';
+    document.getElementById('company-form-submit').textContent = 'Registrar Empresa';
+    if (window.lucide) window.lucide.createIcons();
   };
+
+  const companiesActuales = await getCompaniesAsync();
+
+  // Editar: reutiliza el formulario de alta con los datos cargados
+  document.querySelectorAll('.btn-edit-company').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const c = companiesActuales.find((x) => x.id === btn.dataset.id);
+      if (!c) return;
+      form.dataset.editId = c.id;
+      document.getElementById('co-name').value = c.razon_social || '';
+      document.getElementById('co-cuit').value = c.cuit || '';
+      document.getElementById('co-type').value = c.tipo || 'SRL';
+      document.getElementById('co-iva').value = c.condicion_iva || 'Responsable Inscripto';
+      document.getElementById('co-activity').value = c.actividad || '';
+      document.getElementById('co-start').value = c.inicio_actividades || '';
+      document.getElementById('co-color').value = c.color || '#0d9488';
+      const dom = document.getElementById('co-domicilio');
+      if (dom) dom.value = c.domicilio || '';
+      document.getElementById('company-form-title').innerHTML = '<i data-lucide="pencil"></i> Editar empresa';
+      document.getElementById('company-form-submit').textContent = 'Guardar cambios';
+      container.style.display = 'block';
+      btnShowAdd.style.display = 'none';
+      if (window.lucide) window.lucide.createIcons();
+      container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+
+  // Eliminar: borra la empresa y todos sus registros (confirmacion escrita)
+  document.querySelectorAll('.btn-delete-company').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const nombre = btn.dataset.name;
+      const r = window.prompt(`Vas a eliminar "${nombre}" y TODOS sus registros: comprobantes, libros, retenciones, sueldos y accesos de sus clientes al portal. No se puede deshacer.\n\nPara confirmar, escribí ELIMINAR:`);
+      if (r === null) return;
+      if (r.trim() !== 'ELIMINAR') { mainApp.showToast('Confirmación incorrecta: no se eliminó nada.', 'info'); return; }
+      try {
+        await deleteCompanyAsync(btn.dataset.id);
+        mainApp.showToast(`"${nombre}" fue eliminada.`, 'success');
+      } catch (err) {
+        mainApp.showToast(`No se pudo eliminar: ${err.message || err}`, 'error');
+      }
+    });
+  });
 
   btnCancelAdd?.addEventListener('click', hideForm);
   btnFormCancel?.addEventListener('click', hideForm);
@@ -210,7 +261,10 @@ export async function initEmpresas(mainApp) {
     const color = document.getElementById('co-color').value;
     const domicilio = document.getElementById('co-domicilio')?.value || '';
 
+    const editId = form.dataset.editId || null;
+    const previa = editId ? (companiesActuales.find((x) => x.id === editId) || {}) : {};
     const newCompany = {
+      ...previa,
       razon_social: name,
       cuit,
       tipo: type,
@@ -223,12 +277,12 @@ export async function initEmpresas(mainApp) {
 
     try {
       await saveCompanyAsync(newCompany);
-      mainApp.showToast(`¡Empresa "${name}" registrada con éxito!`, 'success');
+      mainApp.showToast(editId ? `Cambios guardados en "${name}".` : `¡Empresa "${name}" registrada con éxito!`, 'success');
       hideForm();
       // No hace falta un mainApp.router() explícito acá: saveCompanyAsync ya
       // dispara "vmp_db_updated", que main.js escucha para re-renderizar.
     } catch (err) {
-      mainApp.showToast(`Error al registrar la empresa: ${err.message || err}`, 'error');
+      mainApp.showToast(`Error al guardar la empresa: ${err.message || err}`, 'error');
     }
   });
 

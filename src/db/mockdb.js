@@ -397,6 +397,38 @@ export async function getCompaniesAsync() {
   }
 }
 
+/**
+ * Elimina una empresa del estudio. Con Supabase, la base borra en cascada todos
+ * sus registros; los archivos de Storage se borran aparte (no cascadean).
+ */
+export async function deleteCompanyAsync(companyId) {
+  if (!companyId) throw new Error('Empresa inválida.');
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { data: archivos } = await supabase.storage.from('comprobantes').list(companyId, { limit: 1000 });
+      const rutas = (archivos || []).map((f) => `${companyId}/${f.name}`);
+      for (let i = 0; i < rutas.length; i += 100) {
+        await supabase.storage.from('comprobantes').remove(rutas.slice(i, i + 100));
+      }
+    } catch (e) {
+      console.error('No se pudieron borrar los archivos de la empresa:', e);
+    }
+    const { error } = await supabase.from('empresas').delete().eq('id', companyId);
+    if (error) throw error;
+  }
+  const cos = (getCompanies() || []).filter((c) => c.id !== companyId);
+  localStorage.setItem('vmp_studio_companies', JSON.stringify(cos));
+  try {
+    const txs = JSON.parse(localStorage.getItem('vmp_studio_transactions')) || {};
+    delete txs[companyId];
+    localStorage.setItem('vmp_studio_transactions', JSON.stringify(txs));
+  } catch (e) { /* cache local opcional */ }
+  if (localStorage.getItem('vmp_studio_active_co') === companyId) {
+    localStorage.setItem('vmp_studio_active_co', cos[0]?.id || '');
+  }
+  window.dispatchEvent(new CustomEvent('vmp_db_updated', { detail: { companyId, type: 'company_deleted' } }));
+}
+
 export async function saveCompanyAsync(company) {
   if (!isSupabaseConfigured || !supabase) return saveCompany(company);
 
