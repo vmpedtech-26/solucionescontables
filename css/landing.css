@@ -1333,3 +1333,19 @@ h1, h2, h3, h4, h5, h6 {
   .lp-wa-float span { display: none; }
   .lp-wa-float { padding: 14px; right: 16px; bottom: 16px; }
 }
+
+/* -------------------------------------------------------------
+   Celular: sin scroll horizontal. Las grillas de una columna no se
+   estiran al ancho del contenido largo (emails, formularios).
+   ------------------------------------------------------------- */
+@media (max-width: 900px) {
+  .hero-grid, .contact-card, .features-grid, .pricing-grid, .partners-card, .roi-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  .hero-grid > *, .contact-card > *, .features-grid > *, .pricing-grid > *, .partners-card > * { min-width: 0; }
+  .cd-text p, .cd-text a, .lp-footer a, .lp-footer p { overflow-wrap: anywhere; }
+}
+@media (max-width: 480px) {
+  .contact-form { padding: 22px 18px !important; }
+  .contact-card { padding: 22px 14px !important; }
+}
