@@ -313,7 +313,7 @@ export async function renderSueldos() {
 }
 
 export async function initSueldos(mainApp) {
-  const isUnlocked = localStorage.getItem('vmp_premium_unlocked') === 'true';
+  const isUnlocked = isSupabaseConfigured || localStorage.getItem('vmp_premium_unlocked') === 'true';
   if (!isUnlocked) return;
 
   if (window.lucide) window.lucide.createIcons();

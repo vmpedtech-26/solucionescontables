@@ -10,7 +10,8 @@ export function renderDashboardLayout(childHTML, activeRoute, role = null) {
   const studioName = (isSupabaseConfigured && getCachedStudioName()) || 'Estudio Contable Comahue';
   const activeCompany = getActiveCompany();
   const companies = getCompanies();
-  const isAdminUnlocked = localStorage.getItem('vmp_premium_unlocked') === 'true';
+  // Con cuenta real todo el sistema esta habilitado; el candado es solo de la demo.
+  const isAdminUnlocked = isSupabaseConfigured || localStorage.getItem('vmp_premium_unlocked') === 'true';
 
   // Calcular estado inicial de sincronización
   const syncStatus = getSyncStatus();
@@ -177,7 +178,7 @@ export function renderDashboardLayout(childHTML, activeRoute, role = null) {
           <span class="user-name">${esc(isCliente ? activeCompany.razon_social : studioName)}</span>
           <span class="user-role" style="display: flex; align-items: center; gap: 4px;">
             ${isCliente ? 'Cliente' : 'Administrador'}
-            ${isAdminUnlocked ? `
+            ${isAdminUnlocked && !isSupabaseConfigured ? `
               <span id="vmp-admin-lock-btn" title="Re-bloquear funciones Premium (Volver a Modo Demo)" style="cursor: pointer; color: #f59e0b; display: inline-flex; align-items: center; margin-left: 4px;">
                 <i data-lucide="unlock" style="width: 12px; height: 12px;"></i>
               </span>

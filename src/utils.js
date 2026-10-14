@@ -178,7 +178,8 @@ export function downloadFile(filename, content, mimeType = 'text/plain') {
  */
 export function renderPremiumTeaser(childHTML, title, description) {
   // Si el administrador activó la licencia temporalmente para revisión
-  const isUnlocked = localStorage.getItem('vmp_premium_unlocked') === 'true';
+  // Con cuenta real el acceso lo da la sesion del estudio: nunca se bloquea.
+  const isUnlocked = isSupabaseConfigured || localStorage.getItem('vmp_premium_unlocked') === 'true';
   if (isUnlocked) {
     return childHTML;
   }

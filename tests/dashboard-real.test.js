@@ -14,7 +14,7 @@ vi.mock('../src/db/mockdb.js', () => ({
 }));
 
 const { renderDashboardHome } = await import('../src/views/dashboard_home.js');
-const { getActivePeriod, periodLabel, periodOptions } = await import('../src/utils.js');
+const { getActivePeriod, periodLabel, periodOptions, renderPremiumTeaser } = await import('../src/utils.js');
 
 describe('dashboard en modo real', () => {
   beforeEach(() => { localStorage.clear(); });
@@ -49,5 +49,10 @@ describe('dashboard en modo real', () => {
 
   it('marca las fechas de vencimiento como orientativas', () => {
     expect(renderDashboardHome()).toContain('orientativas');
+  });
+
+  it('con cuenta real los modulos nunca quedan bloqueados, aunque falte la marca local', () => {
+    localStorage.removeItem('vmp_premium_unlocked');
+    expect(renderPremiumTeaser('<p>contenido</p>', 'Retenciones', 'x')).toBe('<p>contenido</p>');
   });
 });
