@@ -55,13 +55,13 @@ export function renderDashboardLayout(childHTML, activeRoute, role = null) {
 
   return `
   <style>
-      .role-cliente .db-nav-label, .role-cliente .db-nav-item:not([data-route="portal"]):not([data-route="facturar"]), .role-cliente #company-selector-dropdown, .role-cliente #topbar-company-selector i[data-lucide="chevron-down"], .role-cliente .mobile-bottom-nav .mb-nav-item { display: none !important; }
+      .role-cliente .db-nav-label, .role-cliente .db-nav-item:not([data-route="portal"]):not([data-route="facturar"]), .role-cliente #company-selector-dropdown, .role-cliente #topbar-company-selector i[data-lucide="chevron-down"] { display: none !important; }
       .role-cliente #topbar-company-selector { cursor: default; }
       ${isSupabaseConfigured ? '.db-wrapper [data-simulated] { opacity: .5; cursor: not-allowed; }' : ''}
     </style>
   <div class="db-wrapper ${isCliente ? 'role-cliente' : ''}" id="db-wrapper-root">
     <!-- Sidebar -->
-    <aside class="db-sidebar">
+    <aside class="db-sidebar" id="db-sidebar">
       <div class="db-sidebar-header">
         <a href="#/studio" class="db-sidebar-logo" style="display: flex; align-items: center; gap: 10px;">
           <img src="/SolucionesContables_Logo.png" alt="SolucionesContables Logo" style="height: 32px; width: 32px; border-radius: 6px; object-fit: cover; border: 1px solid rgba(15, 23, 42, 0.15);" />
@@ -263,29 +263,61 @@ export function renderDashboardLayout(childHTML, activeRoute, role = null) {
 
       <!-- Mobile Bottom Navigation Bar -->
       <nav class="mobile-bottom-nav">
+        ${isCliente ? `
+        <a href="#/studio/portal" class="mb-nav-item ${activeRoute === 'portal' ? 'active' : ''}">
+          <i data-lucide="send"></i>
+          <span>Comprobantes</span>
+        </a>
+        ${isSupabaseConfigured ? `<a href="#/studio/facturar" class="mb-nav-item ${activeRoute === 'facturar' ? 'active' : ''}">
+          <i data-lucide="receipt"></i>
+          <span>Facturar</span>
+        </a>` : ''}
+        ` : `
         <a href="#/studio" class="mb-nav-item ${activeRoute === 'studio' ? 'active' : ''}">
           <i data-lucide="layout-dashboard"></i>
           <span>Inicio</span>
         </a>
-        <a href="#/studio/ventas" class="mb-nav-item ${activeRoute === 'ventas' ? 'active' : ''}">
+        <a href="#/studio/empresas" class="mb-nav-item ${activeRoute === 'empresas' ? 'active' : ''}">
+          <i data-lucide="building-2"></i>
+          <span>Clientes</span>
+        </a>
+        ${isSupabaseConfigured ? `<a href="#/studio/bandeja" class="mb-nav-item ${activeRoute === 'bandeja' ? 'active' : ''}">
+          <i data-lucide="inbox"></i>
+          <span>Bandeja</span>
+        </a>` : `<a href="#/studio/ventas" class="mb-nav-item ${activeRoute === 'ventas' ? 'active' : ''}">
           <i data-lucide="file-text"></i>
           <span>Comprobantes</span>
-        </a>
-        <a href="#/studio/iva" class="mb-nav-item ${activeRoute === 'iva' ? 'active' : ''}">
-          <i data-lucide="book-open"></i>
-          <span>Libro IVA</span>
-        </a>
-        <a href="#/studio/ayuda" class="mb-nav-item ${activeRoute === 'ayuda' ? 'active' : ''}">
-          <i data-lucide="help-circle"></i>
-          <span>Ayuda</span>
-        </a>
+        </a>`}
+        `}
+        <button type="button" class="mb-nav-item" id="mobile-menu-open" aria-label="Abrir menú completo" aria-controls="db-sidebar" aria-expanded="false">
+          <i data-lucide="menu"></i>
+          <span>Menú</span>
+        </button>
       </nav>
+      <div class="db-mobile-overlay" id="db-mobile-overlay" hidden></div>
     </div>
   </div>
   `;
 }
 
 export function initDashboardLayout(mainApp) {
+  // Menu completo en celular: la barra lateral se abre como panel deslizable
+  const wrapperRoot = document.getElementById('db-wrapper-root');
+  const menuBtn = document.getElementById('mobile-menu-open');
+  const overlayMovil = document.getElementById('db-mobile-overlay');
+  const cerrarMenuMovil = () => {
+    wrapperRoot?.classList.remove('mobile-menu-open');
+    menuBtn?.setAttribute('aria-expanded', 'false');
+    if (overlayMovil) overlayMovil.hidden = true;
+  };
+  menuBtn?.addEventListener('click', () => {
+    const abierto = wrapperRoot?.classList.toggle('mobile-menu-open');
+    menuBtn.setAttribute('aria-expanded', abierto ? 'true' : 'false');
+    if (overlayMovil) overlayMovil.hidden = !abierto;
+  });
+  overlayMovil?.addEventListener('click', cerrarMenuMovil);
+  document.querySelectorAll('#db-sidebar a').forEach((a) => a.addEventListener('click', cerrarMenuMovil));
+
   // Inyectar keyframes CSS dinámicos para spin del cargador impositivo
   if (!document.getElementById('vmp-sync-keyframes')) {
     const style = document.createElement('style');

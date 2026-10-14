@@ -1018,3 +1018,25 @@
 
 
 
+
+/* -------------------------------------------------------------
+   Menu completo en celular: la barra lateral como panel deslizable
+   ------------------------------------------------------------- */
+.mobile-bottom-nav button.mb-nav-item { background: none; border: none; font: inherit; cursor: pointer; }
+.db-mobile-overlay { display: none; }
+@media (max-width: 768px) {
+  .db-sidebar {
+    display: flex !important;
+    position: fixed; top: 0; left: 0; bottom: 0;
+    width: min(300px, 86vw); height: 100%;
+    transform: translateX(-105%);
+    transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 300;
+    box-shadow: 0 20px 50px -10px rgba(15, 23, 42, 0.35);
+  }
+  .db-wrapper.mobile-menu-open .db-sidebar { transform: none; }
+  .db-mobile-overlay { display: block; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.45); z-index: 250; }
+  .db-mobile-overlay[hidden] { display: none; }
+  #sidebar-collapse-btn { display: none; }
+  .db-sidebar .db-sidebar-footer { padding-bottom: calc(14px + env(safe-area-inset-bottom)); }
+}
