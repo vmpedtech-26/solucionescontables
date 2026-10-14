@@ -54,6 +54,7 @@ export async function renderConfiguracion() {
     <!-- Left Column: Settings and certificate upload -->
     <div style="display: flex; flex-direction: column; gap: 24px;">
       
+${isSupabaseConfigured ? '' : `
       <!-- Model selector card -->
       <div class="card">
         <div class="card-header">
@@ -89,6 +90,7 @@ export async function renderConfiguracion() {
           </div>
         </div>
       </div>
+      `}
 
       ${isSupabaseConfigured ? renderArcaPanel() : `
       <!-- Certificate Upload Card -->
@@ -188,6 +190,7 @@ export async function renderConfiguracion() {
 
       `}
 
+${isSupabaseConfigured ? '' : `
       <!-- Supabase Sync configuration card -->
       <div class="card" style="border-color: rgba(34, 197, 94, 0.3); background: rgba(34, 197, 94, 0.01);">
         <div class="card-header" style="border-bottom-color: rgba(34, 197, 94, 0.1);">
@@ -219,12 +222,13 @@ export async function renderConfiguracion() {
           </div>
         </div>
       </div>
-
+      `}
     </div>
 
     <!-- Right Column: Delegated CUITs status & instructions -->
     <div style="display: flex; flex-direction: column; gap: 24px;">
       
+${isSupabaseConfigured ? '' : `
       <!-- Delegated status panel -->
       <div class="card">
         <div class="card-header">
@@ -344,7 +348,27 @@ export async function renderConfiguracion() {
           </div>
         </div>
       </div>
+      `}
 
+      ${isSupabaseConfigured ? `<!-- Guia de delegacion (cuenta real) -->
+      <div class="card">
+        <div class="card-header">
+          <h3 style="color:var(--color-accent-light);"><i data-lucide="help-circle"></i> ¿Cómo factura el estudio por un cliente?</h3>
+        </div>
+        <div class="card-body">
+          <p class="text-secondary" style="font-size: 12.5px; line-height: 1.5; margin-bottom: 12px;">
+            Para emitir facturas en nombre de un cliente con el certificado del estudio, el cliente tiene que delegarle el servicio en ARCA. Es un trámite por única vez:
+          </p>
+          <ol style="padding-left: 18px; font-size: 12px; color: var(--text-secondary); display: flex; flex-direction: column; gap: 6px; line-height: 1.45;">
+            <li>El cliente ingresa con su Clave Fiscal a <strong>arca.gob.ar</strong> y abre <strong>Administrador de Relaciones de Clave Fiscal</strong>.</li>
+            <li>Toca <strong>Nueva Relación</strong> → Buscar → <strong>ARCA</strong> → WebServices → <strong>Facturación Electrónica</strong>.</li>
+            <li>En <strong>Representante</strong> pone el CUIT del estudio y confirma.</li>
+            <li>El estudio, desde su Administrador de Relaciones, asocia ese servicio a su certificado (computador fiscal).</li>
+            <li>El cliente necesita un <strong>punto de venta de tipo Web Services</strong> (Administración de puntos de venta y domicilios).</li>
+          </ol>
+          <p class="text-secondary" style="font-size: 11.5px; margin-top: 10px;">Los pasos y nombres de servicios pueden variar según la versión del sitio de ARCA.</p>
+        </div>
+      </div>` : `
       <!-- ARCA Delegation Instructions -->
       <div class="card">
         <div class="card-header" style="border-bottom-color: rgba(22, 163, 74, 0.1); background: rgba(22,163,74,0.01);">
@@ -364,6 +388,7 @@ export async function renderConfiguracion() {
           </ul>
         </div>
       </div>
+      `}
 
       ${renderDatosCard({ esEstudio: true })}
 

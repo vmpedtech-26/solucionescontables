@@ -220,7 +220,7 @@ const TabContents = {
           <div style="border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 12px; text-align: center;">
             <div style="background: rgba(14, 165, 233, 0.06); color: #0ea5e9; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px;">4</div>
             <h5 style="font-size: 12px; font-weight: 700; margin-bottom: 4px;">Cierre y DDJJ</h5>
-            <p style="font-size: 10px; color: var(--text-secondary); line-height: 1.3; margin: 0;">Se generan los TXT automáticos y listos para subir a ARCA.</p>
+            <p style="font-size: 10px; color: var(--text-secondary); line-height: 1.3; margin: 0;">Generás los TXT del Libro IVA Digital para validar y presentar en ARCA.</p>
           </div>
 
         </div>
@@ -244,55 +244,37 @@ const TabContents = {
   arca: `
     <div class="help-section-flow" style="display: flex; flex-direction: column; gap: 20px;">
       <p class="text-primary" style="font-size: 13.5px; line-height: 1.5; font-weight: 500;">
-        La automatización segura se basa en delegar servicios de ARCA al CUIT del estudio. Esto evita compartir claves fiscales y mantiene el 100% de cumplimiento legal.
+        El sistema se conecta con ARCA usando el certificado digital de tu estudio. Nadie tiene que compartir su Clave Fiscal: cada cliente le delega al estudio los servicios que necesita.
       </p>
-
-      <!-- Steps for Accountant -->
       <div class="card" style="border-color: rgba(22, 163, 74, 0.15);">
         <div class="card-header" style="background: rgba(22, 163, 74, 0.01); padding: 12px 16px;">
-          <h4 style="font-size: 13px; font-weight: 700; color: #4f46e5; margin: 0; display: flex; align-items: center; gap: 6px;">
-            <i data-lucide="folder-key"></i> Paso 1: Configurar la Firma del Estudio Contable
-          </h4>
+          <h4 style="font-size: 13px; font-weight: 700; color: var(--color-accent); margin: 0; display: flex; align-items: center; gap: 6px;"><i data-lucide="key-round"></i> Paso 1: Conectá el certificado del estudio</h4>
         </div>
-        <div class="card-body" style="padding: 16px; font-size: 12px; color: var(--text-secondary); line-height: 1.5;">
-          El estudio genera un certificado digital (CSR) único por su CUIT.
-          <ol style="margin-top: 8px; padding-left: 16px; display: flex; flex-direction: column; gap: 6px;">
-            <li>En VMP Studio, ingresás a <strong>Configuración ARCA</strong>.</li>
-            <li>Subís tu Certificado Homologado (<code>.crt</code>) obtenido de ARCA y tu Clave Privada (<code>.key</code>).</li>
-            <li>Con esto, el servidor central de VMP Studio está oficialmente autorizado para comunicarse con ARCA en tu nombre.</li>
-          </ol>
-        </div>
+        <div class="card-body" style="padding: 16px; font-size: 12.5px; color: var(--text-secondary); line-height: 1.55;">
+          <ol style="padding-left: 16px; display: flex; flex-direction: column; gap: 6px; margin: 0;">
+            <li>Entrá a <a href="#/studio/configuracion">Configuración → Conexión con ARCA</a> y empezá por <strong>Homologación</strong> (pruebas sin validez fiscal).</li>
+            <li>Cargá el CUIT del estudio y tocá <strong>Generar solicitud (CSR)</strong>. La clave privada se genera y se guarda cifrada en el servidor: nunca se descarga.</li>
+            <li>Pegá la solicitud en ARCA (WSASS en homologación, Administración de Certificados Digitales en producción) y cargá el certificado que te devuelve.</li>
+            <li>Autorizá el certificado para <code>wsfe</code> (factura electrónica) y <code>ws_sr_padron_a5</code> (padrón) y tocá <strong>Probar</strong>.</li>
+          </ol></div>
       </div>
-
-      <!-- Steps for Client -->
-      <div class="card" style="border-color: rgba(34, 197, 94, 0.15);">
-        <div class="card-header" style="background: rgba(34, 197, 94, 0.01); padding: 12px 16px;">
-          <h4 style="font-size: 13px; font-weight: 700; color: var(--color-accent); margin: 0; display: flex; align-items: center; gap: 6px;">
-            <i data-lucide="user-check"></i> Paso 2: El cliente realiza la delegación (Copia y enviale esto por Whatsapp)
-          </h4>
+      <div class="card" style="border-color: rgba(22, 163, 74, 0.15);">
+        <div class="card-header" style="background: rgba(22, 163, 74, 0.01); padding: 12px 16px;">
+          <h4 style="font-size: 13px; font-weight: 700; color: var(--color-accent); margin: 0; display: flex; align-items: center; gap: 6px;"><i data-lucide="user-check"></i> Paso 2: Cada cliente delega la facturación al estudio</h4>
         </div>
-        <div class="card-body" style="padding: 16px; background: #fff;">
-          <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 12px; line-height: 1.5;">
-            Copiá este mensaje simple y envíaselo a tus clientes nuevos para explicarles cómo hacer el onboarding:
-          </p>
-          <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 12px; font-family: 'Outfit', sans-serif; font-size: 11.5px; color: var(--text-primary); line-height: 1.5; white-space: pre-wrap; position: relative;">
-<strong style="color: var(--color-teal-light);">Mensaje para enviar al Cliente:</strong>
-"Hola! Para poder importar tus facturas y retenciones de forma automática a nuestra nueva plataforma contable, te pido que nos delegues el acceso de lectura en ARCA. Es muy fácil, seguro y se hace por única vez:
-
-1. Entrá con tu CUIT y Clave Fiscal a la web de ARCA.
-2. Buscá el servicio <strong>"Administrador de Relaciones de Clave Fiscal"</strong>.
-3. Hacé clic en <strong>"Nueva Relación"</strong>.
-4. Hacé clic en <strong>"Buscar"</strong> -> seleccioná <strong>"ARCA"</strong> -> <strong>"WebServices"</strong>.
-5. Buscá el servicio: <code>"Libro de IVA Digital"</code>.
-6. En <strong>"Representante"</strong>, poné nuestro CUIT del Estudio: <strong>[INGRESAR_CUIT_ESTUDIO]</strong>.
-7. Confirmá la relación y ¡listo! No hace falta que nos pases tu clave fiscal."
-          </div>
-          <button class="btn btn-outline btn-sm" id="btn-copy-template" style="margin-top: 10px; font-size: 11px; padding: 4px 10px;">
-            <i data-lucide="copy" style="width: 12px; height: 12px; display: inline-block; vertical-align: middle; margin-right: 4px;"></i> Copiar Plantilla de Mensaje
-          </button>
-        </div>
+        <div class="card-body" style="padding: 16px; font-size: 12.5px; color: var(--text-secondary); line-height: 1.55;">
+          <p style="margin: 0 0 10px;">Solo hace falta si el estudio va a facturar en nombre del cliente. Copiá este mensaje y mandáselo:</p>
+          <div id="help-msg-delegacion" style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 12px; font-size: 12px; color: var(--text-primary); white-space: pre-wrap; line-height: 1.5;"></div>
+          <button class="btn btn-outline btn-sm" id="btn-copy-template" style="margin-top: 10px; font-size: 11px; padding: 4px 10px;"><i data-lucide="copy" style="width: 12px; height: 12px;"></i> Copiar mensaje</button>
+          <p style="margin: 10px 0 0; font-size: 11.5px;">Además, el cliente necesita un <strong>punto de venta de tipo Web Services</strong>. La pantalla Factura electrónica explica cómo crearlo.</p></div>
       </div>
-
+      <div class="card" style="border-color: rgba(22, 163, 74, 0.15);">
+        <div class="card-header" style="background: rgba(22, 163, 74, 0.01); padding: 12px 16px;">
+          <h4 style="font-size: 13px; font-weight: 700; color: var(--color-accent); margin: 0; display: flex; align-items: center; gap: 6px;"><i data-lucide="search"></i> Consulta al padrón</h4>
+        </div>
+        <div class="card-body" style="padding: 16px; font-size: 12.5px; color: var(--text-secondary); line-height: 1.55;">
+          Con el certificado conectado, al dar de alta una empresa tocá <strong>Completar desde ARCA</strong>: trae razón social, condición frente al IVA, domicilio y estado de la Clave Fiscal.</div>
+      </div>
     </div>
   `,
 
@@ -355,72 +337,36 @@ const TabContents = {
   portal: `
     <div class="help-section-flow" style="display: flex; flex-direction: column; gap: 20px;">
       <p class="text-primary" style="font-size: 13.5px; line-height: 1.5; font-weight: 500;">
-        El **Portal del Cliente (Suite Operativa)** es el puente de producción definitivo entre la PyME o contribuyente individual y el estudio contable. Integra en una única herramienta simplificada dos módulos fundamentales que eliminan el papelerío físico y automatizan la gestión impositiva.
+        El Portal del Cliente es donde tus clientes te mandan sus comprobantes desde el celular, cada uno con su cuenta y viendo solo su empresa.
       </p>
-
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start;">
-        
-        <!-- Módulo 1 -->
-        <div style="background: rgba(22, 163, 74, 0.01); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 20px;">
-          <h4 style="font-size: 14px; font-weight: 800; color: var(--color-accent-light); margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
-            <i data-lucide="camera" style="width: 18px; height: 18px;"></i>
-            1. Digitalización de Comprobantes (OCR con IA)
-          </h4>
-          <p style="font-size: 12px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 12px;">
-            Permite a los clientes enviar fotos de tickets impresos o PDFs de gastos directamente en el momento en que se generan.
-          </p>
-          <ul style="padding-left: 16px; font-size: 11.5px; color: var(--text-secondary); display: flex; flex-direction: column; gap: 6px; line-height: 1.4; margin-bottom: 0;">
-            <li><strong>Reconocimiento por IA:</strong> Extracción automática de CUIT de emisor, montos neto/IVA, fecha y números usando Gemini 2.5 Flash.</li>
-            <li><strong>Detección de Bienes de Uso:</strong> Clasifica de forma inteligente si una compra califica como gasto corriente o como un activo amortizable (Bien de Uso).</li>
-            <li><strong>Sincronización en un Clic:</strong> Los gastos aparecen pre-cargados al instante en el módulo contable del estudio para su aprobación formal.</li>
-          </ul>
+      <div class="card" style="border-color: rgba(22, 163, 74, 0.15);">
+        <div class="card-header" style="background: rgba(22, 163, 74, 0.01); padding: 12px 16px;">
+          <h4 style="font-size: 13px; font-weight: 700; color: var(--color-accent); margin: 0; display: flex; align-items: center; gap: 6px;"><i data-lucide="user-plus"></i> 1. Invitá a tu cliente</h4>
         </div>
-
-        <!-- Módulo 2 -->
-        <div style="background: rgba(34, 197, 94, 0.01); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 20px;">
-          <h4 style="font-size: 14px; font-weight: 800; color: var(--color-accent-light); margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
-            <i data-lucide="zap" style="width: 18px; height: 18px;"></i>
-            2. Facturador Directo ARCA (ex-AFIP) Live
-          </h4>
-          <p style="font-size: 12px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 12px;">
-            Una consola de facturación móvil y de escritorio de nivel corporativo que emite comprobantes oficiales directamente en el portal.
-          </p>
-          <ul style="padding-left: 16px; font-size: 11.5px; color: var(--text-secondary); display: flex; flex-direction: column; gap: 6px; line-height: 1.4; margin-bottom: 0;">
-            <li><strong>Formulario Reactivo Integrado:</strong> Previsualización de la factura en tiempo real en la pantalla (Split Screen) a medida que se completan los campos.</li>
-            <li><strong>Validación CUIT Módulo 11:</strong> Algoritmo en vivo que comprueba la validez matemática del dígito verificador impositivo de AFIP antes de enviar la petición.</li>
-            <li><strong>Inteligencia de Restricciones Contables:</strong> Configura y restringe automáticamente Facturas A/B (RI) o Factura C (Monotributo) previniendo infracciones técnicas.</li>
-            <li><strong>Liquidación y Percepciones de IIBB:</strong> Soporte para liquidación automática de IIBB por jurisdicción provincial y fechas operativas de servicios.</li>
-          </ul>
-        </div>
-
+        <div class="card-body" style="padding: 16px; font-size: 12.5px; color: var(--text-secondary); line-height: 1.55;">
+          En <a href="#/studio/empresas">Mis Clientes</a>, tocá <strong>Portal</strong> en la empresa y luego <strong>Generar nueva invitación</strong>. Se copia un link para mandarle por WhatsApp o email. El cliente crea su cuenta con ese link y queda vinculado a esa empresa.
+          Desde el mismo panel ves quién tiene acceso, podés <strong>quitar el acceso</strong> o <strong>anular</strong> invitaciones que no se usaron.</div>
       </div>
-
-      <div style="display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 24px; border-top: 1px solid var(--border-color); padding-top: 20px; align-items: center;">
-        <div>
-          <h4 style="font-size: 13.5px; font-weight: 800; margin-bottom: 6px; color: var(--color-primary);">Exportaciones Directas e Intercambio Seguro SOAP</h4>
-          <p style="font-size: 12px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 0;">
-            El facturador cuenta con una **Consola de Intercambio SOAP XML** integrada que detalla los logs cifrados de comunicación con las pasarelas WSAA y WSFE de ARCA. Además, los clientes pueden exportar sus lotes en un archivo <strong>.txt adaptado al diseño de registro oficial de AFIP (REGINFO Ventas)</strong>, permitiendo al contador importar los datos de forma inmediata y masiva en la plataforma tributaria nacional.
-          </p>
+      <div class="card" style="border-color: rgba(22, 163, 74, 0.15);">
+        <div class="card-header" style="background: rgba(22, 163, 74, 0.01); padding: 12px 16px;">
+          <h4 style="font-size: 13px; font-weight: 700; color: var(--color-accent); margin: 0; display: flex; align-items: center; gap: 6px;"><i data-lucide="send"></i> 2. El cliente envía sus comprobantes</h4>
         </div>
-
-        <div style="background: rgba(22, 163, 74, 0.03); border: 1px solid rgba(22, 163, 74, 0.12); border-radius: var(--radius-md); padding: 16px; text-align: center;">
-          <h4 style="font-size: 12.5px; font-weight: 700; color: var(--color-accent-light); margin-bottom: 6px; display: flex; align-items: center; justify-content: center; gap: 6px;">
-            <i data-lucide="smartphone"></i> Acceso a la Experiencia
-          </h4>
-          <p style="font-size: 11px; color: var(--text-secondary); line-height: 1.4; margin-bottom: 12px;">
-            Visualizá de forma transparente el funcionamiento del portal de tus clientes y realizá emisiones reales de prueba.
-          </p>
-          <a href="#/studio/portal" class="btn btn-primary btn-sm" style="font-size: 11px; background: var(--color-accent); border-color: var(--color-accent); padding: 8px 16px; display: inline-block;">
-            <i data-lucide="eye" style="width: 12px; height: 12px; display: inline-block; vertical-align: middle; margin-right: 4px;"></i> Abrir Portal del Cliente
-          </a>
-        </div>
+        <div class="card-body" style="padding: 16px; font-size: 12.5px; color: var(--text-secondary); line-height: 1.55;">
+          Desde el celular sube una foto o PDF y completa los datos que sepa (proveedor, CUIT, monto). El comprobante queda <strong>En revisión</strong> y el archivo se guarda de forma privada.</div>
       </div>
-
-      <div style="border-top: 1px solid var(--border-color); padding-top: 16px;">
-        <h4 style="font-size: 13px; font-weight: 700; margin-bottom: 8px; color: var(--color-primary);">Canal Automatizado por WhatsApp RPA</h4>
-        <p style="font-size: 12px; color: var(--text-secondary); line-height: 1.5; margin: 0;">
-          Para contribuyentes que prefieran no utilizar la web, el sistema cuenta con integración de **WhatsApp Contable Broker**. Al enviar la foto del ticket al número de WhatsApp del estudio contable, el bot realiza la extracción inteligente Gemini OCR, clasifica la categoría de gasto y la deposita automáticamente en el registro digital de VMP Studio.
-        </p>
+      <div class="card" style="border-color: rgba(22, 163, 74, 0.15);">
+        <div class="card-header" style="background: rgba(22, 163, 74, 0.01); padding: 12px 16px;">
+          <h4 style="font-size: 13px; font-weight: 700; color: var(--color-accent); margin: 0; display: flex; align-items: center; gap: 6px;"><i data-lucide="inbox"></i> 3. Vos los revisás en la Bandeja</h4>
+        </div>
+        <div class="card-body" style="padding: 16px; font-size: 12.5px; color: var(--text-secondary); line-height: 1.55;">
+          En <a href="#/studio/bandeja">Bandeja de clientes</a> ves todos los comprobantes pendientes de tus empresas. Abrís el archivo, completás los datos fiscales y lo <strong>cargás al Libro de Compras</strong>, o lo <strong>rechazás</strong> con un motivo que el cliente ve en su portal.</div>
+      </div>
+      <div class="card" style="border-color: rgba(22, 163, 74, 0.15);">
+        <div class="card-header" style="background: rgba(22, 163, 74, 0.01); padding: 12px 16px;">
+          <h4 style="font-size: 13px; font-weight: 700; color: var(--color-accent); margin: 0; display: flex; align-items: center; gap: 6px;"><i data-lucide="receipt"></i> 4. Facturación desde el portal (opcional)</h4>
+        </div>
+        <div class="card-body" style="padding: 16px; font-size: 12.5px; color: var(--text-secondary); line-height: 1.55;">
+          Si querés que un cliente emita sus propias facturas con CAE, activá <strong>Permitir que el cliente emita facturas</strong> en el panel Portal de esa empresa. Usa el certificado de ARCA del estudio. Por defecto está apagado.</div>
       </div>
     </div>
   `,
@@ -462,10 +408,10 @@ const TabContents = {
       <!-- FAQ 4 -->
       <div class="faq-item" style="padding-bottom: 4px;">
         <h4 style="font-size: 13px; font-weight: 700; color: var(--color-primary); margin-bottom: 6px;">
-          ¿Los archivos de firma digital (.crt y .key) del estudio son seguros?
+          ¿Es segura la clave del certificado de ARCA del estudio?
         </h4>
         <p style="font-size: 12px; color: var(--text-secondary); line-height: 1.4; margin: 0;">
-          <strong>Absolutamente seguros.</strong> El certificado y clave privada cargados por el estudio contable se encriptan bajo estándares bancarios AES-256 en almacenamiento seguro desconectado de internet público. El bot de RPA solo los invoca en el momento exacto de firmar la comunicación con los servidores oficiales de ARCA (WSAA).
+          La clave privada se genera en el servidor y se guarda cifrada en una bóveda (Supabase Vault): no se descarga ni se muestra, y solo la usa el servidor para firmar las solicitudes a ARCA. El certificado lo podés renovar o desconectar desde Configuración.
         </p>
       </div>
 
@@ -498,18 +444,26 @@ export async function initAyuda(mainApp) {
       
       // Bind template copy buttons inside tabs if they exist
       if (activeTab === 'arca') {
+        const msgEl = document.getElementById('help-msg-delegacion');
+        const armarMensaje = (cuit) => `Hola! Para que podamos emitir tus facturas electrónicas desde el estudio, necesitamos que nos delegues el servicio en ARCA. Es por única vez y no tenés que pasarnos tu Clave Fiscal:
+
+1. Entrá con tu CUIT y Clave Fiscal a arca.gob.ar.
+2. Abrí "Administrador de Relaciones de Clave Fiscal".
+3. Tocá "Nueva Relación" → "Buscar" → "ARCA" → "WebServices" → "Facturación Electrónica".
+4. En "Representante" poné el CUIT del estudio: ${cuit}.
+5. Confirmá y listo. ¡Gracias!`;
+        if (msgEl) {
+          msgEl.textContent = armarMensaje('[CUIT DEL ESTUDIO]');
+          if (isSupabaseConfigured && supabase) {
+            supabase.from('arca_credenciales').select('cuit').limit(1).then(({ data }) => {
+              const c = data?.[0]?.cuit;
+              if (c) msgEl.textContent = armarMensaje(`${c.slice(0, 2)}-${c.slice(2, 10)}-${c.slice(10)}`);
+            });
+          }
+        }
         const copyBtn = document.getElementById('btn-copy-template');
         copyBtn?.addEventListener('click', () => {
-          const textToCopy = `Hola! Para poder importar tus facturas y retenciones de forma automática a nuestra nueva plataforma contable, te pido que nos delegues el acceso de lectura en ARCA. Es muy fácil, seguro y se hace por única vez:
-
-1. Entrá con tu CUIT y Clave Fiscal a la web de ARCA.
-2. Buscá el servicio "Administrador de Relaciones de Clave Fiscal".
-3. Hacé clic en "Nueva Relación".
-4. Hacé clic en "Buscar" -> seleccioná "ARCA" -> "WebServices".
-5. Buscá el servicio: "Libro de IVA Digital".
-6. En "Representante", poné nuestro CUIT del Estudio: 30-71938495-2.
-7. Confirmá la relación y ¡listo! No hace falta que nos pases tu clave fiscal.`;
-          
+          const textToCopy = document.getElementById('help-msg-delegacion')?.textContent || '';
           navigator.clipboard.writeText(textToCopy).then(() => {
             mainApp.showToast("¡Plantilla copiada al portapapeles!", "success");
           }).catch(err => {
@@ -615,11 +569,12 @@ export async function initAyuda(mainApp) {
       // Search inside the FAQ and Modules texts
       const allSearchable = [
         { q: "cuit clave fiscal contador estudio", title: "¿Necesito la clave de todos mis clientes?", desc: "No, la delegación impositiva permite que uses únicamente tu clave fiscal de contador." },
-        { q: "delegacion arca relacion", title: "¿Cómo funciona la delegación en ARCA?", desc: "El cliente final entra por única vez a ARCA y delega servicios como Libro de IVA Digital a tu CUIT de estudio." },
+        { q: "delegacion arca relacion", title: "¿Cómo funciona la delegación en ARCA?", desc: "El cliente entra por única vez a ARCA y delega el servicio Facturación Electrónica al CUIT del estudio, sin compartir su Clave Fiscal." },
         { q: "iva simple f2051 formula", title: "IVA Simple Formulario 2051", desc: "Modulo normativo adaptado al nuevo régimen simplificado. Cruza las actividades declaradas y bloquea liquidación si hay desvíos mayores a $1." },
         { q: "retenciones percepciones sircreb sire", title: "Retenciones y Percepciones - Conciliación 3 fuentes", desc: "Cruza libro diario, SIRE y extracto bancario (SIRCREB) para no perder crédito impositivo." },
         { q: "rt 54 contable balance existencia", title: "Norma Técnica RT 54 Contable", desc: "Panel de balance exprés para micro y pequeñas entidades. Existencia inicial = Inventario × factor de 1.2x. Fórmula: CV = EI + C - EF." },
-        { q: "whatsapp celular portal foto ocr", title: "Portal de Clientes & Whatsapp Contable", desc: "El cliente saca foto al ticket de compra, el motor OCR inteligente extrae los datos y lo importa sin intervención manual." }
+        { q: "portal celular foto cliente bandeja invitar", title: "Portal de Clientes y Bandeja", desc: "Invitás al cliente desde Mis Clientes → Portal. Sube fotos o PDFs desde el celular y vos los revisás y cargás al libro desde la Bandeja." },
+        { q: "factura electronica cae arca certificado", title: "Factura electrónica con CAE", desc: "Conectá el certificado del estudio en Configuración → Conexión con ARCA y emití facturas A, B o C con CAE y QR." }
       ];
 
       allSearchable.forEach(item => {

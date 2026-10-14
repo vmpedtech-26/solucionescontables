@@ -562,7 +562,7 @@ export function renderLanding() {
                 <input type="email" class="form-input" id="partner-email" placeholder="tuemail@correo.com" required>
               </div>
               <button type="submit" class="btn btn-primary w-full" style="background: var(--color-accent); border-color: var(--color-accent); color: white;">
-                Postularme y Recibir Kit de Ventas
+                Postularme por WhatsApp
               </button>
             </form>
           </div>
@@ -676,7 +676,7 @@ export function renderLanding() {
 
 import { validarCUIT } from '../utils.js';
 import { initLandingMotion } from './landing-motion.js';
-import { initDemoForm } from './landing-demo.js';
+import { initDemoForm, numeroWA } from './landing-demo.js';
 import { LEGAL } from '../legal-config.js';
 import { supabase, isSupabaseConfigured } from '../db/supabase.js';
 import { getCompanies, getClienteFinalAsync } from '../db/mockdb.js';
@@ -804,7 +804,18 @@ export function initLanding(mainApp) {
     const phone = document.getElementById('partner-phone').value;
     const email = document.getElementById('partner-email').value;
 
-    mainApp.showToast(`¡Postulación enviada, ${name}! Nos contactaremos por WhatsApp.`, 'success');
+    // La postulacion llega por WhatsApp (como la demo): antes solo quedaba en
+    // una tabla que nadie veia.
+    const texto = [
+      'Hola! Quiero sumarme como partner de Soluciones Contables.',
+      `Nombre: ${name}`,
+      `WhatsApp: ${phone}`,
+      `Email: ${email}`
+    ].join('\n');
+    const url = `https://wa.me/${numeroWA()}?text=${encodeURIComponent(texto)}`;
+    const w = window.open(url, '_blank', 'noopener');
+    if (!w) window.location.href = url;
+    mainApp.showToast(`¡Gracias, ${name}! Enviá el mensaje de WhatsApp que se abrió y te contactamos.`, 'success');
 
     // Register lead in Supabase in background
     if (isSupabaseConfigured && supabase) {

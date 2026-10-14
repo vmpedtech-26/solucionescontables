@@ -48,6 +48,20 @@ class Application {
         : { access_token: p.get('access_token'), refresh_token: p.get('refresh_token') };
       history.replaceState(null, '', window.location.pathname + window.location.search + '#/recuperar');
     }
+    // 0b. Link de confirmacion de cuenta (o de cambio de email): abre la sesion y
+    // entra directo al sistema en vez de dejar a la persona en la portada.
+    else if (/[#&]access_token=/.test(frag) && /[#&]type=(signup|email_change|magiclink|invite)\b/.test(frag) && isSupabaseConfigured && supabase) {
+      const p = new URLSearchParams(frag.replace(/^#/, ''));
+      history.replaceState(null, '', window.location.pathname + window.location.search + '#/');
+      try {
+        const { error } = await supabase.auth.setSession({ access_token: p.get('access_token'), refresh_token: p.get('refresh_token') });
+        if (!error) {
+          localStorage.setItem('vmp_premium_unlocked', 'true');
+          history.replaceState(null, '', window.location.pathname + window.location.search + '#/studio');
+          this.bienvenida = p.get('type') === 'email_change' ? 'Tu nuevo email quedó confirmado.' : '¡Tu email quedó confirmado! Bienvenido.';
+        }
+      } catch (e) { /* si falla, queda en la portada y puede ingresar a mano */ }
+    }
     
     // 1. Initialize Mock Database (localStorage)
     initMockDB();
@@ -92,6 +106,7 @@ class Application {
 
     // 3. Trigger initial routing
     await this.router();
+    if (this.bienvenida && this.showToast) { this.showToast(this.bienvenida, 'success'); this.bienvenida = null; }
   }
 
   async router() {

@@ -4,7 +4,7 @@
    ------------------------------------------------------------- */
 import { LEGAL } from '../legal-config.js';
 
-const numeroWA = () => (LEGAL.telefono || '+54 299 673-1487').replace(/\D/g, '').replace(/^54(?!9)/, '549');
+export const numeroWA = () => (LEGAL.telefono || '+54 299 673-1487').replace(/\D/g, '').replace(/^54(?!9)/, '549');
 
 export function initDemoForm() {
   const form = document.getElementById('demo-form');
