@@ -5,6 +5,7 @@ import { getCompaniesAsync, saveCompanyAsync, deleteCompanyAsync } from '../db/m
 import { supabase, isSupabaseConfigured } from '../db/supabase.js';
 import { sanitizeInput as esc, validarCUIT } from '../utils.js';
 import { arca } from '../arca.js';
+import { abrirAccesosPortal, crearInvitacion } from './portal_accesos.js';
 
 export async function renderEmpresas() {
   const companies = await getCompaniesAsync();
@@ -206,6 +207,14 @@ export async function initEmpresas(mainApp) {
     });
   });
 
+  // Accesos al portal: clientes, invitaciones y permiso para facturar
+  document.querySelectorAll('.btn-clients-company').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const c = companiesActuales.find((x) => x.id === btn.dataset.id);
+      if (c) abrirAccesosPortal(c, mainApp);
+    });
+  });
+
   // Eliminar: borra la empresa y todos sus registros (confirmacion escrita)
   document.querySelectorAll('.btn-delete-company').forEach((btn) => {
     btn.addEventListener('click', async () => {
@@ -296,16 +305,7 @@ export async function initEmpresas(mainApp) {
       const empresaId = btn.dataset.id;
       const empresaName = btn.dataset.name;
       try {
-        const { data: { user } } = await supabase.auth.getUser();
-        const codigo = crypto.randomUUID().split('-')[0].toUpperCase();
-        const { error } = await supabase.from('invitaciones_clientes').insert({
-          codigo,
-          empresa_id: empresaId,
-          estudio_id: user.id
-        });
-        if (error) throw error;
-
-        const link = `${window.location.origin}${window.location.pathname}#/registro-cliente?invite=${codigo}`;
+        const link = await crearInvitacion(empresaId);
         await navigator.clipboard.writeText(link);
         mainApp.showToast(`¡Link de invitación para "${empresaName}" copiado al portapapeles!`, 'success');
       } catch (err) {

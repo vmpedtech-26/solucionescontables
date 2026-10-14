@@ -30,6 +30,15 @@ export async function renderFacturar() {
     return '<div class="card"><div class="card-body">Primero cargá una empresa en <a href="#/studio/empresas">Mis Clientes</a>.</div></div>';
   }
   const esEstudio = (await getCachedRole()) === 'estudio';
+  if (!esEstudio && !emp.cliente_puede_facturar) {
+    return `
+    <div class="view-header"><div><h1 class="view-title">Factura electrónica</h1>
+      <p class="view-subtitle">${esc(emp.razon_social)}</p></div></div>
+    <div class="card"><div class="card-body" style="text-align:center;padding:40px 24px;">
+      <p style="font-size:14px;color:var(--text-secondary);margin:0 0 16px;">Tu estudio contable todavía no habilitó la facturación desde el portal. Si la necesitás, pedísela a tu contador.</p>
+      <a href="#/studio/portal" class="btn btn-primary" style="display:inline-flex;">Volver a mis comprobantes</a>
+    </div></div>`;
+  }
   const esMono = String(emp.condicion_iva).toLowerCase().includes('monotributo');
   const inp = 'width:100%;border:1px solid var(--border-color);border-radius:6px;padding:8px 10px;font-size:13px;box-sizing:border-box;background:#fff;';
   const lab = 'display:block;font-size:11px;font-weight:700;color:var(--text-secondary);margin:10px 0 4px;text-transform:uppercase;';
@@ -124,6 +133,7 @@ export async function initFacturar(mainApp) {
   if (!form) return;
   const emp = await empresaParaFacturar();
   const $ = (id) => document.getElementById(id);
+  if (!document.getElementById('fac-pv')) return;
   let ambiente = null;
 
   $('fac-guardar-emisor')?.addEventListener('click', async () => {

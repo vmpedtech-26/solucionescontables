@@ -39,6 +39,9 @@ describe('Portal del cliente en modo real', () => {
     expect(html).not.toContain('gemini-status-card');
     expect(html).not.toContain('Emitir Factura Electrónica (ARCA Live)');
     expect(html).not.toContain('btn-simulate-ticket');
+    // sin permiso del estudio no hay acceso a facturar
+    expect(html).not.toContain('#/studio/facturar');
+    expect(html).not.toContain('portal-tab-btn');
   });
   it('muestra el estado traducido de los comprobantes', async () => {
     const html = await renderPortalCliente();

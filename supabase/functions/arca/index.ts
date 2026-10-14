@@ -74,10 +74,13 @@ function soloEstudio(ctx: Ctx) {
 }
 
 async function empresaAutorizada(ctx: Ctx, empresaId: string) {
-  const { data: emp } = await admin.from("empresas").select("id, estudio_id, razon_social, cuit, condicion_iva").eq("id", empresaId).maybeSingle();
+  const { data: emp } = await admin.from("empresas").select("id, estudio_id, razon_social, cuit, condicion_iva, cliente_puede_facturar").eq("id", empresaId).maybeSingle();
   if (!emp) throw new ErrorUsuario("Empresa no encontrada.", 404);
   if (ctx.rol === "estudio" && emp.estudio_id !== ctx.uid) throw new ErrorUsuario("Empresa no encontrada.", 404);
   if (ctx.rol === "cliente" && ctx.empresaCliente !== emp.id) throw new ErrorUsuario("Empresa no encontrada.", 404);
+  if (ctx.rol === "cliente" && !emp.cliente_puede_facturar) {
+    throw new ErrorUsuario("Tu estudio contable todavía no habilitó la facturación desde el portal.", 403);
+  }
   return emp;
 }
 

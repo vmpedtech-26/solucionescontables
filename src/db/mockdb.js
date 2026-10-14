@@ -200,8 +200,18 @@ export async function processSyncQueue() {
       task.retries += 1;
       
       if (task.retries >= 5) {
-        console.error(`Sync Engine: Tarea ${task.id} excedió los reintentos máximos.`);
+        // Una tarea que falla siempre (ej. CUIT invalido) no puede frenar al
+        // resto: se aparta en vmp_sync_failed y la cola sigue.
+        console.error(`Sync Engine: Tarea ${task.id} descartada tras 5 intentos.`);
+        try {
+          const fallidas = JSON.parse(localStorage.getItem('vmp_sync_failed') || '[]');
+          fallidas.push({ ...task, error: String(err?.message || err) });
+          localStorage.setItem('vmp_sync_failed', JSON.stringify(fallidas.slice(-200)));
+        } catch (e) { /* almacenamiento lleno: se descarta igual */ }
+        queue.splice(currentIndex, 1);
+        saveSyncQueue(queue);
         updateSyncStatus('error');
+        continue;
       }
       
       const backoff = Math.min(30000, Math.pow(2, task.retries) * 1000);

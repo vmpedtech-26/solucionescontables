@@ -119,7 +119,7 @@ export function renderDashboardLayout(childHTML, activeRoute, role = null) {
           <i data-lucide="refresh-cw"></i>
           <span>Importar "Mis Comprobantes"</span>
         </a>
-        ${isSupabaseConfigured ? `<a href="#/studio/facturar" class="db-nav-item ${activeRoute === 'facturar' ? 'active' : ''}" data-route="facturar">
+        ${isSupabaseConfigured && (!isCliente || activeCompany.cliente_puede_facturar) ? `<a href="#/studio/facturar" class="db-nav-item ${activeRoute === 'facturar' ? 'active' : ''}" data-route="facturar">
           <i data-lucide="receipt"></i>
           <span>Factura electrónica</span>
         </a>` : ''}
@@ -269,7 +269,7 @@ export function renderDashboardLayout(childHTML, activeRoute, role = null) {
           <i data-lucide="send"></i>
           <span>Comprobantes</span>
         </a>
-        ${isSupabaseConfigured ? `<a href="#/studio/facturar" class="mb-nav-item ${activeRoute === 'facturar' ? 'active' : ''}">
+        ${isSupabaseConfigured && activeCompany.cliente_puede_facturar ? `<a href="#/studio/facturar" class="mb-nav-item ${activeRoute === 'facturar' ? 'active' : ''}">
           <i data-lucide="receipt"></i>
           <span>Facturar</span>
         </a>` : ''}

@@ -1,7 +1,8 @@
 /* -------------------------------------------------------------
    VMP Studio Contable - Importación ARCA View Component
    ------------------------------------------------------------- */
-import { getActiveCompany, addTransaction, getTransactions } from '../db/mockdb.js';
+import { getActiveCompany, addTransaction, addTransactionAsync, getTransactions } from '../db/mockdb.js';
+import { parseMisComprobantes } from '../domain/mis-comprobantes.js';
 import { fmt } from '../utils.js';
 import { renderSinEmpresas } from '../utils.js';
 import { isSupabaseConfigured } from '../db/supabase.js';
@@ -494,6 +495,44 @@ export function initImportacion(mainApp) {
   const tbodyCoincident = document.getElementById('rec-tbody-coincident');
   const tbodyMissingAfip = document.getElementById('rec-tbody-missing-afip');
 
+  // Guarda cada comprobante (en cuenta real, directo en la base) y junta los errores
+  const guardarLote = async (batch, type) => {
+    if (!isSupabaseConfigured) {
+      batch.forEach((tx) => addTransaction(activeCompany.id, type, tx));
+      return { ok: batch.length, errores: [] };
+    }
+    let ok = 0;
+    const errores = [];
+    for (const tx of batch) {
+      try {
+        await addTransactionAsync(activeCompany.id, type, { ...tx });
+        ok++;
+      } catch (e) {
+        const msg = /ya existe/i.test(e.message) ? 'ya estaba cargado' : /verificador|cuit/i.test(e.message) ? 'CUIT inválido' : e.message;
+        errores.push(`${tx.tipo_comprobante} ${tx.numero}: ${msg}`);
+      }
+    }
+    return { ok, errores };
+  };
+
+  const mostrarResumenImportacion = (ok, errores, total) => {
+    const notas = [...errores, ...avisosImportacion];
+    mainApp.showToast(errores.length
+      ? `Se importaron ${ok} de ${total} comprobantes. ${errores.length} no se cargaron (ver detalle).`
+      : `Se importaron ${ok} comprobantes.`, errores.length ? 'warning' : 'success');
+    let caja = document.getElementById('import-resumen');
+    if (!caja) {
+      caja = document.createElement('div');
+      caja.id = 'import-resumen';
+      caja.style.cssText = 'margin: 12px 0; padding: 12px 14px; border-radius: 8px; font-size: 12.5px; line-height: 1.5;';
+      resContainer.prepend(caja);
+    }
+    caja.style.background = errores.length ? '#fff7ed' : '#f0fdf4';
+    caja.style.border = `1px solid ${errores.length ? '#fed7aa' : '#bbf7d0'}`;
+    caja.innerHTML = `<strong>${ok} de ${total} comprobantes importados.</strong>` +
+      (notas.length ? `<ul style="margin: 6px 0 0; padding-left: 18px;">${notas.slice(0, 30).map((n) => `<li>${esc(n)}</li>`).join('')}</ul>${notas.length > 30 ? `<p style="margin:4px 0 0;">y ${notas.length - 30} más…</p>` : ''}` : '');
+  };
+
   const startSimulation = (batch, type) => {
     if (batch.length === 0) {
       mainApp.showToast("No se detectaron filas válidas de transacciones para importar en el archivo.", "error");
@@ -524,16 +563,12 @@ export function initImportacion(mainApp) {
       } else if (percent === 100) {
         clearInterval(interval);
         
-        // Cargar en la DB temporal real
-        batch.forEach(tx => {
-          addTransaction(activeCompany.id, type, tx);
-        });
+        guardarLote(batch, type).then(({ ok, errores }) => mostrarResumenImportacion(ok, errores, batch.length));
 
         // Mostrar listado de resultados
         progContainer.style.display = 'none';
         resContainer.style.display = 'block';
         
-        mainApp.showToast(`¡Importación exitosa! Se procesaron ${batch.length} comprobantes reales de la AFIP.`, 'success');
 
         if (type === 'ventas') {
           resHeader.innerHTML = `
@@ -738,192 +773,17 @@ export function initImportacion(mainApp) {
   // -------------------------------------------------------------
   // MOTOR DE ANALIZADOR SINTÁCTICO DE ARCHIVOS REALES DE LA AFIP
   // -------------------------------------------------------------
+  let avisosImportacion = [];
   const parseAFIPFileContent = (fileContent, fileName) => {
     try {
-      const lines = fileContent.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
-      if (lines.length === 0) throw new Error("El archivo está vacío.");
-
-      // A. Encontrar la fila de encabezados impositiva
-      let headerLineIndex = -1;
-      for (let i = 0; i < Math.min(15, lines.length); i++) {
-        if (/fecha/i.test(lines[i]) && (/comprobante/i.test(lines[i]) || /nro/i.test(lines[i]) || /total/i.test(lines[i]))) {
-          headerLineIndex = i;
-          break;
-        }
-      }
-
-      if (headerLineIndex === -1) {
-        throw new Error("No se detectó la estructura oficial de AFIP (columna 'Fecha' ausente). Verificá el formato del reporte CSV/TXT.");
-      }
-
-      const headerLine = lines[headerLineIndex];
-      
-      // B. Auto-detectar delimitador impositivo
-      let delimiter = ',';
-      const commaCount = (headerLine.match(/,/g) || []).length;
-      const semiCount = (headerLine.match(/;/g) || []).length;
-      const tabCount = (headerLine.match(/\t/g) || []).length;
-
-      if (semiCount > commaCount && semiCount > tabCount) delimiter = ';';
-      else if (tabCount > commaCount && tabCount > semiCount) delimiter = '\t';
-
-      console.log(`CPN Parser: Separador detectado en reporte: "${delimiter}"`);
-
-      // C. Tokenizar y limpiar nombres de columnas
-      const cleanHeaderToken = (token) => {
-        return token.replace(/^["']|["']$/g, '').trim().toLowerCase()
-          .normalize("NFD").replace(/[\u0300-\u036f]/g, ""); // quitar tildes
-      };
-
-      const columns = headerLine.split(delimiter).map(cleanHeaderToken);
-      console.log("CPN Parser: Columnas identificadas:", columns);
-
-      // D. Mapeo inteligente de índices de AFIP
-      const idx = {
-        fecha: columns.findIndex(c => /fecha/i.test(c)),
-        tipo: columns.findIndex(c => /tipo/i.test(c) && !/cambio/i.test(c) && !/documento/i.test(c)),
-        pv: columns.findIndex(c => /punto.*venta/i.test(c) || /p\.v\./i.test(c) || /pv/i.test(c)),
-        numero: columns.findIndex(c => /numero.*desde/i.test(c) || /nro.*comprobante/i.test(c) || /numero/i.test(c)),
-        cuit: columns.findIndex(c => /doc.*receptor/i.test(c) || /doc.*emisor/i.test(c) || /cuit/i.test(c) || /c.u.i.t./i.test(c)),
-        entidad: columns.findIndex(c => /denominacion.*receptor/i.test(c) || /denominacion.*emisor/i.test(c) || /nombre/i.test(c) || /cliente/i.test(c) || /proveedor/i.test(c)),
-        neto: columns.findIndex(c => /neto.*gravado/i.test(c) || /neto/i.test(c) || /imp.*neto/i.test(c)),
-        iva: columns.findIndex(c => /iva/i.test(c) || /impuesto.*valor.*agregado/i.test(c) || /alicuota/i.test(c)),
-        total: columns.findIndex(c => /total/i.test(c) || /imp.*total/i.test(c))
-      };
-
-      if (idx.fecha === -1 || idx.total === -1) {
-        throw new Error("Estructura impositiva incompleta. Faltan columnas core de 'Fecha' o 'Total'.");
-      }
-
-      // E. Detectar si el reporte es de Ventas o de Compras
-      let operationType = 'ventas';
-      const isFileNameCompras = /recibidos|compras|purchases|compr/i.test(fileName);
-      const isHeaderCompras = columns.some(c => /emisor/i.test(c) || /proveedor/i.test(c));
-      if (isFileNameCompras || isHeaderCompras) {
-        operationType = 'compras';
-      }
-      console.log(`CPN Parser: Dirección operativa detectada: ${operationType.toUpperCase()}`);
-
-      const parsedTransactions = [];
-
-      // F. Parsear filas de datos impositivas
-      const sanitizeNumber = (val) => {
-        if (!val) return 0;
-        let clean = val.replace(/^["']|["']$/g, '').trim();
-        clean = clean.replace(/[^0-9,\.-]/g, ''); // quitar signos de peso, espacios
-        
-        // Formato español: punto para miles y coma para decimales (ej. 1.250,50)
-        if (clean.includes(',') && clean.includes('.')) {
-          clean = clean.replace(/\./g, '').replace(/,/g, '.');
-        } else if (clean.includes(',')) {
-          clean = clean.replace(/,/g, '.');
-        }
-        const num = parseFloat(clean);
-        return isNaN(num) ? 0 : num;
-      };
-
-      const sanitizeCUIT = (val) => {
-        if (!val) return '00-00000000-0';
-        let clean = val.replace(/\D/g, ''); // dejar sólo números
-        if (clean.length === 11) {
-          return `${clean.substring(0, 2)}-${clean.substring(2, 10)}-${clean.substring(10, 11)}`;
-        }
-        return val;
-      };
-
-      const sanitizeDate = (val) => {
-        if (!val) return new Date().toISOString().split('T')[0];
-        let clean = val.replace(/^["']|["']$/g, '').trim();
-        // DD/MM/AAAA o DD-MM-AAAA o DD.MM.AAAA
-        const match = clean.match(/^(\d{1,2})[\/\.-](\d{1,2})[\/\.-](\d{4})/);
-        if (match) {
-          const d = match[1].padStart(2, '0');
-          const m = match[2].padStart(2, '0');
-          const y = match[3];
-          return `${y}-${m}-${d}`;
-        }
-        return clean; // Retornar tal cual si ya es AAAA-MM-DD
-      };
-
-      for (let i = headerLineIndex + 1; i < lines.length; i++) {
-        const line = lines[i];
-        const tokens = line.split(delimiter).map(t => t.replace(/^["']|["']$/g, '').trim());
-        
-        if (tokens.length < columns.length / 2) continue; // omitir líneas de totales o firmas cortadas
-
-        const fechaRaw = tokens[idx.fecha];
-        if (!fechaRaw || fechaRaw.toLowerCase().includes('total')) continue; // omitir fila de totales al final del archivo
-
-        // Extraer valores sanitizados
-        const fecha = sanitizeDate(fechaRaw);
-        const tipoComprobante = idx.tipo !== -1 ? tokens[idx.tipo] : 'Factura A';
-        
-        let numero = '0001-00000001';
-        if (idx.pv !== -1 && idx.numero !== -1) {
-          const pvStr = tokens[idx.pv].replace(/\D/g, '').padStart(4, '0');
-          const numStr = tokens[idx.numero].replace(/\D/g, '').padStart(8, '0');
-          numero = `${pvStr}-${numStr}`;
-        } else if (idx.numero !== -1) {
-          const numClean = tokens[idx.numero].replace(/[^\d-]/g, '');
-          if (numClean.includes('-')) {
-            numero = numClean;
-          } else {
-            numero = `0001-${numClean.padStart(8, '0')}`;
-          }
-        }
-
-        const cuit = sanitizeCUIT(idx.cuit !== -1 ? tokens[idx.cuit] : '');
-        const entidad = idx.entidad !== -1 ? tokens[idx.entidad] : 'Cliente Autocargado';
-        
-        const total = sanitizeNumber(tokens[idx.total]);
-        let neto = idx.neto !== -1 ? sanitizeNumber(tokens[idx.neto]) : 0;
-        let iva = idx.iva !== -1 ? sanitizeNumber(tokens[idx.iva]) : 0;
-
-        // Si no vienen neto o iva desglosados en el CSV, el sistema los desglosa automáticamente bajo la alícuota general del 21%
-        if (neto === 0 && iva === 0 && total > 0) {
-          if (tipoComprobante.includes('A') || tipoComprobante.includes('B') || tipoComprobante.includes('C')) {
-            neto = Number((total / 1.21).toFixed(2));
-            iva = Number((total - neto).toFixed(2));
-          } else {
-            neto = total;
-            iva = 0;
-          }
-        }
-
-        const record = {
-          fecha,
-          tipo_comprobante: tipoComprobante,
-          numero,
-          cuit,
-          neto,
-          iva,
-          total,
-          es_activo: false,
-          categoria: operationType === 'ventas' ? 'Venta' : 'General'
-        };
-
-        if (operationType === 'ventas') {
-          record.cliente = entidad;
-        } else {
-          record.proveedor = entidad;
-        }
-
-        parsedTransactions.push(record);
-      }
-
-      console.log(`CPN Parser: Archivo analizado correctamente. Registros listos: ${parsedTransactions.length}`);
-      
-      // If we are in the Reconcile Solapa, we run the Reconciler directly with the parsed list!
-      const activeTab = document.querySelector('.import-tab-btn.active').dataset.tab;
-      if (activeTab === 'reconcile') {
-        executeReconciliation(parsedTransactions, operationType);
-      } else {
-        startSimulation(parsedTransactions, operationType);
-      }
-
+      const { tipo, registros, avisos } = parseMisComprobantes(fileContent, fileName);
+      avisosImportacion = avisos;
+      const activeTab = document.querySelector('.import-tab-btn.active')?.dataset.tab;
+      if (activeTab === 'reconcile') executeReconciliation(registros, tipo);
+      else startSimulation(registros, tipo);
     } catch (err) {
-      console.error("CPN Parser Error:", err);
-      mainApp.showToast(`Error al procesar el archivo impositivo: ${err.message}`, "error");
+      console.error('Lectura de Mis Comprobantes:', err);
+      mainApp.showToast(`No se pudo leer el archivo: ${err.message}`, 'error');
     }
   };
 
