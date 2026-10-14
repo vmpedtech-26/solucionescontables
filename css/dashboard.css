@@ -1022,7 +1022,7 @@
 /* -------------------------------------------------------------
    Menu completo en celular: la barra lateral como panel deslizable
    ------------------------------------------------------------- */
-.mobile-bottom-nav button.mb-nav-item { background: none; border: none; font: inherit; cursor: pointer; }
+.mobile-bottom-nav button.mb-nav-item { background: none; border: none; font-family: inherit; font-size: 10px; font-weight: 600; color: var(--text-secondary); cursor: pointer; padding: 0; }
 .db-mobile-overlay { display: none; }
 @media (max-width: 768px) {
   .db-sidebar {
@@ -1039,4 +1039,29 @@
   .db-mobile-overlay[hidden] { display: none; }
   #sidebar-collapse-btn { display: none; }
   .db-sidebar .db-sidebar-footer { padding-bottom: calc(14px + env(safe-area-inset-bottom)); }
+}
+
+/* -------------------------------------------------------------
+   Celular: el sistema no puede ser mas ancho que la pantalla.
+   La columna principal se achica (minmax 0) y las grillas fijas de las
+   vistas pasan a una columna; las tablas conservan su scroll propio.
+   ------------------------------------------------------------- */
+@media (max-width: 768px) {
+  .db-wrapper { grid-template-columns: minmax(0, 1fr) !important; }
+  .db-main { min-width: 0; max-width: 100vw; overflow-x: hidden; }
+  .db-view-container { min-width: 0; }
+  .db-view-container [style*="grid-template-columns"],
+  .db-view-container .form-grid,
+  .db-view-container .analytics-grid,
+  .db-view-container .portal-grid { grid-template-columns: minmax(0, 1fr) !important; }
+  .db-view-container .card, .db-view-container .card-body, .db-view-container [style*="grid-template-columns"] > * { min-width: 0; }
+  .db-view-container .card-header, .db-view-container .view-header { flex-wrap: wrap; gap: 8px; }
+  .db-view-container .card-header h3 { min-width: 0; overflow-wrap: anywhere; }
+  .db-view-container .table-responsive { max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .db-topbar { min-width: 0; overflow: hidden; }
+  .db-view-container [style*="display: flex"]:not(.mb-nav-item):not(.btn) { flex-wrap: wrap; }
+  .db-view-container .card-body { overflow-x: auto; }
+  .db-view-container .btn { white-space: normal; max-width: 100%; }
+  .db-view-container [style*="flex-direction: column"] > * { min-width: 0; max-width: 100%; }
+  .db-view-container [style*="position: sticky"] { position: static !important; }
 }
