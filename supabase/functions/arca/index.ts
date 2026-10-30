@@ -249,7 +249,8 @@ const acciones: Record<string, (ctx: Ctx, p: Record<string, unknown>) => Promise
         id: `v-cae-${resultado!.cae}`, empresa_id: emp.id, tipo: "ventas", fecha: f.fecha,
         tipo_comprobante: tipoTxt, numero: numeroTxt,
         cliente: String(p.receptor_nombre || (f.docTipo === 99 ? "Consumidor Final" : "")).slice(0, 160),
-        cuit: f.docTipo === 80 ? `${f.docNro.slice(0, 2)}-${f.docNro.slice(2, 10)}-${f.docNro.slice(10)}` : "",
+        // DNI (96) se guarda sin guiones: el Libro IVA lo reconoce por la cantidad de digitos
+        cuit: f.docTipo === 80 ? `${f.docNro.slice(0, 2)}-${f.docNro.slice(2, 10)}-${f.docNro.slice(10)}` : f.docTipo === 96 ? f.docNro.slice(0, 8) : "",
         neto: f.neto, iva: f.iva, total: f.total, cae: resultado!.cae, cae_vto: resultado!.caeVto,
       });
       registrado = !error;
@@ -265,7 +266,8 @@ Deno.serve(async (req) => {
   if (req.method !== "POST") return new Response(JSON.stringify({ error: "Método no permitido" }), { status: 405, headers });
   try {
     const body = await req.json().catch(() => ({}));
-    const accion = acciones[String(body.accion || "")];
+    const nombre = String(body.accion || "");
+    const accion = Object.hasOwn(acciones, nombre) ? acciones[nombre] : undefined;
     if (!accion) throw new ErrorUsuario("Acción desconocida.");
     const ctx = await usuario(req);
     const data = await accion(ctx, body);

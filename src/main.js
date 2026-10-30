@@ -9,6 +9,7 @@ import { renderTerminos, renderPrivacidad } from './views/legal.js';
 // Import Views
 import { renderLanding, initLanding } from './views/landing.js';
 import { animarVista } from './app-motion.js';
+import { sanitizeInput } from './utils.js';
 import { renderRecuperar, initRecuperar } from './views/recuperar.js';
 import { renderDashboardLayout, initDashboardLayout } from './views/layout.js';
 import { renderDashboardHome, initDashboardHome } from './views/dashboard_home.js';
@@ -183,6 +184,13 @@ class Application {
             window.location.hash = '#/studio/portal';
             return;
           }
+        } else if (role === 'sin_conexion') {
+          // Error de red o del servidor al leer el rol: no se cierra la sesion
+          rootEl.innerHTML = `<div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;text-align:center;font-family:'Plus Jakarta Sans',sans-serif;">
+            <h1 style="font-size:20px;margin:0;">No pudimos conectarnos</h1>
+            <p style="color:var(--text-secondary);max-width:420px;margin:0;">Revisá tu conexión a internet y volvé a intentar. Tu sesión sigue abierta.</p>
+            <button class="btn btn-primary" onclick="window.location.reload()">Reintentar</button></div>`;
+          return;
         } else if (role !== 'estudio') {
           await supabase.auth.signOut();
           window.location.hash = '#/';
@@ -277,7 +285,7 @@ class Application {
             <p style="font-size: 14px; color: var(--text-secondary); max-width: 500px; line-height: 1.6; margin-bottom: 24px;">
               El sistema encontró una inconsistencia al procesar los datos locales. Esto puede suceder por una sesión anterior no finalizada.
             </p>
-            <div style="background: #ffffff; border: 1px solid #e2e8f0; padding: 16px; border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-secondary); max-width: 600px; overflow-x: auto; margin-bottom: 24px; border-left: 4px solid #dc2626; text-align: left; white-space: pre-wrap;"><strong>Error técnico:</strong> ${err.message}</div>
+            <div style="background: #ffffff; border: 1px solid #e2e8f0; padding: 16px; border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-secondary); max-width: 600px; overflow-x: auto; margin-bottom: 24px; border-left: 4px solid #dc2626; text-align: left; white-space: pre-wrap;"><strong>Error técnico:</strong> ${sanitizeInput(err.message)}</div>
             <div style="display: flex; gap: 16px; justify-content: center;">
               <button onclick="window.location.reload()" style="background: var(--color-accent); color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 600; cursor: pointer; transition: background 0.2s;">
                 Recargar Sistema
@@ -349,7 +357,7 @@ class Application {
           <div style="background: #fee2e2; color: #ef4444; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 20px;">⚠️</div>
           <h3 style="color: #1e293b; font-size: 16px; font-weight: 700; margin-bottom: 8px;">Error al cargar la sección</h3>
           <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 16px;">Ocurrió un problema al procesar los datos de esta pantalla. Esto puede deberse a la interferencia de extensiones externas del navegador o problemas de consistencia local.</p>
-          <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-secondary); text-align: left; overflow-x: auto; margin-bottom: 16px; border-left: 3px solid #ef4444; white-space: pre-wrap;">${err.stack || err.message || err}</div>
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-secondary); text-align: left; overflow-x: auto; margin-bottom: 16px; border-left: 3px solid #ef4444; white-space: pre-wrap;">${sanitizeInput(err.stack || err.message || err)}</div>
           <button class="btn btn-primary" onclick="window.location.reload()" style="background: var(--color-accent); color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer;">Recargar Sección</button>
         </div>
       `;

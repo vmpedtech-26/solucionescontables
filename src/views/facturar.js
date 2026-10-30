@@ -8,7 +8,12 @@ import { arca, AMBIENTE_LABEL } from '../arca.js';
 import { abrirComprobante, CODIGOS_TIPO } from '../domain/comprobante.js';
 import { sanitizeInput as esc, validarCUIT, renderComingSoon } from '../utils.js';
 
-const CONDICIONES = [[5, 'Consumidor Final'], [1, 'IVA Responsable Inscripto'], [6, 'Responsable Monotributo'], [4, 'IVA Sujeto Exento'], [15, 'IVA No Alcanzado'], [13, 'Monotributista Social']];
+const CONDICIONES = [[5, 'Consumidor Final'], [1, 'IVA Responsable Inscripto'], [6, 'Responsable Monotributo'], [4, 'IVA Sujeto Exento'], [15, 'IVA No Alcanzado'], [13, 'Monotributista Social'],
+  [16, 'Monotributo Trabajador Independiente Promovido'], [7, 'Sujeto No Categorizado'], [9, 'Cliente del Exterior'], [8, 'Proveedor del Exterior'], [10, 'IVA Liberado – Ley 19.640']];
+// Condiciones admitidas por clase (RG 5616); la C admite todas
+const CONDICIONES_CLASE = { 1: [1, 6, 13, 16], 6: [4, 5, 7, 8, 9, 10, 15] };
+// Fecha de hoy en Argentina: toISOString da el dia UTC (despues de las 21 h ya es mañana)
+const hoyAR = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' }).format(new Date());
 const pesos = (n) => '$ ' + Number(n || 0).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 async function empresaParaFacturar() {
@@ -42,7 +47,7 @@ export async function renderFacturar() {
   const esMono = String(emp.condicion_iva).toLowerCase().includes('monotributo');
   const inp = 'width:100%;border:1px solid var(--border-color);border-radius:6px;padding:8px 10px;font-size:13px;box-sizing:border-box;background:#fff;';
   const lab = 'display:block;font-size:11px;font-weight:700;color:var(--text-secondary);margin:10px 0 4px;text-transform:uppercase;';
-  const hoy = new Date().toISOString().slice(0, 10);
+  const hoy = hoyAR();
   const tipos = esMono ? ['Factura C'] : ['Factura B', 'Factura A'];
 
   let emitidas = [];
@@ -181,8 +186,13 @@ export async function initFacturar(mainApp) {
     $('fac-docnro').disabled = dt === '99';
     if (dt === '99') $('fac-docnro').value = '';
     $('fac-serv').style.display = $('fac-concepto').value === '1' ? 'none' : 'grid';
-    // Factura A solo a responsables inscriptos
-    if ($('fac-tipo').value === '1') { $('fac-doctipo').value = '80'; $('fac-condrec').value = '1'; $('fac-docnro').disabled = false; }
+    // Cada clase solo admite ciertas condiciones del receptor: se ocultan las demas
+    // y solo se corrige la elegida si deja de ser valida (no en cada tecla).
+    const permitidas = CONDICIONES_CLASE[$('fac-tipo').value];
+    const condrec = $('fac-condrec');
+    [...condrec.options].forEach((o) => { o.hidden = o.disabled = !!permitidas && !permitidas.includes(Number(o.value)); });
+    if (condrec.selectedOptions[0]?.disabled) condrec.value = String(permitidas[0]);
+    if ($('fac-tipo').value === '1') { $('fac-doctipo').value = '80'; $('fac-docnro').disabled = false; }
   };
   ['fac-neto', 'fac-ali', 'fac-tipo', 'fac-doctipo', 'fac-concepto'].forEach((id) => $(id)?.addEventListener('input', refrescar));
   ['fac-tipo', 'fac-doctipo', 'fac-concepto'].forEach((id) => $(id)?.addEventListener('change', refrescar));
@@ -228,7 +238,7 @@ export async function initFacturar(mainApp) {
         $('fac-imprimir').addEventListener('click', imprimir);
         imprimir();
         form.reset();
-        $('fac-fecha').value = new Date().toISOString().slice(0, 10);
+        $('fac-fecha').value = hoyAR();
         refrescar();
       } else {
         out.innerHTML = `<div style="color:#b91c1c;font-weight:700;">✗ Rechazada por ARCA</div><p>${esc([...r.errores, ...r.observaciones].join(' | ') || 'Sin detalle')}</p>`;

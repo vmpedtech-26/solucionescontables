@@ -13,6 +13,11 @@ import { isSupabaseConfigured } from './db/supabase.js';
  * @param {string|number|null|undefined} str
  * @returns {string} Texto con entidades HTML escapadas
  */
+/** Color de empresa apto para CSS: solo #rgb o #rrggbb (evita inyeccion en style="..."). */
+export function colorSeguro(c) {
+  return /^#[0-9a-f]{3}([0-9a-f]{3})?$/i.test(String(c ?? '').trim()) ? String(c).trim() : '#16a34a';
+}
+
 export function sanitizeInput(str) {
   if (str === null || str === undefined) return '';
   return String(str)

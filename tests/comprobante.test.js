@@ -14,11 +14,13 @@ describe('QR de comprobante (RG 4892)', () => {
 });
 
 describe('Comprobante imprimible', () => {
-  it('muestra letra, código, CAE, IVA discriminado y escapa HTML', () => {
+  it('Factura B: letra, código, CAE, IVA contenido (Ley 27.743) y escapa HTML', () => {
     const html = htmlComprobante({ emisor, cbte, receptor: { nombre: 'Consumidor Final', docTipo: 99, docNro: '0' }, detalle: 'Servicio' });
     expect(html).toContain('COD. 006');
     expect(html).toContain('76123456789012');
-    expect(html).toContain('IVA 21%');
+    expect(html).toContain('IVA contenido');
+    expect(html).toContain('Ley 27.743');
+    expect(html).not.toContain('IVA 21%');
     expect(html).toContain('<svg');
     expect(html).not.toContain('<Real>');
     expect(html).not.toContain('SIN VALIDEZ FISCAL');
@@ -28,5 +30,11 @@ describe('Comprobante imprimible', () => {
     expect(html).toContain('COD. 011');
     expect(html).not.toContain('IVA 21%');
     expect(html).toContain('SIN VALIDEZ FISCAL');
+  });
+  it('Factura A discrimina el IVA', () => {
+    const html = htmlComprobante({ emisor, cbte: { ...cbte, tipo: 'Factura A' }, receptor: { docTipo: 80, docNro: '30719283719' }, detalle: '' });
+    expect(html).toContain('COD. 001');
+    expect(html).toContain('IVA 21%');
+    expect(html).not.toContain('IVA contenido');
   });
 });

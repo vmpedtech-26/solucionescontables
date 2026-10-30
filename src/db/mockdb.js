@@ -95,6 +95,9 @@ const DEFAULT_TRANSACTIONS = {
 // 1. MOTORES DE AUDITORÍA Y ESTADO DE SINCRONIZACIÓN (OUTBOX ENGINE)
 // -------------------------------------------------------------
 let isSyncingInProgress = false;
+let reintentoSync = null;
+let listenersRed = false;
+let ultimoPull = 0;
 let syncStatusCallbacks = [];
 
 export function subscribeSyncStatus(callback) {
@@ -174,11 +177,11 @@ export async function processSyncQueue() {
   updateSyncStatus('syncing');
   console.log(`Sync Engine: Procesando Cola Outbox (${queue.length} tareas pendientes)`);
 
-  let currentIndex = 0;
-  while (currentIndex < queue.length) {
-    const task = queue[currentIndex];
-    let success = false;
-
+  // La cola se relee de localStorage en cada paso y las tareas se quitan por id:
+  // lo que se encole mientras hay un envio en curso no se pisa.
+  const quitarTarea = (id) => saveSyncQueue(getSyncQueue().filter((t) => t.id !== id));
+  let task;
+  while ((task = getSyncQueue()[0])) {
     if (!navigator.onLine) {
       updateSyncStatus('offline');
       break;
@@ -187,53 +190,59 @@ export async function processSyncQueue() {
     try {
       if (task.action === 'save_company') {
         await pushCompanyToSupabase(task.payload.company, task.payload.isNew);
-        success = true;
       } else if (task.action === 'insert_transaction') {
         await pushTransactionToSupabase(task.payload.companyId, task.payload.type, task.payload.item);
-        success = true;
       } else {
         console.warn("Sync Engine: Acción de tarea desconocida:", task.action);
-        success = true;
       }
+      quitarTarea(task.id);
     } catch (err) {
       console.error(`Sync Engine: Falló la tarea ${task.id}:`, err);
-      task.retries += 1;
-      
-      if (task.retries >= 5) {
+      const retries = (task.retries || 0) + 1;
+
+      if (retries >= 5) {
         // Una tarea que falla siempre (ej. CUIT invalido) no puede frenar al
         // resto: se aparta en vmp_sync_failed y la cola sigue.
         console.error(`Sync Engine: Tarea ${task.id} descartada tras 5 intentos.`);
         try {
           const fallidas = JSON.parse(localStorage.getItem('vmp_sync_failed') || '[]');
-          fallidas.push({ ...task, error: String(err?.message || err) });
+          fallidas.push({ ...task, retries, error: String(err?.message || err) });
           localStorage.setItem('vmp_sync_failed', JSON.stringify(fallidas.slice(-200)));
         } catch (e) { /* almacenamiento lleno: se descarta igual */ }
-        queue.splice(currentIndex, 1);
-        saveSyncQueue(queue);
+        quitarTarea(task.id);
         updateSyncStatus('error');
         continue;
       }
-      
-      const backoff = Math.min(30000, Math.pow(2, task.retries) * 1000);
-      console.log(`Sync Engine: Reintento programado en ${backoff}ms`);
-      
-      saveSyncQueue(queue);
-      setTimeout(processSyncQueue, backoff);
-      
-      isSyncingInProgress = false;
-      return; 
-    }
 
-    if (success) {
-      queue.splice(currentIndex, 1);
-      saveSyncQueue(queue);
-    } else {
-      currentIndex++;
+      saveSyncQueue(getSyncQueue().map((t) => (t.id === task.id ? { ...t, retries } : t)));
+      const backoff = Math.min(30000, Math.pow(2, retries) * 1000);
+      console.log(`Sync Engine: Reintento programado en ${backoff}ms`);
+      // Un solo reintento pendiente a la vez
+      clearTimeout(reintentoSync);
+      reintentoSync = setTimeout(processSyncQueue, backoff);
+
+      isSyncingInProgress = false;
+      return;
     }
   }
 
   isSyncingInProgress = false;
   updateSyncStatus(getSyncStatus());
+}
+
+/**
+ * Borra del navegador los datos del estudio (empresas, comprobantes, cola,
+ * claves) al cerrar sesion o eliminar la cuenta. Antes intenta enviar lo
+ * pendiente para no perder cargas hechas sin conexion.
+ */
+export async function limpiarDatosLocales() {
+  if (isSupabaseConfigured && supabase && getSyncQueue().length) {
+    try { await processSyncQueue(); } catch (e) { /* lo que quede se descarta */ }
+  }
+  Object.keys(localStorage)
+    .filter((k) => k.startsWith('vmp_') && k !== 'vmp_supabase_url' && k !== 'vmp_supabase_anon_key')
+    .forEach((k) => localStorage.removeItem(k));
+  ultimoPull = 0;
 }
 
 // -------------------------------------------------------------
@@ -255,6 +264,15 @@ export function initMockDB() {
   if (!localStorage.getItem("vmp_studio_sync_queue")) {
     localStorage.setItem("vmp_studio_sync_queue", "[]");
   }
+
+  // initMockDB corre en cada lectura: los listeners se registran una sola vez
+  // y la descarga desde Supabase se limita a una cada 30 s.
+  if (listenersRed) {
+    if (isSupabaseConfigured && Date.now() - ultimoPull > 30000) { ultimoPull = Date.now(); pullFromSupabase(); }
+    return;
+  }
+  listenersRed = true;
+  ultimoPull = Date.now();
 
   // Vincular eventos globales de red para sincronización resiliente
   window.addEventListener('online', () => {
@@ -286,7 +304,11 @@ async function pullFromSupabase() {
 
     if (coError) throw coError;
 
-    if (dbCompanies && dbCompanies.length > 0) {
+    if (dbCompanies && dbCompanies.length === 0) {
+      // Sin empresas en la nube: no se conserva el cache de otra sesion
+      localStorage.setItem("vmp_studio_companies", "[]");
+      localStorage.setItem("vmp_studio_transactions", "{}");
+    } else if (dbCompanies && dbCompanies.length > 0) {
       localStorage.setItem("vmp_studio_companies", JSON.stringify(dbCompanies));
       
       const coIds = dbCompanies.map(c => c.id);
@@ -307,22 +329,20 @@ async function pullFromSupabase() {
           const typeKey = t.tipo;
           if (transactionsMap[t.empresa_id]) {
             transactionsMap[t.empresa_id][typeKey].push({
-              id: t.id,
-              fecha: t.fecha,
-              tipo_comprobante: t.tipo_comprobante,
-              numero: t.numero,
-              proveedor: t.proveedor,
-              cliente: t.cliente,
-              cuit: t.cuit,
+              ...t,
               neto: Number(t.neto),
               iva: Number(t.iva),
-              total: Number(t.total),
-              es_activo: t.es_activo,
-              categoria: t.categoria
+              total: Number(t.total)
             });
           }
         });
       }
+
+      // Lo cargado localmente que todavia esta en la cola no se pierde
+      getSyncQueue().filter((task) => task.action === 'insert_transaction').forEach(({ payload }) => {
+        const lista = transactionsMap[payload.companyId]?.[payload.type];
+        if (lista && !lista.some((x) => x.id === payload.item.id)) lista.unshift(payload.item);
+      });
 
       localStorage.setItem("vmp_studio_transactions", JSON.stringify(transactionsMap));
       console.log("Sync Engine: Pull y refresco local exitoso!");
@@ -346,11 +366,12 @@ export function getCompanies() {
   } catch (e) {
     console.error("Error al leer empresas locales:", e);
   }
-  return DEFAULT_COMPANIES;
+  // Con backend real nunca se muestran las empresas demo
+  return (isSupabaseConfigured && supabase) ? [] : DEFAULT_COMPANIES;
 }
 
 export function saveCompany(company) {
-  const cos = getCompanies() || [...DEFAULT_COMPANIES];
+  const cos = getCompanies();
   let isNew = false;
   
   if (company.id) {
@@ -358,7 +379,7 @@ export function saveCompany(company) {
     if (idx !== -1) cos[idx] = company;
   } else {
     isNew = true;
-    company.id = "co-" + Date.now();
+    company.id = "co-" + crypto.randomUUID();
     cos.push(company);
     
     try {
@@ -446,7 +467,7 @@ export async function saveCompanyAsync(company) {
   if (!user) throw new Error('No autenticado.');
 
   const isNew = !company.id;
-  if (isNew) company.id = "co-" + Date.now();
+  if (isNew) company.id = "co-" + crypto.randomUUID();
 
   const payload = {
     id: company.id,
@@ -596,7 +617,7 @@ export function getActiveCompanyId() {
 export function getActiveCompany() {
   try {
     const id = getActiveCompanyId();
-    const cos = getCompanies() || DEFAULT_COMPANIES;
+    const cos = getCompanies();
     const found = cos.find(c => c.id === id);
     if (found) return found;
     
@@ -627,6 +648,7 @@ export function getTransactions(companyId) {
   } catch (e) {
     console.error("Error al parsear transacciones de localStorage:", e);
   }
+  if (isSupabaseConfigured && supabase) return { ventas: [], compras: [] };
   return DEFAULT_TRANSACTIONS[companyId] || { ventas: [], compras: [] };
 }
 
@@ -672,11 +694,13 @@ async function pushTransactionToSupabase(companyId, type, item) {
     iva: item.iva,
     total: item.total,
     es_activo: item.es_activo || false,
-    categoria: item.categoria || 'General'
+    categoria: item.categoria || 'General',
+    exento: !!item.exento
   };
 
   const { error } = await supabase.from('transacciones').insert(payload);
-  if (error) throw error;
+  // 23505: ya se habia insertado en un intento anterior cuya respuesta se perdio
+  if (error && error.code !== '23505') throw error;
 }
 
 export async function getTransactionsAsync(companyId) {
@@ -713,7 +737,8 @@ export async function getTransactionsAsync(companyId) {
   }
 }
 
-export async function addTransactionAsync(companyId, type, item) {
+// opciones.silencioso: no avisa a la UI (las importaciones masivas redibujan una sola vez)
+export async function addTransactionAsync(companyId, type, item, opciones = {}) {
   if (!isSupabaseConfigured || !supabase) return addTransaction(companyId, type, item);
 
   if (!item.id) {
@@ -734,7 +759,8 @@ export async function addTransactionAsync(companyId, type, item) {
     iva: item.iva,
     total: item.total,
     es_activo: item.es_activo || false,
-    categoria: item.categoria || 'General'
+    categoria: item.categoria || 'General',
+    exento: !!item.exento
   };
 
   const { data, error } = await supabase.from('transacciones').insert(payload).select().single();
@@ -752,7 +778,7 @@ export async function addTransactionAsync(companyId, type, item) {
   allTxs[companyId][type].unshift(result);
   localStorage.setItem("vmp_studio_transactions", JSON.stringify(allTxs));
 
-  window.dispatchEvent(new CustomEvent('vmp_db_updated', { detail: { companyId, type, item: result } }));
+  if (!opciones.silencioso) window.dispatchEvent(new CustomEvent('vmp_db_updated', { detail: { companyId, type, item: result } }));
 
   return result;
 }

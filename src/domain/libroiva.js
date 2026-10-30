@@ -23,12 +23,27 @@ const FAMILIAS = {
   M: { F: '051', D: '052', C: '053' }
 };
 
+const norm = (t) => String(t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ').trim();
+
+// Codigos explicitos (tabla de comprobantes de ARCA) para los tipos que no siguen
+// el patron Factura/Nota de Debito/Nota de Credito + letra.
+const CODIGOS_EXPLICITOS = {
+  'recibo a': '004', 'recibo b': '009', 'recibo c': '015', 'recibo m': '054',
+  'factura de credito electronica a': '201', 'nota de debito electronica a': '202', 'nota de credito electronica a': '203',
+  'factura de credito electronica b': '206', 'nota de debito electronica b': '207', 'nota de credito electronica b': '208',
+  'factura de credito electronica c': '211', 'nota de debito electronica c': '212', 'nota de credito electronica c': '213',
+  'tique factura a': '081', 'tique factura b': '082', 'tique': '083', 'tique factura c': '111'
+};
+
 /** Codigo de tipo de comprobante ARCA (3 digitos) a partir del texto de la app. */
 export function codigoComprobante(tipo) {
-  const t = String(tipo || '').toLowerCase();
-  if (t.includes('liq. primaria') || t.includes('liquidación primaria')) return '033';
-  const familia = /nota de d[eé]bito/.test(t) ? 'D' : /nota de cr[eé]dito/.test(t) ? 'C' : 'F';
-  const letra = (/(?:factura|nota de d[eé]bito|nota de cr[eé]dito)\s+([abcem])\b/.exec(t) || [])[1];
+  const t = norm(tipo);
+  const numerico = /^(\d{1,3})(?:\s*-|$)/.exec(t); // "201 - Factura de Credito..." o "11"
+  if (numerico) return numerico[1].padStart(3, '0');
+  if (CODIGOS_EXPLICITOS[t]) return CODIGOS_EXPLICITOS[t];
+  if (t.includes('liq. primaria') || t.includes('liquidacion primaria')) return '033';
+  const familia = /nota de debito/.test(t) ? 'D' : /nota de credito/.test(t) ? 'C' : 'F';
+  const letra = (/(?:factura|nota de debito|nota de credito)\s+([abcem])\b/.exec(t) || [])[1];
   return (FAMILIAS[(letra || 'a').toUpperCase()] || FAMILIAS.A)[familia];
 }
 

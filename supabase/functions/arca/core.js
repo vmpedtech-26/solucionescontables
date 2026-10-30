@@ -285,7 +285,20 @@ export function parsePadron(xml) {
 // -------------------------------------------------------------
 export const TIPOS_CBTE = { 1: 'Factura A', 6: 'Factura B', 11: 'Factura C', 3: 'Nota de Crédito A', 8: 'Nota de Crédito B', 13: 'Nota de Crédito C' };
 export const ALICUOTAS_WSFE = { 0: 3, 10.5: 4, 21: 5, 27: 6, 5: 8, 2.5: 9 };
-export const CONDICION_IVA_RECEPTOR = { 1: 'IVA Responsable Inscripto', 4: 'IVA Sujeto Exento', 5: 'Consumidor Final', 6: 'Responsable Monotributo', 13: 'Monotributista Social', 15: 'IVA No Alcanzado' };
+export const CONDICION_IVA_RECEPTOR = { 1: 'IVA Responsable Inscripto', 4: 'IVA Sujeto Exento', 5: 'Consumidor Final', 6: 'Responsable Monotributo', 7: 'Sujeto No Categorizado', 8: 'Proveedor del Exterior', 9: 'Cliente del Exterior', 10: 'IVA Liberado – Ley 19.640', 13: 'Monotributista Social', 15: 'IVA No Alcanzado', 16: 'Monotributo Trabajador Independiente Promovido' };
+// Condiciones del receptor admitidas por clase de comprobante (RG 5616)
+const CONDICIONES_POR_CLASE = { A: [1, 6, 13, 16], B: [4, 5, 7, 8, 9, 10, 15] };
+
+/** Fecha de hoy en Argentina (YYYY-MM-DD); toISOString daria el dia UTC. */
+export const hoyAR = (d = new Date()) => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' }).format(d);
+
+function fechaValida(iso, campo) {
+  const s = String(iso ?? '');
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s);
+  const d = m && new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));
+  if (!d || d.getUTCMonth() !== +m[2] - 1 || d.getUTCDate() !== +m[3]) throw new Error(`${campo}: fecha inválida (usar AAAA-MM-DD).`);
+  return s;
+}
 
 export function wsfeEnvelope(metodo, cuerpo) {
   return '<?xml version="1.0" encoding="utf-8"?>' +
@@ -341,11 +354,19 @@ export function prepararFactura(datos) {
   const docNro = String(datos.docNro || '0').replace(/\D/g, '') || '0';
   if (docTipo === 80 && docNro.length !== 11) throw new Error('El CUIT del receptor debe tener 11 dígitos.');
   if ([1, 3].includes(cbteTipo) && docTipo !== 80) throw new Error('La Factura A requiere CUIT del receptor.');
+  if ([3, 8, 13].includes(cbteTipo)) throw new Error('Las notas de crédito requieren el comprobante asociado y todavía no se emiten desde el sistema.');
   const condicionIvaReceptor = Number(datos.condicionIvaReceptor || 5);
   if (!CONDICION_IVA_RECEPTOR[condicionIvaReceptor]) throw new Error('Condición frente al IVA del receptor inválida.');
-  const fecha = datos.fecha || new Date().toISOString().slice(0, 10);
-  if (concepto !== 1 && (!datos.servDesde || !datos.servHasta || !datos.vtoPago)) {
-    throw new Error('Para servicios hay que indicar período facturado y vencimiento de pago.');
+  const clase = [1, 3].includes(cbteTipo) ? 'A' : [6, 8].includes(cbteTipo) ? 'B' : null;
+  if (clase && !CONDICIONES_POR_CLASE[clase].includes(condicionIvaReceptor)) {
+    throw new Error(`La Factura ${clase} no se puede emitir a un receptor "${CONDICION_IVA_RECEPTOR[condicionIvaReceptor]}".`);
+  }
+  const fecha = datos.fecha ? fechaValida(datos.fecha, 'Fecha') : hoyAR();
+  if (concepto !== 1) {
+    if (!datos.servDesde || !datos.servHasta || !datos.vtoPago) throw new Error('Para servicios hay que indicar período facturado y vencimiento de pago.');
+    fechaValida(datos.servDesde, 'Servicio desde'); fechaValida(datos.servHasta, 'Servicio hasta'); fechaValida(datos.vtoPago, 'Vencimiento de pago');
+    if (datos.servHasta < datos.servDesde) throw new Error('El período facturado termina antes de empezar.');
+    if (datos.vtoPago < fecha) throw new Error('El vencimiento de pago no puede ser anterior a la fecha de la factura.');
   }
   return { cbteTipo, concepto, esC, neto, alicuota, iva, total, docTipo, docNro, condicionIvaReceptor, fecha,
     servDesde: datos.servDesde, servHasta: datos.servHasta, vtoPago: datos.vtoPago };

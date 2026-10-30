@@ -1,9 +1,9 @@
 /* -------------------------------------------------------------
    VMP Studio Contable - Dashboard Layout Component
    ------------------------------------------------------------- */
-import { getCompanies, getActiveCompany, getSyncStatus } from '../db/mockdb.js';
+import { getCompanies, getActiveCompany, getSyncStatus, limpiarDatosLocales } from '../db/mockdb.js';
 import { supabase, isSupabaseConfigured, getCachedStudioName } from '../db/supabase.js';
-import { sanitizeInput as esc, getActivePeriod, periodOptions, periodLabel } from '../utils.js';
+import { sanitizeInput as esc, getActivePeriod, periodOptions, periodLabel, colorSeguro } from '../utils.js';
 
 export function renderDashboardLayout(childHTML, activeRoute, role = null) {
   const isCliente = role === 'cliente';
@@ -65,7 +65,7 @@ export function renderDashboardLayout(childHTML, activeRoute, role = null) {
     <aside class="db-sidebar" id="db-sidebar">
       <div class="db-sidebar-header">
         <a href="#/studio" class="db-sidebar-logo" style="display: flex; align-items: center; gap: 10px;">
-          <img src="/SolucionesContables_Logo.png" alt="SolucionesContables Logo" style="height: 32px; width: 32px; border-radius: 6px; object-fit: cover; border: 1px solid rgba(15, 23, 42, 0.15);" />
+          <img src="/logo-128.webp" alt="SolucionesContables Logo" style="height: 32px; width: 32px; border-radius: 6px; object-fit: cover; border: 1px solid rgba(15, 23, 42, 0.15);" />
           <div class="db-sidebar-logo-text" style="font-size: 13.5px; font-weight: 800; letter-spacing: 0.02em; color: var(--color-primary);">
             SOLUCIONES CONTABLES
           </div>
@@ -79,7 +79,7 @@ export function renderDashboardLayout(childHTML, activeRoute, role = null) {
         <!-- Active Client Scoping Context Card -->
         <div class="sidebar-active-client-card" style="background: rgba(13, 148, 136, 0.04); border: 1px solid rgba(13, 148, 136, 0.15); border-radius: var(--radius-md); padding: 12px; margin: 4px 8px 16px; display: flex; flex-direction: column; gap: 8px;">
           <div style="display: flex; align-items: center; gap: 6px;">
-            <div style="background: ${activeCompany.color}; width: 8px; height: 8px; border-radius: 50%;"></div>
+            <div style="background: ${colorSeguro(activeCompany.color)}; width: 8px; height: 8px; border-radius: 50%;"></div>
             <span style="font-size: 9.5px; font-weight: 700; color: var(--color-teal-light); text-transform: uppercase; letter-spacing: 0.05em;">${isCliente ? 'Tu empresa' : 'Cliente Seleccionado'}</span>
           </div>
           <div>
@@ -223,7 +223,7 @@ export function renderDashboardLayout(childHTML, activeRoute, role = null) {
           <!-- Dynamic Company Selector Pill -->
           <div style="position: relative;">
             <div class="company-selector-container" id="topbar-company-selector" style="border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 5px 12px; display: flex; align-items: center; gap: 8px; background: #fff; box-shadow: var(--shadow-sm); cursor: pointer; transition: border-color 0.2s;">
-              <div class="company-avatar" style="background: ${activeCompany.color}; width: 22px; height: 22px; border-radius: 50%; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700;">
+              <div class="company-avatar" style="background: ${colorSeguro(activeCompany.color)}; width: 22px; height: 22px; border-radius: 50%; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700;">
                 ${esc(activeCompany.razon_social[0])}
               </div>
               <div class="company-select-text" style="display: flex; flex-direction: column; text-align: left;">
@@ -239,7 +239,7 @@ export function renderDashboardLayout(childHTML, activeRoute, role = null) {
               <div style="max-height: 250px; overflow-y: auto;">
                 ${companies.map(c => `
                   <div class="dropdown-item ${c.id === activeCompany.id ? 'active' : ''}" data-id="${esc(c.id)}" style="padding: 8px 12px; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: background 0.15s;">
-                    <div class="company-avatar" style="background: ${c.color}; width: 22px; height: 22px; border-radius: 50%; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700;">
+                    <div class="company-avatar" style="background: ${colorSeguro(c.color)}; width: 22px; height: 22px; border-radius: 50%; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700;">
                       ${esc(c.razon_social[0])}
                     </div>
                     <div class="company-select-text" style="display: flex; flex-direction: column; text-align: left;">
@@ -395,6 +395,7 @@ export function initDashboardLayout(mainApp) {
   // Logout studio
   document.getElementById('logout-studio-btn')?.addEventListener('click', async () => {
     if (isSupabaseConfigured && supabase) {
+      await limpiarDatosLocales();
       await supabase.auth.signOut();
     }
     localStorage.removeItem('vmp_premium_unlocked');

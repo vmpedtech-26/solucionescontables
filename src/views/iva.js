@@ -4,7 +4,7 @@
 import { getActiveCompany, getTransactions } from '../db/mockdb.js';
 import { ventasComprobantes, ventasAlicuotas, comprasComprobantes, comprasAlicuotas } from '../domain/libroiva.js';
 import { sanitizeInput as esc, getActivePeriod, periodLabel } from '../utils.js';
-import { renderSinEmpresas } from '../utils.js';
+import { renderSinEmpresas, sanitizeCSV } from '../utils.js';
 import { isSupabaseConfigured } from '../db/supabase.js';
 
 export function renderIVA() {
@@ -326,8 +326,9 @@ export function initIVA(mainApp) {
 
     combined.forEach(item => {
       const date = item.fecha.split('-').reverse().join('/');
-      const name = (item.ent || '').replace(/;/g, ',');
-      csvContent += `${date};${item.type};${item.tipo_comprobante};${item.numero};${name};${item.cuit};${item.neto.toFixed(2)};${item.df.toFixed(2)};${item.cf.toFixed(2)};${item.total.toFixed(2)}\r\n`;
+      // sanitizeCSV: un nombre como =HYPERLINK(...) no se ejecuta al abrir en Excel
+      const celda = (v) => sanitizeCSV(String(v ?? '').replace(/[;\r\n]/g, ','));
+      csvContent += `${date};${item.type};${celda(item.tipo_comprobante)};${celda(item.numero)};${celda(item.ent)};${celda(item.cuit)};${item.neto.toFixed(2)};${item.df.toFixed(2)};${item.cf.toFixed(2)};${item.total.toFixed(2)}\r\n`;
     });
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });

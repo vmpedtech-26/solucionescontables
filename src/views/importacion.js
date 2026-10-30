@@ -505,7 +505,7 @@ export function initImportacion(mainApp) {
     const errores = [];
     for (const tx of batch) {
       try {
-        await addTransactionAsync(activeCompany.id, type, { ...tx });
+        await addTransactionAsync(activeCompany.id, type, { ...tx }, { silencioso: true });
         ok++;
       } catch (e) {
         const msg = /ya existe/i.test(e.message) ? 'ya estaba cargado' : /verificador|cuit/i.test(e.message) ? 'CUIT inválido' : e.message;
@@ -630,9 +630,11 @@ export function initImportacion(mainApp) {
     const missingAfip = [];
 
     // Helper key creator
+    // Clave: CUIT + tipo + numero. Solo con el numero, dos proveedores con la
+    // misma factura 0001-00000123 se daban por conciliados.
     const getCcbteKey = (tx) => {
-      const numClean = tx.numero.replace(/[^\d]/g, '');
-      return `${numClean}`;
+      const d = (v) => String(v ?? '').replace(/[^\d]/g, '');
+      return `${d(tx.cuit)}|${String(tx.tipo_comprobante || '').toLowerCase()}|${d(tx.numero)}`;
     };
 
     const localKeysMap = {};
@@ -707,12 +709,8 @@ export function initImportacion(mainApp) {
           addTransaction(activeCompany.id, type, item);
           mainApp.showToast(`¡Comprobante N° ${item.numero} incorporado con éxito al Ledger!`, "success");
           
-          // Re-trigger reconciler instantly
-          if (type === 'compras') {
-            executeReconciliation(ARCA_MOCK_RECIBIDAS, 'compras');
-          } else {
-            executeReconciliation(ARCA_MOCK_EMITIDAS, 'ventas');
-          }
+          // Re-trigger reconciler con el mismo archivo (no con los datos de ejemplo)
+          executeReconciliation(afipComprobantes, type);
         });
       });
     }

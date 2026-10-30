@@ -3,7 +3,7 @@
    ------------------------------------------------------------- */
 import { getCompaniesAsync, saveCompanyAsync, deleteCompanyAsync } from '../db/mockdb.js';
 import { supabase, isSupabaseConfigured } from '../db/supabase.js';
-import { sanitizeInput as esc, validarCUIT } from '../utils.js';
+import { sanitizeInput as esc, validarCUIT, colorSeguro } from '../utils.js';
 import { arca } from '../arca.js';
 import { abrirAccesosPortal, crearInvitacion } from './portal_accesos.js';
 
@@ -114,7 +114,7 @@ export async function renderEmpresas() {
               <tr>
                 <td>
                   <div style="display: flex; align-items: center; gap: 12px;">
-                    <div class="company-avatar" style="background: ${c.color}; width: 36px; height: 36px; border-radius: 10px; font-weight: 800; font-size: 15px;">
+                    <div class="company-avatar" style="background: ${colorSeguro(c.color)}; width: 36px; height: 36px; border-radius: 10px; font-weight: 800; font-size: 15px;">
                       ${esc(c.razon_social[0])}
                     </div>
                     <div>

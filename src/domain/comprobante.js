@@ -57,8 +57,14 @@ export function htmlComprobante({ emisor, cbte, receptor, detalle }) {
   const docLabel = { 80: 'CUIT', 96: 'DNI', 99: 'Consumidor Final' }[Number(receptor.docTipo)] || 'Doc.';
   const qr = urlQR({ fecha: cbte.fecha, cuitEmisor: emisor.cuit, ptoVta: pv, tipoCmp: codigo, nroCmp: nro, importe: cbte.total,
     docTipo: receptor.docTipo, docNro: receptor.docNro, cae: cbte.cae });
+  // Factura B: el IVA no se discrimina; se informa como "IVA contenido"
+  // (Régimen de Transparencia Fiscal al Consumidor, Ley 27.743 / RG 5614).
   const filasImportes = esC
     ? `<tr><td>Importe total</td><td class="r"><b>${pesos(cbte.total)}</b></td></tr>`
+    : letra === 'B'
+    ? `<tr><td><b>Importe total</b></td><td class="r"><b>${pesos(cbte.total)}</b></td></tr>
+       <tr><td colspan="2" style="padding-top:8px;font-size:11px;">Régimen de Transparencia Fiscal al Consumidor (Ley 27.743)</td></tr>
+       <tr><td style="font-size:11px;">IVA contenido</td><td class="r" style="font-size:11px;">${pesos(cbte.iva)}</td></tr>`
     : `<tr><td>Importe neto gravado</td><td class="r">${pesos(cbte.neto)}</td></tr>
        <tr><td>IVA ${esc(String(cbte.alicuota).replace('.', ','))}%</td><td class="r">${pesos(cbte.iva)}</td></tr>
        <tr><td><b>Importe total</b></td><td class="r"><b>${pesos(cbte.total)}</b></td></tr>`;

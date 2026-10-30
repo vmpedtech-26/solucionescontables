@@ -39,6 +39,10 @@ describe('Libro IVA Digital - contenido', () => {
   });
   it('codigos de comprobante', () => {
     expect(codigoComprobante('Factura B')).toBe('006');
+    expect(codigoComprobante('Factura de Crédito Electrónica A')).toBe('201');
+    expect(codigoComprobante('Recibo C')).toBe('015');
+    expect(codigoComprobante('Tique Factura B')).toBe('082');
+    expect(codigoComprobante('51')).toBe('051');
     expect(codigoComprobante('Nota de Crédito A')).toBe('003');
     expect(codigoComprobante('Nota de Débito B')).toBe('007');
     expect(codigoComprobante('Factura A - Retención')).toBe('001');

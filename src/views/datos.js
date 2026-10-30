@@ -5,6 +5,7 @@
 import { supabase, isSupabaseConfigured, getCachedRole } from '../db/supabase.js';
 import { LEGAL } from '../legal-config.js';
 import { sanitizeInput as esc } from '../utils.js';
+import { limpiarDatosLocales } from '../db/mockdb.js';
 
 export function renderDatosCard({ esEstudio = true } = {}) {
   if (!isSupabaseConfigured) return '';
@@ -74,7 +75,7 @@ export function initDatosCard(mainApp) {
       return;
     }
     try { await supabase.auth.signOut(); } catch (e) { /* la sesión ya no existe */ }
-    localStorage.removeItem('vmp_premium_unlocked');
+    await limpiarDatosLocales();
     window.location.hash = '#/';
     window.location.reload();
   });

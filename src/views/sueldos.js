@@ -444,8 +444,8 @@ export async function initSueldos(mainApp) {
 
     listContainer.innerHTML = filtered.map(l => `
       <tr style="border-bottom: 1px solid rgba(15, 23, 42, 0.04);">
-        <td style="padding: 12px 20px; font-weight: 700; color: var(--text-primary); font-size: 13px;">${l.name}</td>
-        <td style="padding: 12px 20px; font-family: monospace; font-size: 12.5px; color: var(--text-secondary);">${l.cuil}</td>
+        <td style="padding: 12px 20px; font-weight: 700; color: var(--text-primary); font-size: 13px;">${esc(l.name)}</td>
+        <td style="padding: 12px 20px; font-family: monospace; font-size: 12.5px; color: var(--text-secondary);">${esc(l.cuil)}</td>
         <td style="padding: 12px 20px; text-align: center; font-size: 12.5px; font-weight: 600; color: var(--text-secondary);">${l.periodo.split('-').reverse().join('/')}</td>
         <td style="padding: 12px 20px; text-align: right; font-weight: 700; color: var(--text-primary); font-size: 13px;">$${fmt(l.bruto)}</td>
         <td style="padding: 12px 20px; text-align: right; font-weight: 600; color: #ef4444; font-size: 13px;">-$${fmt(l.totalDeduc)}</td>

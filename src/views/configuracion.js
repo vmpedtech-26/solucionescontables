@@ -204,11 +204,11 @@ ${isSupabaseConfigured ? '' : `
           <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px;">
             <div>
               <label style="font-size: 11.5px; font-weight: 600; display: block; margin-bottom: 6px;">Supabase URL</label>
-              <input type="text" id="supabase-url-input" class="form-input" style="width: 100%; padding: 8px 12px; font-size: 12.5px; background: #fff;" placeholder="https://xxxxxxxxxxxxxxxxxxxx.supabase.co" value="${localStorage.getItem('vmp_supabase_url') || ''}">
+              <input type="text" id="supabase-url-input" class="form-input" style="width: 100%; padding: 8px 12px; font-size: 12.5px; background: #fff;" placeholder="https://xxxxxxxxxxxxxxxxxxxx.supabase.co" value="${esc(localStorage.getItem('vmp_supabase_url') || '')}">
             </div>
             <div>
               <label style="font-size: 11.5px; font-weight: 600; display: block; margin-bottom: 6px;">Supabase Anon Key (API Key)</label>
-              <input type="password" id="supabase-anon-key-input" class="form-input" style="width: 100%; padding: 8px 12px; font-size: 12.5px; background: #fff;" placeholder="Pega tu Anon Key..." value="${localStorage.getItem('vmp_supabase_anon_key') || ''}">
+              <input type="password" id="supabase-anon-key-input" class="form-input" style="width: 100%; padding: 8px 12px; font-size: 12.5px; background: #fff;" placeholder="Pega tu Anon Key..." value="${esc(localStorage.getItem('vmp_supabase_anon_key') || '')}">
             </div>
           </div>
           <div style="display: flex; gap: 12px; align-items: center;">

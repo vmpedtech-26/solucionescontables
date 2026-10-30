@@ -91,6 +91,9 @@ export function detectarColumnas(encabezados) {
     iva: primero(/^total iva$/, /^(imp\.? )?iva$/),
     ivaPorAlicuota,
     total: primero(/^(imp\.? )?total$/, /^importe total$/),
+    exentas: primero(/^(imp\.? )?(op\.?|operaciones) exentas$/),
+    noGravado: primero(/^(imp\.? )?neto no gravado$/),
+    otrosTributos: primero(/^(imp\.? )?otros tributos$/),
     emisor: c.some((x) => /emisor|proveedor|vendedor/.test(x)),
     receptor: c.some((x) => /receptor|cliente|comprador/.test(x))
   };
@@ -152,7 +155,20 @@ export function parseMisComprobantes(texto, nombreArchivo = '') {
     iva = Math.round(iva * cambio * 100) / 100;
 
     const tipoComprobante = normalizarTipo(col.tipo !== -1 ? campos[col.tipo] : '');
-    if (neto === 0 && iva === 0 && total !== 0) {
+    const monto = (i) => (i !== -1 ? Math.round(parseMonto(campos[i]) * cambio * 100) / 100 : 0);
+    const exentas = monto(col.exentas);
+    const otros = monto(col.noGravado) + monto(col.otrosTributos);
+    const alicuotasUsadas = col.netoPorAlicuota.filter((i) => parseMonto(campos[i]) !== 0).length;
+    if (alicuotasUsadas > 1) avisos.push(`Fila ${n + 1}: ${tipoComprobante} ${numero} tiene ${alicuotasUsadas} alícuotas de IVA; se cargó como una sola. Revisalo antes de presentar el Libro IVA.`);
+    let exento = false;
+    if (neto === 0 && iva === 0 && exentas !== 0) {
+      // Operacion exenta: va al Libro IVA con codigo E, sin alicuota
+      neto = total;
+      exento = true;
+    } else if (neto !== 0 && (exentas !== 0 || otros !== 0)) {
+      avisos.push(`Fila ${n + 1}: ${tipoComprobante} ${numero} incluye importes exentos, no gravados u otros tributos que no se desglosan; revisalo antes de presentar el Libro IVA.`);
+    }
+    if (!exento && neto === 0 && iva === 0 && total !== 0) {
       // Sin desglose (por ejemplo Factura C o B recibida): no se inventa IVA
       neto = total;
       if (!/\bC$|\bC\b/.test(tipoComprobante)) avisos.push(`Fila ${n + 1}: ${tipoComprobante} ${numero} sin IVA discriminado; se cargó el total como neto.`);
@@ -163,6 +179,7 @@ export function parseMisComprobantes(texto, nombreArchivo = '') {
       neto: Math.abs(neto), iva: Math.abs(iva), total: Math.abs(total),
       es_activo: false, categoria: tipo === 'ventas' ? 'Venta' : 'General'
     };
+    if (exento) registro.exento = true;
     const nombre = col.denominacion !== -1 ? campos[col.denominacion] : '';
     if (tipo === 'ventas') registro.cliente = nombre || (cuit ? '' : 'Consumidor Final');
     else registro.proveedor = nombre || 'Proveedor sin nombre';
