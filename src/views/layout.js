@@ -109,6 +109,10 @@ export function renderDashboardLayout(childHTML, activeRoute, role = null) {
           <i data-lucide="building-2"></i>
           <span>Mis Clientes (CUITs)</span>
         </a>
+        <a href="#/studio/honorarios" class="db-nav-item solo-no-asistente ${activeRoute === 'honorarios' ? 'active' : ''}" data-route="honorarios">
+          <i data-lucide="wallet"></i>
+          <span>Honorarios y cobranzas</span>
+        </a>
         ${isSupabaseConfigured ? `<a href="#/studio/equipo" class="db-nav-item ${activeRoute === 'equipo' ? 'active' : ''}" data-route="equipo">
           <i data-lucide="users-round"></i>
           <span>Equipo del estudio</span>
