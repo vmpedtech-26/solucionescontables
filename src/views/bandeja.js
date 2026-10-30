@@ -5,6 +5,7 @@
 import { supabase, isSupabaseConfigured } from '../db/supabase.js';
 import { addTransactionAsync } from '../db/mockdb.js';
 import { sanitizeInput as esc, validarCUIT, renderComingSoon } from '../utils.js';
+import { iaDisponible, leerComprobante } from '../ia.js';
 
 export const TIPOS_COMPROBANTE = ['Factura A', 'Factura B', 'Factura C', 'Factura M', 'Nota de Crédito A', 'Nota de Crédito B', 'Nota de Débito A', 'Nota de Débito B'];
 
@@ -89,6 +90,8 @@ function abrirModalAprobar(t, mainApp) {
     <div style="background:#fff;border-radius:14px;padding:24px;max-width:480px;width:100%;max-height:92vh;overflow:auto;">
       <h3 style="margin:0 0 4px;">Cargar al Libro de Compras</h3>
       <p style="margin:0 0 8px;font-size:12px;color:var(--text-secondary);">${esc(t.empresas?.razon_social || '')} · el cliente informó ${esc(fmtMonto(t.monto))}. Completá los datos fiscales del comprobante.</p>
+      ${t.archivo && t.archivo.includes('/') && iaDisponible() ? `<button type="button" id="b-ia" class="btn btn-outline btn-sm" style="width:100%;"><i data-lucide="sparkles"></i> Leer el archivo con IA</button>
+      <div id="b-ia-avisos" style="font-size:11.5px;line-height:1.5;margin-top:6px;"></div>` : ''}
       <form id="bandeja-form">
         <label style="${label}">Fecha del comprobante *</label>
         <input type="date" id="b-fecha" required value="${esc(t.fecha || hoy)}" style="${input}">
@@ -114,12 +117,16 @@ function abrirModalAprobar(t, mainApp) {
       </form>
     </div>`;
   document.body.appendChild(modal);
+  if (window.lucide) window.lucide.createIcons();
 
   const $ = (id) => modal.querySelector(id);
   const cerrar = () => modal.remove();
   $('#b-cancel').addEventListener('click', cerrar);
 
+  // Lo que leyo la IA: se usa tal cual mientras no se toquen total ni alicuota
+  let leido = null;
   const calc = () => {
+    if (leido) return { total: leido.total, neto: leido.neto, iva: leido.iva };
     const total = parseFloat($('#b-total').value) || 0;
     const ali = parseFloat($('#b-ali').value) || 0;
     const neto = ali > 0 ? total / (1 + ali / 100) : total;
@@ -132,7 +139,45 @@ function abrirModalAprobar(t, mainApp) {
     $('#b-cuit-fb').innerHTML = cuit.length === 11 && !validarCUIT(cuit) ? '<span style="color:#b45309;">⚠ El dígito verificador no coincide: revisá el CUIT.</span>' : '';
   };
   ['#b-total', '#b-ali', '#b-cuit'].forEach((s) => $(s).addEventListener('input', refrescar));
+  ['#b-total', '#b-ali'].forEach((s) => $(s).addEventListener('input', () => { leido = null; refrescar(); }, true));
   refrescar();
+
+  $('#b-ia')?.addEventListener('click', async () => {
+    const boton = $('#b-ia');
+    const avisos = $('#b-ia-avisos');
+    boton.disabled = true;
+    boton.textContent = 'Leyendo el comprobante…';
+    avisos.textContent = '';
+    try {
+      const r = await leerComprobante(t.archivo);
+      if (!r.ok) { avisos.innerHTML = `<span style="color:#b45309;">${esc(r.advertencias.join(' '))}</span>`; return; }
+      const c = r.comprobante;
+      if (c.fecha) $('#b-fecha').value = c.fecha;
+      if (c.contraparte) $('#b-prov').value = c.contraparte;
+      if (c.cuit) $('#b-cuit').value = c.cuit;
+      if (c.numero) $('#b-num').value = c.numero;
+      const tipo = $('#b-tipo');
+      if (![...tipo.options].some((o) => o.value === c.tipo_comprobante)) tipo.add(new Option(c.tipo_comprobante, c.tipo_comprobante));
+      tipo.value = c.tipo_comprobante;
+      $('#b-total').value = Number(c.total || 0).toFixed(2);
+      const principal = [...c.alicuotas].sort((a, b) => b.base - a.base)[0];
+      $('#b-ali').value = principal && ['21', '10.5', '27'].includes(String(principal.alicuota)) ? String(principal.alicuota) : '0';
+      leido = c;
+      refrescar();
+      const extras = [c.alicuotas.length > 1 && `alícuotas ${c.alicuotas.map((a) => `${String(a.alicuota).replace('.', ',')}%`).join(' + ')}`,
+        c.importe_exento && `exento ${fmtMonto(c.importe_exento)}`, c.importe_no_gravado && `no gravado ${fmtMonto(c.importe_no_gravado)}`,
+        c.otros_tributos && `percepciones/otros ${fmtMonto(c.otros_tributos)}`].filter(Boolean);
+      if (extras.length) $('#b-resumen').textContent += ` · ${extras.join(' · ')}`;
+      const lista = (r.libro === 'ventas' ? ['Es una factura emitida por la empresa: corresponde al Libro de Ventas, no al de Compras.'] : []).concat(r.advertencias);
+      avisos.innerHTML = `<div style="color:#15803d;">Datos leídos. Revisalos contra el archivo antes de cargar.</div>`
+        + lista.map((a) => `<div style="color:#b45309;">⚠ ${esc(a)}</div>`).join('');
+    } catch (err) {
+      avisos.innerHTML = `<span style="color:#b91c1c;">${esc(err.message)}</span>`;
+    } finally {
+      boton.disabled = false;
+      boton.textContent = 'Volver a leer con IA';
+    }
+  });
 
   $('#bandeja-form').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -149,6 +194,7 @@ function abrirModalAprobar(t, mainApp) {
         tipo_comprobante: $('#b-tipo').value,
         numero,
         neto: c.neto, iva: c.iva, total: c.total,
+        ...(leido ? { alicuotas: leido.alicuotas, importe_exento: leido.importe_exento, importe_no_gravado: leido.importe_no_gravado, otros_tributos: leido.otros_tributos } : {}),
         es_activo: !!t.es_activo,
         categoria: t.categoria || 'General'
       });
