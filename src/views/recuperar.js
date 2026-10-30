@@ -9,7 +9,7 @@ const tarjeta = (contenido) => `
   <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; background: var(--bg-secondary);">
     <div style="background: #ffffff; border: 1px solid rgba(15, 23, 42, 0.08); border-radius: 16px; padding: 36px; max-width: 420px; width: 100%; box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25);">
       <div style="text-align: center; margin-bottom: 22px;">
-        <img src="/SolucionesContables_Logo.png" alt="Soluciones Contables" style="width: 48px; height: 48px; border-radius: 10px; object-fit: cover; border: 1px solid rgba(15, 23, 42, 0.1);">
+        <img src="/logo-128.webp" alt="Soluciones Contables" style="width: 48px; height: 48px; border-radius: 10px; object-fit: cover; border: 1px solid rgba(15, 23, 42, 0.1);">
       </div>
       ${contenido}
     </div>

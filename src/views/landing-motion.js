@@ -4,7 +4,7 @@
    cortan solos cuando la landing sale del DOM.
    ------------------------------------------------------------- */
 
-const FONDOS = ['/corporate_bg.jpg', '/corporate_bg_2.jpg', '/corporate_bg_3.jpg'];
+const FONDOS = ['/corporate_bg.webp', '/corporate_bg_2.webp', '/corporate_bg_3.webp'];
 
 const NOVEDADES = [
   ['Factura electrónica', 'Factura B emitida · CAE aprobado por ARCA'],

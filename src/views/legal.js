@@ -17,7 +17,7 @@ function pagina(titulo, cuerpo, otraRuta, otraEtiqueta) {
   <div class="legal-page" style="min-height: 100vh; background: var(--bg-secondary, #f8fafc);">
     <header style="background: #fff; border-bottom: 1px solid var(--border-color, #e2e8f0); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
       <a href="#/" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--color-primary);">
-        <img src="/SolucionesContables_Logo.png" alt="" style="width: 34px; height: 34px; border-radius: 6px; object-fit: cover;" />
+        <img src="/logo-128.webp" alt="" style="width: 34px; height: 34px; border-radius: 6px; object-fit: cover;" />
         <strong style="font-size: 15px;">${LEGAL.producto}</strong>
       </a>
       <nav style="display: flex; gap: 18px; font-size: 13px;">

@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="/logo-180.png">
+  <link rel="apple-touch-icon" href="/logo-180.png">
   <title>Soluciones Contables — El integrante virtual que elimina la carga manual de tu estudio.</title>
   <meta name="description" content="SaaS de automatización impositiva para estudios contables en Argentina. Liquidación de IVA, importación de comprobantes ARCA, ajuste por inflación RT 54 y portal de clientes móvil.">
   
@@ -26,16 +28,16 @@
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   
   <!-- Preload permanent background image -->
-  <link rel="preload" as="image" href="/corporate_bg.jpg">
+  <link rel="preload" as="image" href="/corporate_bg.webp">
 
   <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide@1.52.0/dist/umd/lucide.min.js" integrity="sha384-SSRIJfpvnhji4rCcULgpNXRJjQ9P/odU9OaWxSumsZiokvJ7zAu4PGQVWyWxTG3u" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/lucide@1.52.0/dist/umd/lucide.min.js" integrity="sha384-SSRIJfpvnhji4rCcULgpNXRJjQ9P/odU9OaWxSumsZiokvJ7zAu4PGQVWyWxTG3u" crossorigin="anonymous" defer></script>
   
   <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js" integrity="sha384-jb8JQMbMoBUzgWatfe6COACi2ljcDdZQ2OxczGA3bGNeWe+6DChMTBJemed7ZnvJ" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js" integrity="sha384-jb8JQMbMoBUzgWatfe6COACi2ljcDdZQ2OxczGA3bGNeWe+6DChMTBJemed7ZnvJ" crossorigin="anonymous" defer></script>
   
   <!-- Supabase Client -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2" integrity="sha384-WgXwGL6fUsYJWNaKJgVbrJKGRQwc1vieh2oy4kw9nXqpNDz3tdSsqEYUgeHD/NuF" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2" integrity="sha384-WgXwGL6fUsYJWNaKJgVbrJKGRQwc1vieh2oy4kw9nXqpNDz3tdSsqEYUgeHD/NuF" crossorigin="anonymous" defer></script>
   
   <!-- Stylesheets -->
   <link rel="stylesheet" href="./css/landing.css">
@@ -50,7 +52,7 @@
     <div class="lp-wrapper">
       <!-- Permanent Fixed Background -->
       <div class="lp-bg-slideshow">
-        <div class="lp-bg-slide active" style="background-image: url('/corporate_bg.jpg');"></div>
+        <div class="lp-bg-slide active" style="background-image: url('/corporate_bg.webp');"></div>
         <div class="lp-bg-overlay"></div>
       </div>
       
@@ -58,7 +60,7 @@
       <header class="lp-header">
         <div class="container lp-nav">
           <a href="#/" class="lp-logo" style="display: flex; align-items: center; gap: 10px;">
-            <img src="/SolucionesContables_Logo.png" alt="SolucionesContables Logo" style="width: 38px; height: 38px; border-radius: 6px; object-fit: cover; border: 1px solid rgba(15, 23, 42, 0.15);" />
+            <img src="/logo-128.webp" alt="SolucionesContables Logo" style="width: 38px; height: 38px; border-radius: 6px; object-fit: cover; border: 1px solid rgba(15, 23, 42, 0.15);" />
             <div class="lp-logo-text" style="display: flex; flex-direction: column; line-height: 1.05; font-family: var(--font-heading);">
               <span style="font-size: 15px; font-weight: 800; color: var(--color-primary); letter-spacing: 0.02em; text-transform: none;">SolucionesContables</span>
             </div>
@@ -123,7 +125,7 @@
                 <div class="mockup-row">
                   <div class="mockup-widget">
                     <div class="mockup-w-title">Empresa Activa</div>
-                    <div class="mockup-w-val text-teal" style="color: var(--color-accent)">Logística Patagonia</div>
+                    <div class="mockup-w-val text-teal" style="color: var(--color-accent-strong)">Logística Patagonia</div>
                   </div>
                   <div class="mockup-widget">
                     <div class="mockup-w-title">IVA Débito (Mayo)</div>
@@ -146,7 +148,7 @@
                   <i data-lucide="check-circle-2"></i>
                 </div>
                 <div class="mfc-text">
-                  <h4>Portal de Clientes</h4>
+                  <div class="mfc-title">Portal de Clientes</div>
                   <p>Novedad: portal para que tus clientes carguen comprobantes</p>
                 </div>
               </div>
@@ -165,7 +167,7 @@
           <div class="features-grid">
             <div class="feature-card" style="padding: 24px; overflow: hidden;">
               <div class="feature-image-wrapper" style="width: 100%; height: 180px; border-radius: var(--radius-md); overflow: hidden; margin-bottom: 20px; border: 1px solid rgba(15, 23, 42, 0.06); position: relative;">
-                <img src="/client_portal_benefit.png" alt="Clientes enviando comprobantes desde el celular" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; display: block;" loading="lazy" class="benefit-img">
+                <img src="/client_portal_benefit.webp" alt="Clientes enviando comprobantes desde el celular" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; display: block;" loading="lazy" class="benefit-img">
                 <div class="feature-icon" style="position: absolute; bottom: 12px; left: 12px; margin-bottom: 0; background: #ffffff; box-shadow: var(--shadow-sm); width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; z-index: 10; border: 1px solid rgba(15, 23, 42, 0.08);">
                   <i data-lucide="smartphone" style="width: 18px; height: 18px;"></i>
                 </div>
@@ -175,7 +177,7 @@
             </div>
             <div class="feature-card" style="padding: 24px; overflow: hidden;">
               <div class="feature-image-wrapper" style="width: 100%; height: 180px; border-radius: var(--radius-md); overflow: hidden; margin-bottom: 20px; border: 1px solid rgba(15, 23, 42, 0.06); position: relative;">
-                <img src="/monitoreo_monotributo_benefit.png" alt="Control de topes de Monotributo" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; display: block;" loading="lazy" class="benefit-img">
+                <img src="/monitoreo_monotributo_benefit.webp" alt="Control de topes de Monotributo" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; display: block;" loading="lazy" class="benefit-img">
                 <div class="feature-icon" style="position: absolute; bottom: 12px; left: 12px; margin-bottom: 0; background: #ffffff; box-shadow: var(--shadow-sm); width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; z-index: 10; border: 1px solid rgba(15, 23, 42, 0.08);">
                   <i data-lucide="bell-ring" style="width: 18px; height: 18px;"></i>
                 </div>
@@ -185,7 +187,7 @@
             </div>
             <div class="feature-card" style="padding: 24px; overflow: hidden;">
               <div class="feature-image-wrapper" style="width: 100%; height: 180px; border-radius: var(--radius-md); overflow: hidden; margin-bottom: 20px; border: 1px solid rgba(15, 23, 42, 0.06); position: relative;">
-                <img src="/libro_iva_benefit.png" alt="Libro IVA Digital" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; display: block;" loading="lazy" class="benefit-img">
+                <img src="/libro_iva_benefit.webp" alt="Libro IVA Digital" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; display: block;" loading="lazy" class="benefit-img">
                 <div class="feature-icon" style="position: absolute; bottom: 12px; left: 12px; margin-bottom: 0; background: #ffffff; box-shadow: var(--shadow-sm); width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; z-index: 10; border: 1px solid rgba(15, 23, 42, 0.08);">
                   <i data-lucide="clock" style="width: 18px; height: 18px;"></i>
                 </div>
@@ -237,7 +239,7 @@
               <img src="/accounting_firm.png" alt="Escritorio de un contador profesional con libros contables y calculadora" width="600" height="450" loading="lazy" style="width: 100%; height: auto; display: block; object-fit: cover;">
               <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0) 100%); padding: 32px 24px; color: #ffffff;">
                 <span style="font-family: var(--font-heading); font-size: 11px; font-weight: 750; color: var(--color-accent-light); text-transform: uppercase; letter-spacing: 0.1em; display: block; margin-bottom: 6px;">Socio Tecnológico Impositivo</span>
-                <h4 style="font-size: 18px; font-weight: 700; color: #ffffff; margin: 0;">Estudio Contable Comahue</h4>
+                <h3 style="font-size: 18px; font-weight: 700; color: #ffffff; margin: 0;">Estudio Contable Comahue</h3>
                 <p style="font-size: 12px; color: #94a3b8; margin: 4px 0 0 0;">Neuquén, Argentina — Infraestructura en la Nube</p>
               </div>
             </div>
@@ -254,21 +256,21 @@
                 <div style="display: flex; gap: 16px;">
                   <div class="prestige-icon-bullet" style="background: rgba(22, 163, 74, 0.08); color: var(--color-accent); width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;"><i data-lucide="shield-check" style="width: 20px; height: 20px;"></i></div>
                   <div>
-                    <h4 style="font-size: 15px; font-weight: 700; color: var(--color-primary); margin-bottom: 4px;">Aislamiento de Datos y Conexión Cifrada</h4>
+                    <h3 style="font-size: 15px; font-weight: 700; color: var(--color-primary); margin-bottom: 4px;">Aislamiento de Datos y Conexión Cifrada</h3>
                     <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.4; margin: 0;">Cada estudio accede únicamente a su propia información: el aislamiento se aplica en la base de datos y las conexiones viajan cifradas (HTTPS). El sistema no solicita ni guarda tu clave fiscal.</p>
                   </div>
                 </div>
                 <div style="display: flex; gap: 16px;">
                   <div class="prestige-icon-bullet" style="background: rgba(22, 163, 74, 0.08); color: var(--color-accent); width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;"><i data-lucide="check-square" style="width: 20px; height: 20px;"></i></div>
                   <div>
-                    <h4 style="font-size: 15px; font-weight: 700; color: var(--color-primary); margin-bottom: 4px;">Controles de Consistencia de CUIT</h4>
+                    <h3 style="font-size: 15px; font-weight: 700; color: var(--color-primary); margin-bottom: 4px;">Controles de Consistencia de CUIT</h3>
                     <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.4; margin: 0;">Verificación del dígito verificador de cada CUIT y detección de comprobantes repetidos. No consulta el padrón ni la base APOC de ARCA.</p>
                   </div>
                 </div>
                 <div style="display: flex; gap: 16px;">
                   <div class="prestige-icon-bullet" style="background: rgba(22, 163, 74, 0.08); color: var(--color-accent); width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;"><i data-lucide="scale" style="width: 20px; height: 20px;"></i></div>
                   <div>
-                    <h4 style="font-size: 15px; font-weight: 700; color: var(--color-primary); margin-bottom: 4px;">Herramientas de Apoyo Contable</h4>
+                    <h3 style="font-size: 15px; font-weight: 700; color: var(--color-primary); margin-bottom: 4px;">Herramientas de Apoyo Contable</h3>
                     <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.4; margin: 0;">Los cálculos de IVA, Monotributo, retenciones y RT 54 son una ayuda de trabajo y deben ser revisados por el contador antes de presentarse o volcarse a balances.</p>
                   </div>
                 </div>
@@ -432,10 +434,10 @@
               <p>En 20 minutos te mostramos el circuito completo: del ticket que manda tu cliente al Libro IVA y la factura con CAE. Sin compromiso.</p>
               <div class="contact-details">
                 <div class="cd-item">
-                  <div class="cd-icon" style="color: #25d366; background: rgba(37, 211, 102, 0.05); border: 1px solid rgba(37, 211, 102, 0.15); display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 8px;"><i data-lucide="message-circle"></i></div>
+                  <div class="cd-icon" style="color: #0E7C4A; background: rgba(37, 211, 102, 0.05); border: 1px solid rgba(37, 211, 102, 0.15); display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 8px;"><i data-lucide="message-circle"></i></div>
                   <div class="cd-text">
-                    <h4>WhatsApp directo</h4>
-                    <a href="https://wa.me/5492996731487?text=Hola!%20Quiero%20ver%20una%20demo%20de%20Soluciones%20Contables" target="_blank" rel="noopener" style="font-size: 15px; font-weight: 800; color: #25d366; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; margin-top: 2px;">
+                    <h3>WhatsApp directo</h3>
+                    <a href="https://wa.me/5492996731487?text=Hola!%20Quiero%20ver%20una%20demo%20de%20Soluciones%20Contables" target="_blank" rel="noopener" style="font-size: 15px; font-weight: 800; color: #0E7C4A; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; margin-top: 2px;">
                       +54 299 673-1487 <span style="font-size: 10px; font-weight: 700; background: rgba(37,211,102,0.08); padding: 2px 8px; border-radius: 12px;">Respondemos en el día</span>
                     </a>
                   </div>
@@ -443,14 +445,14 @@
                 <div class="cd-item">
                   <div class="cd-icon"><i data-lucide="mail"></i></div>
                   <div class="cd-text">
-                    <h4>Email</h4>
+                    <h3>Email</h3>
                     <p>administracion@vmp-edtech.com</p>
                   </div>
                 </div>
                 <div class="cd-item">
                   <div class="cd-icon"><i data-lucide="map-pin"></i></div>
                   <div class="cd-text">
-                    <h4>Desarrollado y respaldado por</h4>
+                    <h3>Desarrollado y respaldado por</h3>
                     <p>VMP S.A.S. — Neuquén, Argentina</p>
                   </div>
                 </div>
@@ -491,7 +493,7 @@
                   <label class="form-label" for="demo-mensaje">¿Algo que quieras ver en la demo? (opcional)</label>
                   <textarea class="form-input" id="demo-mensaje" rows="2" maxlength="400" placeholder="Ej: cómo cargan los comprobantes mis clientes"></textarea>
                 </div>
-                <button type="submit" class="btn btn-primary w-full" style="background: #25d366; border-color: #25d366;">
+                <button type="submit" class="btn btn-primary w-full" style="background: #25d366; border-color: #0E7C4A;">
                   <i data-lucide="message-circle"></i> Solicitar demo por WhatsApp
                 </button>
               </form>
@@ -540,10 +542,10 @@
             <!-- Column 1: Organic Partners Image -->
             <div class="feature-card" style="padding: 0; min-height: 280px; overflow: hidden; border: 1px solid rgba(15, 23, 42, 0.06); position: relative;">
               <div style="width: 100%; height: 100%; position: relative; overflow: hidden;">
-                <img src="/partners_benefit.png" alt="Socios Comerciales de Soluciones Contables" style="width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.5s ease;" class="benefit-img">
+                <img src="/partners_benefit.webp" alt="Socios Comerciales de Soluciones Contables" loading="lazy" decoding="async" style="width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.5s ease;" class="benefit-img">
                 <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0) 100%); padding: 24px 20px; color: #ffffff; z-index: 10;">
                   <span class="badge" style="background: rgba(34, 197, 94, 0.15); color: var(--color-accent-light); border-color: rgba(34, 197, 94, 0.3); font-weight: 700; font-size: 10px; text-transform: uppercase; margin-bottom: 8px; display: inline-block;">Socio Estratégico</span>
-                  <h4 style="font-size: 16px; font-weight: 800; margin: 0; color: #ffffff; font-family: var(--font-heading);">Crecimiento en Red</h4>
+                  <h3 style="font-size: 16px; font-weight: 800; margin: 0; color: #ffffff; font-family: var(--font-heading);">Crecimiento en Red</h3>
                   <p style="font-size: 11px; color: #cbd5e1; margin: 4px 0 0 0; line-height: 1.4;">Unite a nuestra comunidad de contadores y recomendadores en Argentina.</p>
                 </div>
               </div>
@@ -563,10 +565,10 @@
               
               <!-- Interactive Earnings Calculator -->
               <div style="background: #ffffff; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 16px; box-shadow: var(--shadow-sm);">
-                <h4 style="font-size: 13px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; margin-top: 0;">
+                <h3 style="font-size: 13px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; margin-top: 0;">
                   <i data-lucide="calculator" style="color: var(--color-accent); width: 16px; height: 16px;"></i>
                   Calculador de Comisiones Proyectadas
-                </h4>
+                </h3>
                 
                 <div style="margin-bottom: 14px;">
                   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
@@ -620,12 +622,12 @@
             <a href="#pricing" class="lp-footer-link">Planes</a>
             <a href="#partners" class="lp-footer-link">Partners</a>
             <a href="#preguntas" class="lp-footer-link">Preguntas</a>
-            <a href="#contact" class="lp-footer-link" style="color: var(--color-accent); font-weight: 700;">Solicitar Demo →</a>
+            <a href="#contact" class="lp-footer-link" style="color: var(--color-accent-strong); font-weight: 700;">Solicitar Demo →</a>
             <a href="#/terminos" class="lp-footer-link">Términos</a>
             <a href="#/privacidad" class="lp-footer-link">Privacidad</a>
           </div>
           <div style="display: flex; gap: 20px; align-items: center;">
-            <a href="https://wa.me/5492996731487" target="_blank" rel="noopener" aria-label="WhatsApp" style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: #25d366; font-weight: 700; text-decoration: none;">
+            <a href="https://wa.me/5492996731487" target="_blank" rel="noopener" aria-label="WhatsApp +54 299 673-1487" style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: #0E7C4A; font-weight: 700; text-decoration: none;">
               <i data-lucide="phone" style="width: 14px; height: 14px;"></i> +54 299 673-1487
             </a>
             <span style="color: var(--border-color);">|</span>
@@ -650,7 +652,7 @@
           
           <!-- Header -->
           <div style="text-align: center; margin-bottom: 28px;">
-            <img src="/SolucionesContables_Logo.png" alt="Logo" style="width: 50px; height: 50px; border-radius: 8px; margin-bottom: 12px; border: 1px solid rgba(15, 23, 42, 0.1);" />
+            <img src="/logo-128.webp" alt="Logo" style="width: 50px; height: 50px; border-radius: 8px; margin-bottom: 12px; border: 1px solid rgba(15, 23, 42, 0.1);" />
             <h2 style="font-family: var(--font-heading); font-size: 20px; font-weight: 800; color: #0f172a; margin: 0;">Ingreso al Studio</h2>
             <p style="font-size: 13px; color: #64748b; margin-top: 6px; margin-bottom: 0;">Ingresá tus credenciales de acceso profesional</p>
           </div>
