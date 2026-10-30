@@ -647,11 +647,15 @@ export function renderLanding() {
 
         <div style="text-align: center; margin-bottom: 28px;">
           <img src="/logo-128.webp" alt="Logo" style="width: 50px; height: 50px; border-radius: 8px; margin-bottom: 12px; border: 1px solid rgba(15, 23, 42, 0.1);" />
-          <h2 style="font-family: var(--font-heading); font-size: 20px; font-weight: 800; color: var(--text-primary); margin: 0;">Registro de Cliente</h2>
-          <p style="font-size: 13px; color: var(--text-secondary); margin-top: 6px; margin-bottom: 0;">Tu estudio contable te invitó a subir tus comprobantes acá.</p>
+          <h2 style="font-family: var(--font-heading); font-size: 20px; font-weight: 800; color: var(--text-primary); margin: 0;" id="client-signup-titulo">Registro de Cliente</h2>
+          <p style="font-size: 13px; color: var(--text-secondary); margin-top: 6px; margin-bottom: 0;" id="client-signup-bajada">Tu estudio contable te invitó a subir tus comprobantes acá.</p>
         </div>
 
         <form id="client-signup-form">
+          <div style="margin-bottom: 18px; display: none;" id="client-signup-nombre-wrap">
+            <label for="client-signup-nombre" style="display: block; font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Nombre y apellido</label>
+            <input type="text" id="client-signup-nombre" maxlength="120" autocomplete="name" style="width: 100%; border: 1px solid rgba(15, 23, 42, 0.15); border-radius: 8px; padding: 12px 16px; font-size: 14px; font-family: var(--font-primary); color: var(--text-primary); outline: none;">
+          </div>
           <div style="margin-bottom: 18px;">
             <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Email</label>
             <input type="email" id="client-signup-email" placeholder="tu@email.com" required style="width: 100%; border: 1px solid rgba(15, 23, 42, 0.15); border-radius: 8px; padding: 12px 16px; font-size: 14px; font-family: var(--font-primary); color: var(--text-primary); outline: none;">
@@ -1188,12 +1192,22 @@ export function initLanding(mainApp) {
 
   if (closeClientSignupBtn) closeClientSignupBtn.addEventListener('click', closeClientSignupModal);
 
-  if (window.location.hash.startsWith('#/registro-cliente')) {
+  // El mismo formulario sirve para sumarse al equipo de un estudio
+  // (#/registro-equipo?codigo=CODIGO): pide nombre y entra como miembro.
+  const esEquipo = window.location.hash.startsWith('#/registro-equipo');
+  if (window.location.hash.startsWith('#/registro-cliente') || esEquipo) {
     const queryStr = window.location.hash.split('?')[1] || '';
-    const inviteCode = new URLSearchParams(queryStr).get('invite') || '';
+    const inviteCode = new URLSearchParams(queryStr).get(esEquipo ? 'codigo' : 'invite') || '';
+
+    if (esEquipo) {
+      document.getElementById('client-signup-titulo').textContent = 'Sumate al equipo';
+      document.getElementById('client-signup-bajada').textContent = 'Tu estudio contable te invitó a trabajar en Soluciones Contables.';
+      document.getElementById('client-signup-nombre-wrap').style.display = 'block';
+      document.getElementById('client-signup-nombre').required = true;
+    }
 
     if (!isSupabaseConfigured || !supabase) {
-      mainApp.showToast('El registro de clientes requiere una base de datos configurada.', 'error');
+      mainApp.showToast('El registro por invitación requiere una base de datos configurada.', 'error');
       window.location.hash = '#/';
     } else if (!inviteCode) {
       mainApp.showToast('Este link de invitación es inválido o está incompleto.', 'error');
@@ -1218,7 +1232,11 @@ export function initLanding(mainApp) {
           const { data, error } = await supabase.auth.signUp({
             email,
             password,
-            options: { data: { invite_code: inviteCode, acepta_terminos: LEGAL.version } }
+            options: {
+              data: esEquipo
+                ? { team_code: inviteCode, nombre: document.getElementById('client-signup-nombre').value.trim(), acepta_terminos: LEGAL.version }
+                : { invite_code: inviteCode, acepta_terminos: LEGAL.version }
+            }
           });
 
           if (error) {
@@ -1227,10 +1245,12 @@ export function initLanding(mainApp) {
           }
 
           if (data.session) {
-            mainApp.showToast('¡Cuenta creada! Ingresando al portal...', 'success');
+            mainApp.showToast(esEquipo ? '¡Cuenta creada! Ingresando al estudio...' : '¡Cuenta creada! Ingresando al portal...', 'success');
             setTimeout(() => { window.location.hash = '#/studio'; }, 1200);
           } else {
-            mainApp.showToast(`¡Cuenta creada! Revisá ${email} y confirmá tu correo. Si al ingresar no ves tu empresa, pedile un nuevo link a tu estudio.`, 'success');
+            mainApp.showToast(esEquipo
+              ? `¡Cuenta creada! Revisá ${email} y confirmá tu correo. Si al ingresar no ves el estudio, el link venció o era para otro email: pedí uno nuevo.`
+              : `¡Cuenta creada! Revisá ${email} y confirmá tu correo. Si al ingresar no ves tu empresa, pedile un nuevo link a tu estudio.`, 'success');
             e.target.reset();
           }
         } catch (err) {

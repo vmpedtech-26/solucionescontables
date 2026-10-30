@@ -54,7 +54,7 @@ function vistaAmbiente(amb, cred) {
         <div><label style="font-size:11px;font-weight:700;">CUIT del estudio (titular del certificado)</label><input id="arca-cuit" style="${input}" placeholder="20-12345678-6" maxlength="13"></div>
         <div><label style="font-size:11px;font-weight:700;">Alias del certificado</label><input id="arca-alias" style="${input}" value="solucionescontables" maxlength="40"></div>
       </div>
-      <button class="btn btn-primary btn-sm" id="arca-generar" style="margin-top:12px;"><i data-lucide="key-round"></i> Generar solicitud (CSR)</button>`;
+      <button class="btn btn-primary btn-sm solo-admin" id="arca-generar" style="margin-top:12px;"><i data-lucide="key-round"></i> Generar solicitud (CSR)</button>`;
   }
   if (!cred.tieneCertificado) {
     return `
@@ -69,8 +69,8 @@ function vistaAmbiente(amb, cred) {
       <textarea id="arca-cert" style="${input}font-family:monospace;font-size:10.5px;height:90px;" placeholder="-----BEGIN CERTIFICATE-----"></textarea>
       <div style="display:flex;gap:8px;margin-top:6px;align-items:center;flex-wrap:wrap;">
         <input type="file" id="arca-cert-file" accept=".crt,.pem,.cer,.txt" style="font-size:11.5px;">
-        <button class="btn btn-primary btn-sm" id="arca-cargar"><i data-lucide="upload"></i> Cargar certificado</button>
-        <button class="btn btn-outline btn-sm" id="arca-borrar" style="color:#ef4444;">Empezar de nuevo</button>
+        <button class="btn btn-primary btn-sm solo-admin" id="arca-cargar"><i data-lucide="upload"></i> Cargar certificado</button>
+        <button class="btn btn-outline btn-sm solo-admin" id="arca-borrar" style="color:#ef4444;">Empezar de nuevo</button>
       </div>`;
   }
   const vencido = new Date(cred.cert_hasta).getTime() < Date.now();
@@ -84,8 +84,8 @@ function vistaAmbiente(amb, cred) {
     <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
       <button class="btn btn-primary btn-sm" id="arca-probar-wsfe"><i data-lucide="plug"></i> Probar factura electrónica</button>
       <button class="btn btn-outline btn-sm" id="arca-probar-padron"><i data-lucide="search"></i> Probar padrón</button>
-      <button class="btn btn-outline btn-sm" id="arca-regenerar">Renovar certificado</button>
-      <button class="btn btn-outline btn-sm" id="arca-borrar" style="color:#ef4444;">Desconectar</button>
+      <button class="btn btn-outline btn-sm solo-admin" id="arca-regenerar">Renovar certificado</button>
+      <button class="btn btn-outline btn-sm solo-admin" id="arca-borrar" style="color:#ef4444;">Desconectar</button>
     </div>
     <div id="arca-resultado" style="font-size:12px;margin-top:10px;"></div>`;
 }

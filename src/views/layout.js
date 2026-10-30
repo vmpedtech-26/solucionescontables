@@ -2,11 +2,14 @@
    VMP Studio Contable - Dashboard Layout Component
    ------------------------------------------------------------- */
 import { getCompanies, getActiveCompany, getSyncStatus, limpiarDatosLocales } from '../db/mockdb.js';
-import { supabase, isSupabaseConfigured, getCachedStudioName } from '../db/supabase.js';
+import { supabase, isSupabaseConfigured, getCachedStudioName, getCachedRolEquipo } from '../db/supabase.js';
 import { sanitizeInput as esc, getActivePeriod, periodOptions, periodLabel, colorSeguro } from '../utils.js';
 
 export function renderDashboardLayout(childHTML, activeRoute, role = null) {
   const isCliente = role === 'cliente';
+  // Rol dentro del estudio: oculta lo que el servidor igual rechazaria
+  const rolEquipo = (isSupabaseConfigured && !isCliente && getCachedRolEquipo()) || 'titular';
+  const claseRol = ['titular', 'administrador'].includes(rolEquipo) ? '' : `equipo-no-admin equipo-${rolEquipo}`;
   const studioName = (isSupabaseConfigured && getCachedStudioName()) || 'Estudio Contable Comahue';
   const activeCompany = getActiveCompany();
   const companies = getCompanies();
@@ -58,9 +61,10 @@ export function renderDashboardLayout(childHTML, activeRoute, role = null) {
   <style>
       .role-cliente .db-nav-label, .role-cliente .db-nav-item:not([data-route="portal"]):not([data-route="facturar"]), .role-cliente #company-selector-dropdown, .role-cliente #topbar-company-selector i[data-lucide="chevron-down"] { display: none !important; }
       .role-cliente #topbar-company-selector { cursor: default; }
+      .equipo-no-admin .solo-admin, .equipo-asistente .solo-no-asistente { display: none !important; }
       ${isSupabaseConfigured ? '.db-wrapper [data-simulated] { opacity: .5; cursor: not-allowed; }' : ''}
     </style>
-  <div class="db-wrapper ${isCliente ? 'role-cliente' : ''}" id="db-wrapper-root">
+  <div class="db-wrapper ${isCliente ? 'role-cliente' : ''} ${claseRol}" id="db-wrapper-root">
     <!-- Sidebar -->
     <aside class="db-sidebar" id="db-sidebar">
       <div class="db-sidebar-header">
@@ -101,6 +105,10 @@ export function renderDashboardLayout(childHTML, activeRoute, role = null) {
           <i data-lucide="building-2"></i>
           <span>Mis Clientes (CUITs)</span>
         </a>
+        ${isSupabaseConfigured ? `<a href="#/studio/equipo" class="db-nav-item ${activeRoute === 'equipo' ? 'active' : ''}" data-route="equipo">
+          <i data-lucide="users-round"></i>
+          <span>Equipo del estudio</span>
+        </a>` : ''}
         <a href="#/studio/configuracion" class="db-nav-item ${activeRoute === 'configuracion' ? 'active' : ''}" data-route="configuracion">
           <i data-lucide="cpu"></i>
           <span>${isSupabaseConfigured ? 'Configuración y mis datos' : 'Robots RPA & Scheduler'}</span>

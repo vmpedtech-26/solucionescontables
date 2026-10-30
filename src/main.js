@@ -28,6 +28,7 @@ import { renderAyuda, initAyuda } from './views/ayuda.js';
 import { renderWhatsApp, initWhatsApp } from './views/whatsapp.js';
 import { renderMigrador, initMigrador } from './views/migrador.js';
 import { renderSueldos, initSueldos } from './views/sueldos.js';
+import { renderEquipo, initEquipo } from './views/equipo.js';
 
 class Application {
   constructor() {
@@ -153,10 +154,10 @@ class Application {
       window.scrollTo(0, 0);
     }
     // Registro de cliente final vía link de invitación del estudio (público)
-    else if (hash.startsWith('#/registro-cliente')) {
+    else if (hash.startsWith('#/registro-cliente') || hash.startsWith('#/registro-equipo')) {
       rootEl.innerHTML = renderLanding();
       initLanding(this);
-      document.title = "Registro de Cliente — Soluciones Contables";
+      document.title = (hash.startsWith('#/registro-equipo') ? 'Sumate al equipo' : 'Registro de Cliente') + ' — Soluciones Contables';
     }
     // Studio Professional Routes
     else if (hash.startsWith('#/studio')) {
@@ -264,6 +265,9 @@ class Application {
         }
         else if (subRoute === '/migrador') {
           await this.safeRoute(renderMigrador, initMigrador, 'migrador', "Migrador de Sistemas Legados");
+        }
+        else if (subRoute === '/equipo') {
+          await this.safeRoute(renderEquipo, initEquipo, 'equipo', "Equipo del estudio");
         }
         else if (subRoute === '/ayuda') {
           await this.safeRoute(renderAyuda, initAyuda, 'ayuda', "Instructivo & Onboarding");

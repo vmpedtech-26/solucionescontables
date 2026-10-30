@@ -49,7 +49,12 @@ export async function getCachedSession() {
 // -------------------------------------------------------------
 let cachedRole = null;
 let cachedStudioName = '';
+let cachedEstudioId = null;
+let cachedRolEquipo = null; // 'titular' | 'administrador' | 'contador' | 'asistente'
 let roleReady = false;
+
+// Tabla inexistente (migracion del equipo todavia no aplicada): no es un error de red
+const faltaTabla = (e) => e && (e.code === '42P01' || e.code === 'PGRST205' || e.code === 'PGRST200');
 
 export async function getCachedRole() {
   if (!isSupabaseConfigured || !supabase) return null;
@@ -65,10 +70,23 @@ export async function getCachedRole() {
   if (estudio) {
     cachedRole = 'estudio';
     cachedStudioName = estudio.razon_social || '';
+    cachedEstudioId = estudio.id;
+    cachedRolEquipo = 'titular';
   } else {
-    const { data: cliente, error: e2 } = await supabase.from('clientes_finales').select('id').eq('id', session.user.id).maybeSingle();
-    if (e2) return 'sin_conexion';
-    cachedRole = cliente ? 'cliente' : null;
+    // Miembro del equipo de un estudio: trabaja como "estudio" con su rol
+    const { data: miembro, error: e3 } = await supabase.from('estudio_miembros')
+      .select('estudio_id, rol, estudios(razon_social)').eq('user_id', session.user.id).eq('activo', true).maybeSingle();
+    if (e3 && !faltaTabla(e3)) return 'sin_conexion';
+    if (miembro) {
+      cachedRole = 'estudio';
+      cachedEstudioId = miembro.estudio_id;
+      cachedRolEquipo = miembro.rol;
+      cachedStudioName = miembro.estudios?.razon_social || '';
+    } else {
+      const { data: cliente, error: e2 } = await supabase.from('clientes_finales').select('id').eq('id', session.user.id).maybeSingle();
+      if (e2) return 'sin_conexion';
+      cachedRole = cliente ? 'cliente' : null;
+    }
   }
   roleReady = true;
   return cachedRole;
@@ -78,12 +96,36 @@ export function getCachedStudioName() {
   return cachedStudioName;
 }
 
+/** Id del estudio con el que trabaja el usuario (titular o miembro del equipo). */
+export async function getEstudioId() {
+  await getCachedRole();
+  return cachedEstudioId;
+}
+
+/** Rol dentro del estudio: titular, administrador, contador o asistente. */
+export async function getRolEquipo() {
+  await getCachedRole();
+  return cachedRolEquipo;
+}
+
+/** Version sincronica para el layout (ya resuelta por el router). */
+export function getCachedRolEquipo() {
+  return cachedRolEquipo;
+}
+
+/** Titular o administrador: gestiona equipo, certificado y borrado de empresas. */
+export async function esAdminEstudio() {
+  return ['titular', 'administrador'].includes(await getRolEquipo());
+}
+
 if (isSupabaseConfigured && supabase) {
   supabase.auth.onAuthStateChange((_event, session) => {
     cachedSession = session;
     sessionReady = true;
     cachedRole = null;
     cachedStudioName = '';
+    cachedEstudioId = null;
+    cachedRolEquipo = null;
     roleReady = false;
   });
 }

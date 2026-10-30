@@ -16,7 +16,7 @@ export async function renderEmpresas() {
       <h1 class="view-title">Empresas Clientes</h1>
       <p class="view-subtitle">Administrá la cartera de clientes de tu estudio contable.</p>
     </div>
-    <button class="btn btn-primary" id="btn-show-add-company">
+    <button class="btn btn-primary solo-no-asistente" id="btn-show-add-company">
       <i data-lucide="plus"></i> Nueva Empresa
     </button>
   </div>
@@ -141,7 +141,7 @@ export async function renderEmpresas() {
 <button class="btn btn-outline btn-sm btn-invite-client" data-id="${esc(c.id)}" data-name="${esc(c.razon_social)}" style="font-size: 11px; padding: 4px 10px; white-space: nowrap;">
                     <i data-lucide="user-plus" style="width: 12px; height: 12px;"></i> Invitar cliente
                   </button>
-                    <button class="btn btn-outline btn-sm btn-delete-company" data-id="${esc(c.id)}" data-name="${esc(c.razon_social)}" style="font-size: 11px; padding: 4px 10px; color:#ef4444; border-color: rgba(239,68,68,0.3);" title="Eliminar empresa"><i data-lucide="trash-2" style="width: 12px; height: 12px;"></i></button>
+                    <button class="btn btn-outline btn-sm btn-delete-company solo-admin" data-id="${esc(c.id)}" data-name="${esc(c.razon_social)}" style="font-size: 11px; padding: 4px 10px; color:#ef4444; border-color: rgba(239,68,68,0.3);" title="Eliminar empresa"><i data-lucide="trash-2" style="width: 12px; height: 12px;"></i></button>
                   </div>
                 </td>
               </tr>

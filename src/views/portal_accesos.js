@@ -3,7 +3,7 @@
    clientes con acceso (quitar), invitaciones pendientes (copiar/anular),
    nueva invitacion y permiso para facturar desde el portal.
    ------------------------------------------------------------- */
-import { supabase } from '../db/supabase.js';
+import { supabase, getEstudioId } from '../db/supabase.js';
 import { sanitizeInput as esc } from '../utils.js';
 
 const fecha = (iso) => (iso ? new Date(iso).toLocaleDateString('es-AR') : '—');
@@ -11,9 +11,10 @@ const linkInvitacion = (codigo) => `${window.location.origin}${window.location.p
 
 export async function crearInvitacion(empresaId) {
   const { data: { user } } = await supabase.auth.getUser();
+  const estudioId = (await getEstudioId()) || user.id;
   // 16 caracteres hex (64 bits): no se puede adivinar probando codigos
   const codigo = crypto.randomUUID().replace(/-/g, '').slice(0, 16).toUpperCase();
-  const { error } = await supabase.from('invitaciones_clientes').insert({ codigo, empresa_id: empresaId, estudio_id: user.id });
+  const { error } = await supabase.from('invitaciones_clientes').insert({ codigo, empresa_id: empresaId, estudio_id: estudioId });
   if (error) throw error;
   return linkInvitacion(codigo);
 }

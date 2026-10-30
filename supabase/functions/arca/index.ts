@@ -60,7 +60,10 @@ async function usuario(req: Request) {
   if (error || !data?.user) throw new ErrorUsuario("Sesión inválida o vencida. Volvé a ingresar.", 401);
   const uid = data.user.id;
   const { data: est } = await admin.from("estudios").select("id, razon_social").eq("id", uid).maybeSingle();
-  if (est) return { uid, rol: "estudio" as const, estudio: est };
+  if (est) return { uid, rol: "estudio" as const, estudioId: uid, rolEquipo: "titular" };
+  // Miembro del equipo de un estudio (administrador, contador o asistente)
+  const { data: miembro } = await admin.from("estudio_miembros").select("estudio_id, rol").eq("user_id", uid).eq("activo", true).maybeSingle();
+  if (miembro) return { uid, rol: "estudio" as const, estudioId: miembro.estudio_id as string, rolEquipo: miembro.rol as string };
   const { data: cli } = await admin.from("clientes_finales").select("empresa_id").eq("id", uid).maybeSingle();
   if (cli) return { uid, rol: "cliente" as const, empresaCliente: cli.empresa_id as string };
   throw new ErrorUsuario("Tu cuenta no tiene permisos para operar con ARCA.", 403);
@@ -70,13 +73,26 @@ type Ctx = Awaited<ReturnType<typeof usuario>>;
 
 function soloEstudio(ctx: Ctx) {
   if (ctx.rol !== "estudio") throw new ErrorUsuario("Solo el estudio contable puede hacer esta operación.", 403);
-  return ctx.uid;
+  return ctx.estudioId;
+}
+
+/** Certificado y credenciales: solo titular o administrador del estudio. */
+function soloAdmin(ctx: Ctx) {
+  const estudioId = soloEstudio(ctx);
+  if (ctx.rol === "estudio" && !["titular", "administrador"].includes(ctx.rolEquipo)) {
+    throw new ErrorUsuario("Solo el titular o un administrador del estudio puede gestionar el certificado de ARCA.", 403);
+  }
+  return estudioId;
 }
 
 async function empresaAutorizada(ctx: Ctx, empresaId: string) {
   const { data: emp } = await admin.from("empresas").select("id, estudio_id, razon_social, cuit, condicion_iva, cliente_puede_facturar").eq("id", empresaId).maybeSingle();
   if (!emp) throw new ErrorUsuario("Empresa no encontrada.", 404);
-  if (ctx.rol === "estudio" && emp.estudio_id !== ctx.uid) throw new ErrorUsuario("Empresa no encontrada.", 404);
+  if (ctx.rol === "estudio" && emp.estudio_id !== ctx.estudioId) throw new ErrorUsuario("Empresa no encontrada.", 404);
+  if (ctx.rol === "estudio" && ctx.rolEquipo === "asistente") {
+    const { data: asig } = await admin.from("empresa_asignaciones").select("empresa_id").eq("empresa_id", emp.id).eq("user_id", ctx.uid).maybeSingle();
+    if (!asig) throw new ErrorUsuario("Empresa no encontrada.", 404);
+  }
   if (ctx.rol === "cliente" && ctx.empresaCliente !== emp.id) throw new ErrorUsuario("Empresa no encontrada.", 404);
   if (ctx.rol === "cliente" && !emp.cliente_puede_facturar) {
     throw new ErrorUsuario("Tu estudio contable todavía no habilitó la facturación desde el portal.", 403);
@@ -139,12 +155,13 @@ const acciones: Record<string, (ctx: Ctx, p: Record<string, unknown>) => Promise
   },
 
   async generar_csr(ctx, p) {
-    const estudioId = soloEstudio(ctx);
+    const estudioId = soloAdmin(ctx);
     const ambiente = ambienteValido(p.ambiente);
     const cuit = String(p.cuit || "").replace(/\D/g, "");
     if (!/^\d{11}$/.test(cuit)) throw new ErrorUsuario("CUIT del estudio inválido.");
     const alias = String(p.alias || "solucionescontables").slice(0, 60);
-    const { csrPem, keyPem } = core.generarCSR(forge, { cuit, organizacion: ctx.estudio?.razon_social, alias });
+    const { data: est } = await admin.from("estudios").select("razon_social").eq("id", estudioId).maybeSingle();
+    const { csrPem, keyPem } = core.generarCSR(forge, { cuit, organizacion: est?.razon_social, alias });
     const { data: secretId, error } = await admin.rpc("arca_guardar_clave", { p_estudio: estudioId, p_ambiente: ambiente, p_pem: keyPem });
     if (error) throw new ErrorUsuario("No se pudo guardar la clave privada de forma segura.", 500);
     const { error: e2 } = await admin.from("arca_credenciales").upsert({
@@ -157,7 +174,7 @@ const acciones: Record<string, (ctx: Ctx, p: Record<string, unknown>) => Promise
   },
 
   async cargar_certificado(ctx, p) {
-    const estudioId = soloEstudio(ctx);
+    const estudioId = soloAdmin(ctx);
     const ambiente = ambienteValido(p.ambiente);
     const pem = String(p.certificado || "").trim();
     if (pem.length > 8000) throw new ErrorUsuario("El archivo es demasiado grande para ser un certificado.");
@@ -177,7 +194,7 @@ const acciones: Record<string, (ctx: Ctx, p: Record<string, unknown>) => Promise
   },
 
   async borrar_credenciales(ctx, p) {
-    const estudioId = soloEstudio(ctx);
+    const estudioId = soloAdmin(ctx);
     const ambiente = ambienteValido(p.ambiente);
     await admin.from("arca_tickets").delete().eq("estudio_id", estudioId).eq("ambiente", ambiente);
     await admin.from("arca_credenciales").delete().eq("estudio_id", estudioId).eq("ambiente", ambiente);

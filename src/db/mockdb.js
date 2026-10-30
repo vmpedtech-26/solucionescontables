@@ -1,7 +1,7 @@
 /* -------------------------------------------------------------
    VMP Studio Contable - Resilient Offline-First Sync Database
    ------------------------------------------------------------- */
-import { supabase, isSupabaseConfigured } from './supabase.js';
+import { supabase, isSupabaseConfigured, getEstudioId } from './supabase.js';
 
 const DEFAULT_COMPANIES = [
   {
@@ -300,7 +300,7 @@ async function pullFromSupabase() {
     const { data: dbCompanies, error: coError } = await supabase
       .from('empresas')
       .select('*')
-      .eq('estudio_id', user.id);
+      .eq('estudio_id', (await getEstudioId()) || user.id);
 
     if (coError) throw coError;
 
@@ -415,7 +415,7 @@ export async function getCompaniesAsync() {
     const { data, error } = await supabase
       .from('empresas')
       .select('*')
-      .eq('estudio_id', user.id)
+      .eq('estudio_id', (await getEstudioId()) || user.id)
       .order('created_at', { ascending: true });
 
     if (error) throw error;
@@ -471,7 +471,7 @@ export async function saveCompanyAsync(company) {
 
   const payload = {
     id: company.id,
-    estudio_id: user.id,
+    estudio_id: (await getEstudioId()) || user.id,
     razon_social: company.razon_social,
     cuit: company.cuit,
     tipo: company.tipo,
@@ -560,7 +560,7 @@ export async function getEstudioAsync() {
   if (!isSupabaseConfigured || !supabase) return null;
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
-  const { data, error } = await supabase.from('estudios').select('*').eq('id', user.id).single();
+  const { data, error } = await supabase.from('estudios').select('*').eq('id', (await getEstudioId()) || user.id).single();
   if (error) return null;
   return data;
 }
@@ -583,14 +583,14 @@ export async function updateEstudioFieldsAsync(fields) {
   if (!isSupabaseConfigured || !supabase) return;
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
-  const { error } = await supabase.from('estudios').update(fields).eq('id', user.id);
+  const { error } = await supabase.from('estudios').update(fields).eq('id', (await getEstudioId()) || user.id);
   if (error) throw error;
 }
 
 async function pushCompanyToSupabase(company, isNew) {
   if (!supabase) return;
   const { data: { user } } = await supabase.auth.getUser();
-  const studioId = user ? user.id : '00000000-0000-0000-0000-000000000000'; // Fallback anónimo
+  const studioId = (await getEstudioId()) || (user ? user.id : '00000000-0000-0000-0000-000000000000');
 
   const payload = {
     id: company.id,
