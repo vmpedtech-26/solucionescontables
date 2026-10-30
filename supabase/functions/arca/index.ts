@@ -1,7 +1,7 @@
 // Edge Function "arca": unico punto de contacto con los web services de ARCA.
 // Despliegue: archivos index.ts + core.js, con "Verify JWT" desactivado (la
 // sesion del usuario se valida aca adentro con auth.getUser).
-import forge from "npm:node-forge@1.3.1";
+import forge from "npm:node-forge@1.4.2";
 import { createClient } from "npm:@supabase/supabase-js@2";
 import * as core from "./core.js";
 
