@@ -129,3 +129,18 @@ if (isSupabaseConfigured && supabase) {
     roleReady = false;
   });
 }
+
+/**
+ * Trae todas las filas de una consulta paginando de a 1000 (PostgREST corta
+ * en 1000 filas por pedido sin avisar). consulta(desde, hasta) arma el pedido
+ * con .range(desde, hasta); conviene que tenga un .order() estable.
+ */
+export async function traerTodas(consulta, pagina = 1000) {
+  const filas = [];
+  for (let desde = 0; ; desde += pagina) {
+    const { data, error } = await consulta(desde, desde + pagina - 1);
+    if (error) return { data: null, error };
+    filas.push(...(data || []));
+    if (!data || data.length < pagina) return { data: filas, error: null };
+  }
+}

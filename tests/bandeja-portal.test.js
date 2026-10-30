@@ -4,10 +4,21 @@ const filas = [
   { id: 't-1', empresa_id: 'co-1', fecha: '2026-10-05', detalle: 'Factura A - Prov <b>X</b>', archivo: 'co-1/t-1.jpg', monto: '1210', estado: 'Recibido', proveedor: 'Prov <b>X</b>', cuit: '30-12345678-9', tipo_comprobante: 'Factura A', numero: '0001-00000010', empresas: { razon_social: 'Cliente Real SRL', cuit: '20-12345678-6' } },
   { id: 't-2', empresa_id: 'co-1', fecha: '2026-10-01', detalle: 'Ticket', archivo: 'sin archivo', monto: '500', estado: 'Rechazado', nota_estudio: 'Falta el CUIT', empresas: { razon_social: 'Cliente Real SRL' } }
 ];
-const respuesta = () => { const p = Promise.resolve({ data: filas, error: null }); p.limit = () => Promise.resolve({ data: filas, error: null }); return p; };
-const query = { select: () => query, order: respuesta, eq: () => query, single: () => Promise.resolve({ data: { id: 'co-1', razon_social: 'Cliente Real SRL', cuit: '20-12345678-6', condicion_iva: 'Responsable Inscripto' } }) };
+// Consulta encadenable que filtra por estado (eq/neq) como PostgREST
+const consulta = (filtro = () => true) => {
+  const r = () => Promise.resolve({ data: filas.filter(filtro), error: null });
+  const q = {
+    select: () => q, order: () => q, range: r, limit: r, then: (ok, ko) => r().then(ok, ko),
+    eq: (c, v) => consulta((f) => filtro(f) && (c !== 'estado' || f.estado === v)),
+    neq: (c, v) => consulta((f) => filtro(f) && f[c] !== v),
+    single: () => Promise.resolve({ data: { id: 'co-1', razon_social: 'Cliente Real SRL', cuit: '20-12345678-6', condicion_iva: 'Responsable Inscripto' } })
+  };
+  return q;
+};
+const query = consulta();
 vi.mock('../src/db/supabase.js', () => ({
   isSupabaseConfigured: true,
+  traerTodas: async (armar) => armar(0, 999),
   getCachedRole: async () => 'cliente',
   supabase: { from: () => query, storage: { from: () => ({}) } }
 }));

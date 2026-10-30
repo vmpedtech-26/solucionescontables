@@ -1,7 +1,7 @@
 /* -------------------------------------------------------------
    Tareas del estudio: Supabase con cuenta real, localStorage en la demo.
    ------------------------------------------------------------- */
-import { supabase, isSupabaseConfigured, getEstudioId } from './supabase.js';
+import { supabase, isSupabaseConfigured, getEstudioId, traerTodas } from './supabase.js';
 import { siguienteFecha } from '../domain/vencimientos.js';
 
 const CLAVE_LOCAL = 'vmp_tareas';
@@ -16,9 +16,9 @@ export async function listarTareas(desde, hasta) {
   if (!real()) {
     return leerLocal().filter((t) => (t.vence >= desde && t.vence <= hasta) || (t.estado !== 'hecha' && t.vence < desde));
   }
-  const { data, error } = await supabase.from('tareas').select('*')
+  const { data, error } = await traerTodas((d, h) => supabase.from('tareas').select('*')
     .or(`and(vence.gte.${desde},vence.lte.${hasta}),and(estado.neq.hecha,vence.lt.${desde})`)
-    .order('vence');
+    .order('vence').order('id').range(d, h));
   if (error) throw error;
   return data;
 }

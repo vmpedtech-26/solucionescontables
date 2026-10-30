@@ -1,7 +1,7 @@
 /* -------------------------------------------------------------
    Honorarios: Supabase con cuenta real, localStorage en la demo.
    ------------------------------------------------------------- */
-import { supabase, isSupabaseConfigured, getEstudioId } from './supabase.js';
+import { supabase, isSupabaseConfigured, getEstudioId, traerTodas } from './supabase.js';
 
 const real = () => isSupabaseConfigured && supabase;
 const leer = (k) => { try { return JSON.parse(localStorage.getItem(k)) || []; } catch (e) { return []; } };
@@ -11,7 +11,7 @@ const K_MOVS = 'vmp_hon_movs';
 
 export async function listarAbonos() {
   if (!real()) return leer(K_ABONOS);
-  const { data, error } = await supabase.from('honorarios_abonos').select('*');
+  const { data, error } = await traerTodas((d, h) => supabase.from('honorarios_abonos').select('*').order('empresa_id').range(d, h));
   if (error) throw error;
   return data;
 }
@@ -29,7 +29,7 @@ export async function guardarAbono(abono) {
 
 export async function listarMovimientos() {
   if (!real()) return leer(K_MOVS);
-  const { data, error } = await supabase.from('honorarios_movimientos').select('*').order('fecha');
+  const { data, error } = await traerTodas((d, h) => supabase.from('honorarios_movimientos').select('*').order('fecha').order('id').range(d, h));
   if (error) throw error;
   return data;
 }

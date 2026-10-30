@@ -3,7 +3,7 @@
    Conciliación impositiva, cuenta puente y generador CSV ARCA
    ------------------------------------------------------------- */
 import { getActiveCompanyAsync, getTransactionsAsync } from '../db/mockdb.js';
-import { supabase, isSupabaseConfigured } from '../db/supabase.js';
+import { supabase, isSupabaseConfigured, traerTodas } from '../db/supabase.js';
 import { renderPremiumTeaser, getActivePeriod } from '../utils.js';
 import { resumenRetenciones, coeficienteUnificado, calcularConvenioMultilateral, signo } from '../domain/fiscal.js';
 import { sanitizeInput as esc, sanitizeCSV } from '../utils.js';
@@ -38,11 +38,13 @@ const JURISDICCIONES_SANDBOX = {
 
 export async function getRetencionesAsync(companyId) {
   if (isSupabaseConfigured && supabase) {
-    const { data, error } = await supabase
+    const { data, error } = await traerTodas((d, h) => supabase
       .from('retenciones')
       .select('*')
       .eq('empresa_id', companyId)
-      .order('fecha', { ascending: false });
+      .order('fecha', { ascending: false })
+      .order('id')
+      .range(d, h));
 
     if (!error) {
       return data.map(r => ({

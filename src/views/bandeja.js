@@ -2,7 +2,7 @@
    Bandeja de comprobantes de clientes: el estudio revisa lo que sus clientes
    cargan desde el Portal, lo pasa al Libro de Compras o lo rechaza.
    ------------------------------------------------------------- */
-import { supabase, isSupabaseConfigured } from '../db/supabase.js';
+import { supabase, isSupabaseConfigured, traerTodas } from '../db/supabase.js';
 import { addTransactionAsync } from '../db/mockdb.js';
 import { sanitizeInput as esc, validarCUIT, renderComingSoon } from '../utils.js';
 import { iaDisponible, leerComprobante } from '../ia.js';
@@ -12,14 +12,16 @@ export const TIPOS_COMPROBANTE = ['Factura A', 'Factura B', 'Factura C', 'Factur
 const fmtMonto = (n) => '$ ' + Number(n || 0).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const fmtFecha = (f) => String(f || '').split('-').reverse().join('/');
 
+// Todos los pendientes (paginado) y los ultimos 200 resueltos
 async function cargarComprobantes() {
-  const { data, error } = await supabase
-    .from('comprobantes_digitales')
-    .select('*, empresas(razon_social, cuit)')
-    .order('created_at', { ascending: false })
-    .limit(300);
-  if (error) throw error;
-  return data || [];
+  const consulta = () => supabase.from('comprobantes_digitales').select('*, empresas(razon_social, cuit)').order('created_at', { ascending: false });
+  const [pend, res] = await Promise.all([
+    traerTodas((d, h) => consulta().eq('estado', 'Recibido').order('id').range(d, h)),
+    consulta().neq('estado', 'Recibido').limit(200)
+  ]);
+  if (pend.error) throw pend.error;
+  if (res.error) throw res.error;
+  return [...(pend.data || []), ...(res.data || [])];
 }
 
 export async function renderBandeja() {

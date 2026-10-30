@@ -1,7 +1,7 @@
 /* -------------------------------------------------------------
    VMP Studio Contable - Resilient Offline-First Sync Database
    ------------------------------------------------------------- */
-import { supabase, isSupabaseConfigured, getEstudioId } from './supabase.js';
+import { supabase, isSupabaseConfigured, getEstudioId, traerTodas } from './supabase.js';
 
 const DEFAULT_COMPANIES = [
   {
@@ -297,10 +297,14 @@ async function pullFromSupabase() {
 
     console.log("Sync Engine: Descargando datos actualizados de Supabase...");
 
-    const { data: dbCompanies, error: coError } = await supabase
+    const estudio = (await getEstudioId()) || user.id;
+    const { data: dbCompanies, error: coError } = await traerTodas((desde, hasta) => supabase
       .from('empresas')
       .select('*')
-      .eq('estudio_id', (await getEstudioId()) || user.id);
+      .eq('estudio_id', estudio)
+      .order('created_at', { ascending: true })
+      .order('id')
+      .range(desde, hasta));
 
     if (coError) throw coError;
 
@@ -311,18 +315,22 @@ async function pullFromSupabase() {
     } else if (dbCompanies && dbCompanies.length > 0) {
       localStorage.setItem("vmp_studio_companies", JSON.stringify(dbCompanies));
       
+      // Solo se baja la empresa activa (paginado): un estudio grande no entra
+      // en localStorage. Las demas se traen al elegirlas (setActiveCompanyId).
       const coIds = dbCompanies.map(c => c.id);
-      const { data: dbTxs, error: txError } = await supabase
+      const activa = coIds.includes(getActiveCompanyId()) ? getActiveCompanyId() : coIds[0];
+      const { data: dbTxs, error: txError } = await traerTodas((desde, hasta) => supabase
         .from('transacciones')
         .select('*')
-        .in('empresa_id', coIds);
+        .eq('empresa_id', activa)
+        .order('fecha', { ascending: false })
+        .order('id')
+        .range(desde, hasta));
 
       if (txError) throw txError;
 
       const transactionsMap = {};
-      coIds.forEach(id => {
-        transactionsMap[id] = { ventas: [], compras: [] };
-      });
+      transactionsMap[activa] = { ventas: [], compras: [] };
 
       if (dbTxs) {
         dbTxs.forEach(t => {
@@ -344,7 +352,7 @@ async function pullFromSupabase() {
         if (lista && !lista.some((x) => x.id === payload.item.id)) lista.unshift(payload.item);
       });
 
-      localStorage.setItem("vmp_studio_transactions", JSON.stringify(transactionsMap));
+      guardarCacheTransacciones(transactionsMap);
       console.log("Sync Engine: Pull y refresco local exitoso!");
     }
   } catch (err) {
@@ -412,11 +420,14 @@ export async function getCompaniesAsync() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return getCompanies();
 
-    const { data, error } = await supabase
+    const estudio = (await getEstudioId()) || user.id;
+    const { data, error } = await traerTodas((desde, hasta) => supabase
       .from('empresas')
       .select('*')
-      .eq('estudio_id', (await getEstudioId()) || user.id)
-      .order('created_at', { ascending: true });
+      .eq('estudio_id', estudio)
+      .order('created_at', { ascending: true })
+      .order('id')
+      .range(desde, hasta));
 
     if (error) throw error;
 
@@ -635,6 +646,29 @@ export function getActiveCompany() {
 export function setActiveCompanyId(id) {
   localStorage.setItem("vmp_studio_active_co", id);
   window.dispatchEvent(new CustomEvent('vmp_db_updated', { detail: { companyId: id, type: 'active_company' } }));
+  // En modo real la cache solo tiene la empresa activa: se trae la nueva y se repinta
+  if (isSupabaseConfigured && supabase) {
+    getTransactionsAsync(id).then(() => {
+      if (getActiveCompanyId() === id) window.dispatchEvent(new CustomEvent('vmp_db_updated', { detail: { companyId: id, type: 'transactions_loaded' } }));
+    });
+  }
+}
+
+/**
+ * Guarda la cache de comprobantes. Si no entra en localStorage (estudios con
+ * muchos clientes) se queda solo con la empresa activa y lo pendiente de subir.
+ */
+function guardarCacheTransacciones(mapa) {
+  try {
+    localStorage.setItem("vmp_studio_transactions", JSON.stringify(mapa));
+    return;
+  } catch (e) {
+    console.warn("Cache local llena: se conserva solo la empresa activa.", e?.name);
+  }
+  const conservar = new Set([getActiveCompanyId(), ...getSyncQueue().map((t) => t.payload?.companyId)]);
+  const reducido = Object.fromEntries(Object.entries(mapa).filter(([id]) => conservar.has(id)));
+  try { localStorage.setItem("vmp_studio_transactions", JSON.stringify(reducido)); }
+  catch (e) { console.error("No se pudo guardar la cache de comprobantes:", e); }
 }
 
 export function getTransactions(companyId) {
@@ -731,11 +765,13 @@ export async function getTransactionsAsync(companyId) {
   if (!isSupabaseConfigured || !supabase) return getTransactions(companyId);
 
   try {
-    const { data, error } = await supabase
+    const { data, error } = await traerTodas((desde, hasta) => supabase
       .from('transacciones')
       .select('*')
       .eq('empresa_id', companyId)
-      .order('fecha', { ascending: false });
+      .order('fecha', { ascending: false })
+      .order('id')
+      .range(desde, hasta));
 
     if (error) throw error;
 
@@ -752,7 +788,7 @@ export async function getTransactionsAsync(companyId) {
 
     const allTxs = JSON.parse(localStorage.getItem("vmp_studio_transactions") || '{}');
     allTxs[companyId] = result;
-    localStorage.setItem("vmp_studio_transactions", JSON.stringify(allTxs));
+    guardarCacheTransacciones(allTxs);
 
     return result;
   } catch (e) {
