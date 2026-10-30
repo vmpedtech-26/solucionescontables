@@ -101,6 +101,10 @@ export function renderDashboardLayout(childHTML, activeRoute, role = null) {
           <i data-lucide="layout-dashboard"></i>
           <span>Dashboard General</span>
         </a>
+        <a href="#/studio/agenda" class="db-nav-item ${activeRoute === 'agenda' ? 'active' : ''}" data-route="agenda">
+          <i data-lucide="calendar-clock"></i>
+          <span>Agenda y vencimientos</span>
+        </a>
         <a href="#/studio/empresas" class="db-nav-item ${activeRoute === 'empresas' ? 'active' : ''}" data-route="empresas">
           <i data-lucide="building-2"></i>
           <span>Mis Clientes (CUITs)</span>

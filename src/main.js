@@ -29,6 +29,7 @@ import { renderWhatsApp, initWhatsApp } from './views/whatsapp.js';
 import { renderMigrador, initMigrador } from './views/migrador.js';
 import { renderSueldos, initSueldos } from './views/sueldos.js';
 import { renderEquipo, initEquipo } from './views/equipo.js';
+import { renderAgenda, initAgenda } from './views/agenda.js';
 
 class Application {
   constructor() {
@@ -265,6 +266,9 @@ class Application {
         }
         else if (subRoute === '/migrador') {
           await this.safeRoute(renderMigrador, initMigrador, 'migrador', "Migrador de Sistemas Legados");
+        }
+        else if (subRoute === '/agenda') {
+          await this.safeRoute(renderAgenda, initAgenda, 'agenda', "Agenda y vencimientos");
         }
         else if (subRoute === '/equipo') {
           await this.safeRoute(renderEquipo, initEquipo, 'equipo', "Equipo del estudio");
