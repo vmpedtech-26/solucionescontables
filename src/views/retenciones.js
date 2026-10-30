@@ -6,7 +6,7 @@ import { getActiveCompanyAsync, getTransactionsAsync } from '../db/mockdb.js';
 import { supabase, isSupabaseConfigured } from '../db/supabase.js';
 import { renderPremiumTeaser, getActivePeriod } from '../utils.js';
 import { resumenRetenciones, coeficienteUnificado, calcularConvenioMultilateral, signo } from '../domain/fiscal.js';
-import { sanitizeInput as esc } from '../utils.js';
+import { sanitizeInput as esc, sanitizeCSV } from '../utils.js';
 
 function fmt(n) {
   return n.toLocaleString('es-AR', { minimumFractionDigits: 2 });
@@ -178,7 +178,7 @@ export async function renderRetenciones() {
     </div>
     <div style="display:flex;gap:10px;">
       <button class="btn btn-outline" id="btn-export-csv-sire">
-        <i data-lucide="download"></i> Exportar CSV SIRE
+        <i data-lucide="download"></i> Exportar planilla de control
       </button>
       <button class="btn btn-primary" id="btn-add-ret" style="background:var(--color-accent);border-color:var(--color-accent);">
         <i data-lucide="plus"></i> Agregar Manual
@@ -419,7 +419,7 @@ export async function initRetenciones(mainApp) {
     });
   });
 
-  // Exportar CSV SIRE (ambos botones) con modal de advertencia preventiva de Excel
+  // Exportar planilla de control (ambos botones) con modal de advertencia preventiva de Excel
   const exportarCSV = () => {
     // 1. Crear el overlay del modal
     const modal = document.createElement('div');
@@ -446,7 +446,7 @@ export async function initRetenciones(mainApp) {
         </div>
         <h3 style="font-family:var(--font-heading); font-size:19px; font-weight:800; color:var(--text-primary); margin-top:0; margin-bottom:10px;">¡Advertencia Importante!</h3>
         <p style="font-size:13.5px; color:var(--text-secondary); line-height:1.6; margin-bottom:24px; text-align:left;">
-          El archivo CSV para <strong>ARCA (SIRE)</strong> se generará en formato UTF-8 delimitado por punto y coma.<br><br>
+          Se descarga una planilla de control (CSV UTF-8, separada por punto y coma) para cruzarla con <strong>"Mis Retenciones"</strong> de ARCA. No es el archivo de importación del SIRE: ese lo presenta el agente de retención.<br><br>
           <strong style="color:#ef4444;">⚠ REGLA CRÍTICA:</strong> NO vuelvas a abrir el archivo exportado con <strong>Microsoft Excel</strong> en tu PC, ya que este programa reformatea y corrompe de manera silenciosa las fechas (convirtiéndolas a barras invertidas) y los CUITs (los convierte a notación científica).
         </p>
         <div style="display:flex; gap:12px;">
@@ -480,29 +480,26 @@ export async function initRetenciones(mainApp) {
 
       const rets = await getRetencionesAsync(company.id);
       const bom = '\uFEFF';
-      let csv = 'Fecha;CUIT Agente;Tipo;Numero Comprobante;Monto;Estado\n';
+      let csv = 'Fecha;CUIT Agente;Agente;Tipo;Origen;Monto;Estado\n';
 
       rets.forEach(r => {
         const cuit = r.cuit.replace(/-/g, '');
-        const tipo = r.tipo.includes('FACTURA') ? 'F' : 'O';
-        const numDoc = tipo === 'F'
-          ? r.id.replace('r', '').padStart(7, '0')
-          : r.id.replace('r', '').padStart(16, '0');
         const fechaArr = r.fecha.split('-');
         const fechaFmt = `${fechaArr[2]}/${fechaArr[1]}/${fechaArr[0]}`;
-        csv += `${fechaFmt};${esc(cuit)};${esc(r.tipo)};${numDoc};${r.monto.toFixed(2).replace('.',',')};${r.conciliado ? 'CONCILIADA' : 'PENDIENTE'}\n`;
+        const txt = (v) => sanitizeCSV(v).replace(/[;\r\n]/g, ' ');
+        csv += `${fechaFmt};${txt(cuit)};${txt(r.agente)};${txt(r.tipo)};${txt(r.fuente)};${r.monto.toFixed(2).replace('.',',')};${r.conciliado ? 'CONCILIADA' : 'PENDIENTE'}\n`;
       });
 
       const blob = new Blob([bom + csv], { type: 'text/csv;charset=utf-8' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `sire-retenciones-${company.cuit.replace(/-/g,'')}.csv`;
+      a.download = `control-retenciones-${company.cuit.replace(/-/g,'')}.csv`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      mainApp.showToast('¡CSV del SIRE descargado con éxito!', 'success');
+      mainApp.showToast('Planilla de control de retenciones descargada.', 'success');
     });
   };
 
