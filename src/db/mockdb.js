@@ -697,10 +697,34 @@ async function pushTransactionToSupabase(companyId, type, item) {
     categoria: item.categoria || 'General',
     exento: !!item.exento
   };
+  conCamposExtra(payload, item);
 
-  const { error } = await supabase.from('transacciones').insert(payload);
+  const { error } = await insertarTransaccion(payload);
   // 23505: ya se habia insertado en un intento anterior cuya respuesta se perdio
   if (error && error.code !== '23505') throw error;
+}
+
+// Campos de la migracion 2026-10-31 (alicuotas, exentos, no gravados, otros
+// tributos, comprobante asociado): solo se envian si vienen cargados y, si la
+// base todavia no tiene esas columnas, se reintenta sin ellos.
+const CAMPOS_EXTRA = ['alicuotas', 'importe_exento', 'importe_no_gravado', 'otros_tributos', 'cbte_asoc'];
+function conCamposExtra(payload, item) {
+  CAMPOS_EXTRA.forEach((k) => {
+    const v = item[k];
+    if (v !== undefined && v !== null && v !== 0 && v !== '' && !(Array.isArray(v) && !v.length)) payload[k] = v;
+  });
+  return payload;
+}
+async function insertarTransaccion(payload, conSelect = false) {
+  const ejecutar = (p) => (conSelect ? supabase.from('transacciones').insert(p).select().single() : supabase.from('transacciones').insert(p));
+  let res = await ejecutar(payload);
+  const faltaColumna = res.error && (res.error.code === 'PGRST204' || res.error.code === '42703');
+  if (faltaColumna && CAMPOS_EXTRA.some((k) => k in payload)) {
+    const reducido = { ...payload };
+    CAMPOS_EXTRA.forEach((k) => delete reducido[k]);
+    res = await ejecutar(reducido);
+  }
+  return res;
 }
 
 export async function getTransactionsAsync(companyId) {
@@ -762,8 +786,9 @@ export async function addTransactionAsync(companyId, type, item, opciones = {}) 
     categoria: item.categoria || 'General',
     exento: !!item.exento
   };
+  conCamposExtra(payload, item);
 
-  const { data, error } = await supabase.from('transacciones').insert(payload).select().single();
+  const { data, error } = await insertarTransaccion(payload, true);
   if (error) {
     if (error.code === '23505') {
       throw new Error('Ya existe un comprobante con ese número para este punto de venta.');

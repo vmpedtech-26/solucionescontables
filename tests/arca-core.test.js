@@ -149,7 +149,7 @@ describe('WSFEv1', () => {
   });
 
   it('valida datos obligatorios', () => {
-    expect(() => prepararFactura({ cbteTipo: 1, docTipo: 99, neto: 100, alicuota: 21 })).toThrow(/Factura A requiere CUIT/);
+    expect(() => prepararFactura({ cbteTipo: 1, docTipo: 99, neto: 100, alicuota: 21 })).toThrow(/comprobantes A requieren CUIT/);
     expect(() => prepararFactura({ cbteTipo: 6, neto: 0, alicuota: 21 })).toThrow(/mayor a cero/);
     expect(() => prepararFactura({ cbteTipo: 6, concepto: 2, neto: 10, alicuota: 21 })).toThrow(/servicios/);
     expect(() => prepararFactura({ cbteTipo: 99, neto: 10 })).toThrow(/no soportado/);
@@ -170,5 +170,53 @@ describe('WSFEv1', () => {
     const pv = parsePuntosVenta('<E><FEParamGetPtosVentaResult><ResultGet><PtoVenta><Nro>3</Nro><EmisionTipo>CAE - RECE</EmisionTipo><Bloqueado>N</Bloqueado><FchBaja>NULL</FchBaja></PtoVenta></ResultGet></FEParamGetPtosVentaResult></E>');
     expect(pv).toEqual([{ numero: 3, tipo: 'CAE - RECE', bloqueado: false, baja: null }]);
     expect(parsePuntosVenta('<E><FEParamGetPtosVentaResult><Errors><Err><Code>602</Code><Msg>Sin Resultados</Msg></Err></Errors></FEParamGetPtosVentaResult></E>')).toEqual([]);
+  });
+});
+
+describe('WSFEv1: notas y varias alícuotas', () => {
+  const auth = { token: 'T', sign: 'S', cuit: '20-12345678-6' };
+  const base = { docTipo: 80, docNro: '30719283719', condicionIvaReceptor: 1, fecha: '2026-10-20' };
+
+  it('factura A con 21% y 10,5% arma dos AlicIva y suma bien', () => {
+    const f = prepararFactura({ ...base, cbteTipo: 1, items: [{ neto: 1000, alicuota: 21 }, { neto: 1000, alicuota: 10.5 }, { neto: 500, alicuota: 21 }] });
+    expect(f.neto).toBe(2500);
+    expect(f.iva).toBe(420);
+    expect(f.total).toBe(2920);
+    const body = solicitarCaeBody(auth, 3, 10, f);
+    expect(body.match(/<ar:AlicIva>/g)).toHaveLength(2);
+    expect(body).toContain('<ar:Id>5</ar:Id><ar:BaseImp>1500.00</ar:BaseImp><ar:Importe>315.00</ar:Importe>');
+    expect(body).toContain('<ar:Id>4</ar:Id><ar:BaseImp>1000.00</ar:BaseImp><ar:Importe>105.00</ar:Importe>');
+  });
+
+  it('exento y no gravado van en ImpOpEx e ImpTotConc', () => {
+    const f = prepararFactura({ ...base, cbteTipo: 1, neto: 1000, alicuota: 21, exento: 300, noGravado: 200 });
+    expect(f.total).toBe(1710);
+    const body = solicitarCaeBody(auth, 3, 10, f);
+    expect(body).toContain('<ar:ImpOpEx>300.00</ar:ImpOpEx>');
+    expect(body).toContain('<ar:ImpTotConc>200.00</ar:ImpTotConc>');
+  });
+
+  it('nota de crédito A exige comprobante asociado de la misma clase', () => {
+    expect(() => prepararFactura({ ...base, cbteTipo: 3, neto: 100, alicuota: 21 })).toThrow(/factura a la que corresponde/);
+    expect(() => prepararFactura({ ...base, cbteTipo: 3, neto: 100, alicuota: 21, cbtesAsoc: [{ tipo: 6, ptoVta: 3, nro: 5 }] })).toThrow(/clase A/);
+    const f = prepararFactura({ ...base, cbteTipo: 3, neto: 100, alicuota: 21, cbtesAsoc: [{ tipo: 1, ptoVta: 3, nro: 851, fecha: '2026-10-05' }] });
+    const body = solicitarCaeBody(auth, 3, 12, f);
+    expect(body).toContain('<ar:CbtesAsoc><ar:CbteAsoc><ar:Tipo>1</ar:Tipo><ar:PtoVta>3</ar:PtoVta><ar:Nro>851</ar:Nro><ar:Cuit>20123456786</ar:Cuit><ar:CbteFch>20261005</ar:CbteFch></ar:CbteAsoc></ar:CbtesAsoc>');
+    // El orden del esquema: CondicionIVAReceptorId, CbtesAsoc, Iva
+    expect(body.indexOf('CondicionIVAReceptorId')).toBeLessThan(body.indexOf('CbtesAsoc'));
+    expect(body.indexOf('CbtesAsoc')).toBeLessThan(body.indexOf('<ar:Iva>'));
+  });
+
+  it('nota de débito C con período asociado', () => {
+    const f = prepararFactura({ cbteTipo: 12, docTipo: 99, condicionIvaReceptor: 5, fecha: '2026-10-20', neto: 800, periodoAsoc: { desde: '2026-09-01', hasta: '2026-09-30' } });
+    expect(f.iva).toBe(0);
+    const body = solicitarCaeBody(auth, 2, 4, f);
+    expect(body).toContain('<ar:PeriodoAsoc><ar:FchDesde>20260901</ar:FchDesde><ar:FchHasta>20260930</ar:FchHasta></ar:PeriodoAsoc>');
+    expect(body).not.toContain('<ar:Iva>');
+  });
+
+  it('redondeo sin deriva binaria', () => {
+    const f = prepararFactura({ ...base, cbteTipo: 1, neto: 1.005, alicuota: 21 });
+    expect(f.neto).toBe(1.01);
   });
 });

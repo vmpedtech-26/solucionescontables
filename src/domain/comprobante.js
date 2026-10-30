@@ -5,7 +5,11 @@
 import qrcode from 'qrcode-generator';
 import { sanitizeInput as esc } from '../utils.js';
 
-export const CODIGOS_TIPO = { 'Factura A': 1, 'Factura B': 6, 'Factura C': 11, 'Nota de Crédito A': 3, 'Nota de Crédito B': 8, 'Nota de Crédito C': 13 };
+export const CODIGOS_TIPO = {
+  'Factura A': 1, 'Nota de Débito A': 2, 'Nota de Crédito A': 3,
+  'Factura B': 6, 'Nota de Débito B': 7, 'Nota de Crédito B': 8,
+  'Factura C': 11, 'Nota de Débito C': 12, 'Nota de Crédito C': 13
+};
 
 const base64Utf8 = (s) => (typeof btoa === 'function'
   ? btoa(unescape(encodeURIComponent(s)))
@@ -45,7 +49,8 @@ const fechaAr = (iso) => String(iso || '').slice(0, 10).split('-').reverse().joi
  * HTML completo (documento) listo para imprimir.
  * emisor: { razon_social, cuit, condicion_iva, domicilio, iibb, inicio_actividades }
  * cbte:   { tipo, numero 'PPPPP-NNNNNNNN', fecha, cae, caeVto, concepto, servDesde, servHasta, vtoPago,
- *           neto, iva, alicuota, total, homologacion }
+ *           neto, iva, alicuota | alicuotas [{ alicuota, base, importe }], exento, noGravado, total,
+ *           asociado (texto del comprobante que ajusta una nota), homologacion }
  * receptor: { nombre, docTipo, docNro, condicionIva, domicilio }
  * detalle: texto del concepto facturado
  */
@@ -59,6 +64,12 @@ export function htmlComprobante({ emisor, cbte, receptor, detalle }) {
     docTipo: receptor.docTipo, docNro: receptor.docNro, cae: cbte.cae });
   // Factura B: el IVA no se discrimina; se informa como "IVA contenido"
   // (Régimen de Transparencia Fiscal al Consumidor, Ley 27.743 / RG 5614).
+  const alicuotas = Array.isArray(cbte.alicuotas) && cbte.alicuotas.length
+    ? cbte.alicuotas
+    : [{ alicuota: cbte.alicuota, base: cbte.neto, importe: cbte.iva }];
+  const pct = (n) => esc(String(n).replace('.', ','));
+  const extras = (Number(cbte.exento) ? `<tr><td>Importe exento</td><td class="r">${pesos(cbte.exento)}</td></tr>` : '') +
+    (Number(cbte.noGravado) ? `<tr><td>Importe no gravado</td><td class="r">${pesos(cbte.noGravado)}</td></tr>` : '');
   const filasImportes = esC
     ? `<tr><td>Importe total</td><td class="r"><b>${pesos(cbte.total)}</b></td></tr>`
     : letra === 'B'
@@ -66,8 +77,10 @@ export function htmlComprobante({ emisor, cbte, receptor, detalle }) {
        <tr><td colspan="2" style="padding-top:8px;font-size:11px;">Régimen de Transparencia Fiscal al Consumidor (Ley 27.743)</td></tr>
        <tr><td style="font-size:11px;">IVA contenido</td><td class="r" style="font-size:11px;">${pesos(cbte.iva)}</td></tr>`
     : `<tr><td>Importe neto gravado</td><td class="r">${pesos(cbte.neto)}</td></tr>
-       <tr><td>IVA ${esc(String(cbte.alicuota).replace('.', ','))}%</td><td class="r">${pesos(cbte.iva)}</td></tr>
+       ${alicuotas.map((a) => `<tr><td>IVA ${pct(a.alicuota)}%</td><td class="r">${pesos(a.importe)}</td></tr>`).join('')}
+       ${extras}
        <tr><td><b>Importe total</b></td><td class="r"><b>${pesos(cbte.total)}</b></td></tr>`;
+  const subtotal = esC ? cbte.total : (letra === 'B' ? cbte.total : cbte.neto);
   return `<!doctype html><html lang="es"><head><meta charset="utf-8"><title>${esc(cbte.tipo)} ${esc(cbte.numero)}</title>
 <style>
   body{font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#111;margin:24px;}
@@ -91,13 +104,14 @@ ${cbte.homologacion ? '<div class="homo">COMPROBANTE DE PRUEBA (HOMOLOGACIÓN) �
     <p>CUIT: ${esc(emisor.cuit)} · IIBB: ${esc(emisor.iibb || '—')}</p>
     <p>Inicio de actividades: ${fechaAr(emisor.inicio_actividades)}</p></div>
 </div>
+${cbte.asociado ? `<div class="box" style="border-top:0;">Comprobante asociado: <b>${esc(cbte.asociado)}</b></div>` : ''}
 ${cbte.concepto !== 1 && cbte.servDesde ? `<div class="box" style="border-top:0;">Período facturado: ${fechaAr(cbte.servDesde)} al ${fechaAr(cbte.servHasta)} · Vto. de pago: ${fechaAr(cbte.vtoPago)}</div>` : ''}
 <div class="box" style="border-top:0;">
   <p>${docLabel}${Number(receptor.docTipo) !== 99 ? ': <b>' + esc(receptor.docNro) + '</b>' : ''} · Apellido y nombre / Razón social: <b>${esc(receptor.nombre || 'Consumidor Final')}</b></p>
   <p>Condición frente al IVA: ${esc(receptor.condicionIva || 'Consumidor Final')}${receptor.domicilio ? ' · Domicilio: ' + esc(receptor.domicilio) : ''}</p>
 </div>
 <table><thead><tr><th>Detalle</th><th class="r">Subtotal</th></tr></thead>
-<tbody><tr><td>${esc(detalle || 'Según detalle')}</td><td class="r">${pesos(esC ? cbte.total : cbte.neto)}</td></tr></tbody></table>
+<tbody><tr><td>${esc(detalle || 'Según detalle')}</td><td class="r">${pesos(subtotal)}</td></tr></tbody></table>
 <table style="width:50%;margin-left:50%;">${filasImportes}</table>
 <div class="pie">${qrSvg(qr)}<div><p>CAE N°: <b>${esc(cbte.cae)}</b></p><p>Fecha de vto. de CAE: <b>${fechaAr(cbte.caeVto)}</b></p>
 <p style="font-size:10px;color:#555;">Comprobante autorizado por ARCA. Verificá el código QR en afip.gob.ar/fe/qr</p></div></div>

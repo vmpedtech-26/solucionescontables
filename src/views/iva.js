@@ -6,6 +6,7 @@ import { ventasComprobantes, ventasAlicuotas, comprasComprobantes, comprasAlicuo
 import { sanitizeInput as esc, getActivePeriod, periodLabel } from '../utils.js';
 import { renderSinEmpresas, sanitizeCSV } from '../utils.js';
 import { isSupabaseConfigured } from '../db/supabase.js';
+import { sumaFirmada } from '../domain/fiscal.js';
 
 export function renderIVA() {
   const activeCompany = getActiveCompany();
@@ -20,25 +21,24 @@ export function renderIVA() {
   const filteredCompras = txs.compras.filter(c => c.fecha.startsWith(activePeriod));
 
   // Calcular totales impositivos
-  const totalNetSalesGravadas = filteredVentas.filter(v => !v.exento).reduce((sum, v) => sum + v.neto, 0);
-  const totalNetSalesExentas = filteredVentas.filter(v => v.exento).reduce((sum, v) => sum + v.neto, 0);
+  // Las notas de credito restan (sumaFirmada)
+  const totalNetSalesGravadas = sumaFirmada(filteredVentas.filter(v => !v.exento), 'neto');
+  const totalNetSalesExentas = sumaFirmada(filteredVentas.filter(v => v.exento), 'neto');
   const totalNetSales = totalNetSalesGravadas + totalNetSalesExentas;
-  const totalIvaSales = filteredVentas.reduce((sum, v) => sum + v.iva, 0);
-  const totalSales = filteredVentas.reduce((sum, v) => sum + v.total, 0);
+  const totalIvaSales = sumaFirmada(filteredVentas, 'iva');
+  const totalSales = sumaFirmada(filteredVentas, 'total');
 
-  const totalNetPurchases = filteredCompras.reduce((sum, c) => sum + c.neto, 0);
-  // 1) Se excluye el crédito de proveedores con CUIT no habilitado/inactivo en ARCA.
-  const creditoFiscalHabilitado = filteredCompras.reduce((sum, c) => {
-    const cleanCuit = c.cuit.replace(/[^0-9]/g, '');
-    if (cleanCuit.endsWith('9')) return sum;
-    return sum + c.iva;
-  }, 0);
+  const totalNetPurchases = sumaFirmada(filteredCompras, 'neto');
+  // 1) Solo en la demo se simula un proveedor no habilitado en ARCA (CUIT
+  //    terminado en 9); con datos reales se computa todo el credito.
+  const creditoFiscalHabilitado = sumaFirmada(filteredCompras.filter((c) =>
+    isSupabaseConfigured || !String(c.cuit || '').replace(/[^0-9]/g, '').endsWith('9')), 'iva');
   // 2) Prorrateo del crédito fiscal de uso común (Art. 13 Ley de IVA): cuando hay
   // ventas gravadas Y exentas, el crédito de gastos no atribuibles a una sola
   // actividad se reconoce solo en la proporción de ventas gravadas sobre el total.
   const prorrateoGravado = totalNetSales > 0 ? (totalNetSalesGravadas / totalNetSales) : 1;
   const totalIvaPurchases = Math.round(creditoFiscalHabilitado * prorrateoGravado * 100) / 100;
-  const totalPurchases = filteredCompras.reduce((sum, c) => sum + c.total, 0);
+  const totalPurchases = sumaFirmada(filteredCompras, 'total');
 
   const balance = totalIvaSales - totalIvaPurchases;
 

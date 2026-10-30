@@ -62,3 +62,26 @@ describe('Libro IVA Digital - contenido', () => {
     expect(comprasAlicuotas([c])).toBe('');
   });
 });
+
+describe('Libro IVA: varias alícuotas e importes extra', () => {
+  const v = { fecha: '2026-10-05', tipo_comprobante: 'Factura A', numero: '00003-00000851', cuit: '30-71928371-9', cliente: 'METALURGICA',
+    neto: 2000, iva: 315, total: 2615, importe_exento: 300, importe_no_gravado: 0,
+    alicuotas: [{ alicuota: 21, neto: 1000, iva: 210 }, { alicuota: 10.5, neto: 1000, iva: 105 }] };
+  it('un registro de alícuota por tasa y cantidad 2 en el comprobante', () => {
+    const al = ventasAlicuotas([v]).split('\r\n').filter(Boolean);
+    expect(al).toHaveLength(2);
+    expect(al[0]).toContain('0005');
+    expect(al[1]).toContain('0004');
+    al.forEach((l) => expect(l).toHaveLength(62));
+    const cb = ventasComprobantes([v]).replace('\r\n', '');
+    expect(cb).toHaveLength(266);
+    expect(cb.slice(241, 242)).toBe('2');           // cantidad de alícuotas
+    expect(cb.slice(153, 168)).toBe('000000000030000'); // exentas
+  });
+  it('compra con dos alícuotas', () => {
+    const al = comprasAlicuotas([{ ...v, proveedor: 'X' }]).split('\r\n').filter(Boolean);
+    expect(al).toHaveLength(2);
+    al.forEach((l) => expect(l).toHaveLength(84));
+  });
+});
+

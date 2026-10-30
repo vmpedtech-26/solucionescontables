@@ -72,36 +72,52 @@ function identificacion(cuit) {
 const fechaCompacta = (f) => String(f || '').slice(0, 10).replace(/-/g, '');
 const esExento = (t) => t.exento === true;
 const sinIva = (t) => !(t.iva > 0);
+const CODIGO_POR_TASA = { 0: '0003', 10.5: '0004', 21: '0005', 27: '0006', 5: '0008', 2.5: '0009' };
+
+/**
+ * Renglones de alicuota del comprobante: los guardados (varias alicuotas) o
+ * uno solo deducido de neto/IVA. Las operaciones exentas no llevan alicuota.
+ */
+export function alicuotasDe(t) {
+  if (Array.isArray(t.alicuotas) && t.alicuotas.length) {
+    return t.alicuotas
+      .filter((a) => Number(a.neto) !== 0 || Number(a.iva) !== 0)
+      .map((a) => ({ neto: Number(a.neto) || 0, iva: Number(a.iva) || 0, codigo: CODIGO_POR_TASA[Number(a.alicuota)] || codigoAlicuota(a.neto, a.iva) }));
+  }
+  if (esExento(t) && sinIva(t)) return [];
+  return [{ neto: t.neto, iva: t.iva, codigo: codigoAlicuota(t.neto, t.iva) }];
+}
 
 /** Ventas - Comprobantes (266 caracteres por registro). */
 export function ventasComprobantes(ventas) {
   return ventas.map((v) => {
     const { pv, nro } = partesNumero(v.numero);
     const id = identificacion(v.cuit);
-    const exento = esExento(v) && sinIva(v);
-    const conAlicuota = !exento;
+    const alics = alicuotasDe(v);
+    const soloExento = alics.length === 0;
+    const exentas = soloExento ? (Number(v.importe_exento) || v.total) : (Number(v.importe_exento) || 0);
     return [
       fechaCompacta(v.fecha), codigoComprobante(v.tipo_comprobante), pv, nro, nro,
       id.tipo, id.id, txt(v.cliente || (id.tipo === '99' ? 'CONSUMIDOR FINAL' : ''), 30),
       num(v.total, 15),
-      zeros(15),                       // no integran el neto gravado
+      num(v.importe_no_gravado, 15),   // no integran el neto gravado
       zeros(15),                       // percepcion a no categorizados
-      exento ? num(v.total, 15) : zeros(15), // exentas
+      num(exentas, 15),                // exentas
       zeros(15), zeros(15), zeros(15), zeros(15), // percep. nac., IIBB, municipales, internos
       'PES', '0001000000',
-      conAlicuota ? '1' : '0',
-      exento ? 'E' : '0',
-      zeros(15),                       // otros tributos
+      String(alics.length),
+      soloExento ? 'E' : '0',
+      num(v.otros_tributos, 15),       // otros tributos
       zeros(8)                         // vencimiento de pago
     ].join('') + CRLF;
   }).join('');
 }
 
-/** Ventas - Alicuotas (62 caracteres por registro). Las operaciones exentas no llevan alicuota. */
+/** Ventas - Alicuotas (62 caracteres por registro): uno por alicuota. */
 export function ventasAlicuotas(ventas) {
-  return ventas.filter((v) => !(esExento(v) && sinIva(v))).map((v) => {
+  return ventas.flatMap((v) => {
     const { pv, nro } = partesNumero(v.numero);
-    return [codigoComprobante(v.tipo_comprobante), pv, nro, num(v.neto, 15), codigoAlicuota(v.neto, v.iva), num(v.iva, 15)].join('') + CRLF;
+    return alicuotasDe(v).map((a) => [codigoComprobante(v.tipo_comprobante), pv, nro, num(a.neto, 15), a.codigo, num(a.iva, 15)].join('') + CRLF);
   }).join('');
 }
 
@@ -111,29 +127,31 @@ export function comprasComprobantes(compras) {
     const { pv, nro } = partesNumero(c.numero);
     const id = identificacion(c.cuit);
     const conIva = c.iva > 0;
+    const alics = conIva ? alicuotasDe(c) : [];
+    const noGravado = conIva ? (Number(c.importe_no_gravado) || 0) : c.total;
     return [
       fechaCompacta(c.fecha), codigoComprobante(c.tipo_comprobante), pv, nro,
       ' '.repeat(16),                  // despacho de importacion
       id.tipo, id.id, txt(c.proveedor, 30),
       num(c.total, 15),
-      conIva ? zeros(15) : num(c.total, 15), // no integran el neto gravado
-      zeros(15),                       // exentas
+      num(noGravado, 15),              // no integran el neto gravado
+      num(c.importe_exento, 15),       // exentas
       zeros(15), zeros(15), zeros(15), zeros(15), zeros(15), // percep. IVA, nac., IIBB, municipales, internos
       'PES', '0001000000',
-      conIva ? '1' : '0',
+      String(alics.length),
       conIva ? '0' : 'N',
       num(c.iva, 15),                  // credito fiscal computable
-      zeros(15),                       // otros tributos
+      num(c.otros_tributos, 15),       // otros tributos
       zeros(11), ' '.repeat(30), zeros(15) // CUIT emisor/corredor, denominacion, IVA comision
     ].join('') + CRLF;
   }).join('');
 }
 
-/** Compras - Alicuotas (84 caracteres por registro). */
+/** Compras - Alicuotas (84 caracteres por registro): uno por alicuota. */
 export function comprasAlicuotas(compras) {
-  return compras.filter((c) => c.iva > 0).map((c) => {
+  return compras.filter((c) => c.iva > 0).flatMap((c) => {
     const { pv, nro } = partesNumero(c.numero);
     const id = identificacion(c.cuit);
-    return [codigoComprobante(c.tipo_comprobante), pv, nro, id.tipo, id.id, num(c.neto, 15), codigoAlicuota(c.neto, c.iva), num(c.iva, 15)].join('') + CRLF;
+    return alicuotasDe(c).map((a) => [codigoComprobante(c.tipo_comprobante), pv, nro, id.tipo, id.id, num(a.neto, 15), a.codigo, num(a.iva, 15)].join('') + CRLF);
   }).join('');
 }

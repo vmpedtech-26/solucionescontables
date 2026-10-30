@@ -283,7 +283,13 @@ export function parsePadron(xml) {
 // -------------------------------------------------------------
 // WSFEv1 (factura electronica)
 // -------------------------------------------------------------
-export const TIPOS_CBTE = { 1: 'Factura A', 6: 'Factura B', 11: 'Factura C', 3: 'Nota de Crédito A', 8: 'Nota de Crédito B', 13: 'Nota de Crédito C' };
+export const TIPOS_CBTE = {
+  1: 'Factura A', 2: 'Nota de Débito A', 3: 'Nota de Crédito A',
+  6: 'Factura B', 7: 'Nota de Débito B', 8: 'Nota de Crédito B',
+  11: 'Factura C', 12: 'Nota de Débito C', 13: 'Nota de Crédito C'
+};
+const CLASE_CBTE = { 1: 'A', 2: 'A', 3: 'A', 6: 'B', 7: 'B', 8: 'B', 11: 'C', 12: 'C', 13: 'C' };
+const ES_NOTA = [2, 3, 7, 8, 12, 13];
 export const ALICUOTAS_WSFE = { 0: 3, 10.5: 4, 21: 5, 27: 6, 5: 8, 2.5: 9 };
 export const CONDICION_IVA_RECEPTOR = { 1: 'IVA Responsable Inscripto', 4: 'IVA Sujeto Exento', 5: 'Consumidor Final', 6: 'Responsable Monotributo', 7: 'Sujeto No Categorizado', 8: 'Proveedor del Exterior', 9: 'Cliente del Exterior', 10: 'IVA Liberado – Ley 19.640', 13: 'Monotributista Social', 15: 'IVA No Alcanzado', 16: 'Monotributo Trabajador Independiente Promovido' };
 // Condiciones del receptor admitidas por clase de comprobante (RG 5616)
@@ -331,35 +337,58 @@ export function parseUltimoAutorizado(xml) {
 }
 
 const yyyymmdd = (iso) => String(iso).slice(0, 10).replace(/-/g, '');
-const imp = (n) => (Math.round(Number(n) * 100) / 100).toFixed(2);
+const imp = (n) => (Math.round((Number(n) + Number.EPSILON) * 100) / 100).toFixed(2);
+
+const r2 = (n) => Math.round((Number(n) + Number.EPSILON) * 100) / 100;
 
 /**
- * Valida y calcula importes de una factura. Para Factura C no se discrimina IVA.
- * datos: { cbteTipo, concepto, docTipo, docNro, condicionIvaReceptor, fecha, neto, alicuota,
- *          servDesde, servHasta, vtoPago }
+ * Valida y calcula importes de un comprobante (factura, nota de debito o de credito).
+ * datos: { cbteTipo, concepto, docTipo, docNro, condicionIvaReceptor, fecha,
+ *          items: [{ neto, alicuota }] (o neto + alicuota para una sola alicuota),
+ *          exento, noGravado, servDesde, servHasta, vtoPago,
+ *          cbtesAsoc: [{ tipo, ptoVta, nro, fecha }] | periodoAsoc: { desde, hasta } }
+ * Clase C: no discrimina IVA (todo el importe va como neto).
  */
 export function prepararFactura(datos) {
   const cbteTipo = Number(datos.cbteTipo);
   if (!TIPOS_CBTE[cbteTipo]) throw new Error('Tipo de comprobante no soportado.');
+  const clase = CLASE_CBTE[cbteTipo];
+  const esC = clase === 'C';
   const concepto = Number(datos.concepto || 1);
   if (![1, 2, 3].includes(concepto)) throw new Error('Concepto inválido (1 productos, 2 servicios, 3 ambos).');
-  const esC = [11, 13].includes(cbteTipo);
-  const neto = Math.round(Number(datos.neto) * 100) / 100;
-  if (!(neto > 0)) throw new Error('El importe neto debe ser mayor a cero.');
-  const alicuota = esC ? 0 : Number(datos.alicuota);
-  if (!esC && !(alicuota in ALICUOTAS_WSFE)) throw new Error('Alícuota de IVA inválida.');
-  const iva = esC ? 0 : Math.round(neto * alicuota) / 100;
-  const total = Math.round((neto + iva) * 100) / 100;
+
+  // Items por alicuota: se agrupan por tasa (ARCA admite una linea por alicuota)
+  const crudos = Array.isArray(datos.items) && datos.items.length ? datos.items : [{ neto: datos.neto, alicuota: datos.alicuota }];
+  if (crudos.length > 20) throw new Error('Demasiados renglones de importe.');
+  const porTasa = new Map();
+  for (const it of crudos) {
+    const neto = r2(it.neto);
+    if (!(neto >= 0) || !Number.isFinite(neto)) throw new Error('Los importes no pueden ser negativos.');
+    if (neto === 0) continue;
+    const alicuota = esC ? 0 : Number(it.alicuota);
+    if (!esC && !(alicuota in ALICUOTAS_WSFE)) throw new Error('Alícuota de IVA inválida.');
+    porTasa.set(alicuota, r2((porTasa.get(alicuota) || 0) + neto));
+  }
+  const alicuotas = esC ? [] : [...porTasa].map(([alicuota, base]) => ({ alicuota, id: ALICUOTAS_WSFE[alicuota], base, importe: r2(base * alicuota / 100) }));
+  const neto = r2([...porTasa.values()].reduce((a, b) => a + b, 0));
+  const iva = r2(alicuotas.reduce((a, x) => a + x.importe, 0));
+  const exento = esC ? 0 : r2(datos.exento || 0);
+  const noGravado = esC ? 0 : r2(datos.noGravado || 0);
+  if (exento < 0 || noGravado < 0) throw new Error('Los importes no pueden ser negativos.');
+  const total = r2(neto + iva + exento + noGravado);
+  if (!(total > 0)) throw new Error('El importe del comprobante debe ser mayor a cero.');
+  const alicuota = alicuotas.length === 1 ? alicuotas[0].alicuota : (alicuotas.length ? null : 0);
+
   const docTipo = Number(datos.docTipo || 99);
   const docNro = String(datos.docNro || '0').replace(/\D/g, '') || '0';
+  if (![80, 86, 96, 99].includes(docTipo)) throw new Error('Tipo de documento del receptor inválido.');
   if (docTipo === 80 && docNro.length !== 11) throw new Error('El CUIT del receptor debe tener 11 dígitos.');
-  if ([1, 3].includes(cbteTipo) && docTipo !== 80) throw new Error('La Factura A requiere CUIT del receptor.');
-  if ([3, 8, 13].includes(cbteTipo)) throw new Error('Las notas de crédito requieren el comprobante asociado y todavía no se emiten desde el sistema.');
+  if (docTipo === 96 && !/^\d{7,8}$/.test(docNro)) throw new Error('El DNI del receptor debe tener 7 u 8 dígitos.');
+  if (clase === 'A' && docTipo !== 80) throw new Error('Los comprobantes A requieren CUIT del receptor.');
   const condicionIvaReceptor = Number(datos.condicionIvaReceptor || 5);
   if (!CONDICION_IVA_RECEPTOR[condicionIvaReceptor]) throw new Error('Condición frente al IVA del receptor inválida.');
-  const clase = [1, 3].includes(cbteTipo) ? 'A' : [6, 8].includes(cbteTipo) ? 'B' : null;
-  if (clase && !CONDICIONES_POR_CLASE[clase].includes(condicionIvaReceptor)) {
-    throw new Error(`La Factura ${clase} no se puede emitir a un receptor "${CONDICION_IVA_RECEPTOR[condicionIvaReceptor]}".`);
+  if (clase !== 'C' && !CONDICIONES_POR_CLASE[clase].includes(condicionIvaReceptor)) {
+    throw new Error(`Un comprobante ${clase} no se puede emitir a un receptor "${CONDICION_IVA_RECEPTOR[condicionIvaReceptor]}".`);
   }
   const fecha = datos.fecha ? fechaValida(datos.fecha, 'Fecha') : hoyAR();
   if (concepto !== 1) {
@@ -368,28 +397,61 @@ export function prepararFactura(datos) {
     if (datos.servHasta < datos.servDesde) throw new Error('El período facturado termina antes de empezar.');
     if (datos.vtoPago < fecha) throw new Error('El vencimiento de pago no puede ser anterior a la fecha de la factura.');
   }
-  return { cbteTipo, concepto, esC, neto, alicuota, iva, total, docTipo, docNro, condicionIvaReceptor, fecha,
-    servDesde: datos.servDesde, servHasta: datos.servHasta, vtoPago: datos.vtoPago };
+
+  // Notas de credito y debito: comprobante asociado (o periodo) obligatorio
+  let cbtesAsoc = [];
+  let periodoAsoc = null;
+  if (ES_NOTA.includes(cbteTipo)) {
+    cbtesAsoc = (Array.isArray(datos.cbtesAsoc) ? datos.cbtesAsoc : []).slice(0, 10).map((c) => {
+      const tipo = Number(c.tipo); const ptoVta = Number(c.ptoVta); const nro = Number(c.nro);
+      if (CLASE_CBTE[tipo] !== clase) throw new Error(`El comprobante asociado debe ser de clase ${clase}.`);
+      if (!(ptoVta >= 1 && ptoVta <= 99998) || !(nro >= 1 && nro <= 99999999)) throw new Error('Punto de venta o número del comprobante asociado inválido.');
+      const f = c.fecha ? fechaValida(c.fecha, 'Fecha del comprobante asociado') : null;
+      if (f && f > fecha) throw new Error('El comprobante asociado no puede ser posterior a la nota.');
+      return { tipo, ptoVta, nro, fecha: f };
+    });
+    if (!cbtesAsoc.length && datos.periodoAsoc?.desde && datos.periodoAsoc?.hasta) {
+      periodoAsoc = { desde: fechaValida(datos.periodoAsoc.desde, 'Período desde'), hasta: fechaValida(datos.periodoAsoc.hasta, 'Período hasta') };
+      if (periodoAsoc.hasta < periodoAsoc.desde) throw new Error('El período asociado termina antes de empezar.');
+    }
+    if (!cbtesAsoc.length && !periodoAsoc) throw new Error('Indicá la factura a la que corresponde la nota (o el período que ajusta).');
+  }
+
+  return { cbteTipo, clase, concepto, esC, neto, alicuota, alicuotas, iva, exento, noGravado, total, docTipo, docNro, condicionIvaReceptor, fecha,
+    servDesde: datos.servDesde, servHasta: datos.servHasta, vtoPago: datos.vtoPago, cbtesAsoc, periodoAsoc };
 }
 
-export function solicitarCaeBody(auth, ptoVta, numero, f) {
+/** cuitEmisor: CUIT propio, se informa en cada comprobante asociado. */
+export function solicitarCaeBody(auth, ptoVta, numero, f, cuitEmisor = auth.cuit) {
   const servicios = f.concepto !== 1
     ? `<ar:FchServDesde>${yyyymmdd(f.servDesde)}</ar:FchServDesde><ar:FchServHasta>${yyyymmdd(f.servHasta)}</ar:FchServHasta><ar:FchVtoPago>${yyyymmdd(f.vtoPago)}</ar:FchVtoPago>`
     : '';
-  const ivaBlock = f.esC ? '' :
-    `<ar:Iva><ar:AlicIva><ar:Id>${ALICUOTAS_WSFE[f.alicuota]}</ar:Id><ar:BaseImp>${imp(f.neto)}</ar:BaseImp><ar:Importe>${imp(f.iva)}</ar:Importe></ar:AlicIva></ar:Iva>`;
+  const alicuotas = f.alicuotas || (f.esC ? [] : [{ id: ALICUOTAS_WSFE[f.alicuota], base: f.neto, importe: f.iva }]);
+  const ivaBlock = !f.esC && f.neto > 0
+    ? '<ar:Iva>' + alicuotas.map((a) => `<ar:AlicIva><ar:Id>${a.id}</ar:Id><ar:BaseImp>${imp(a.base)}</ar:BaseImp><ar:Importe>${imp(a.importe)}</ar:Importe></ar:AlicIva>`).join('') + '</ar:Iva>'
+    : '';
+  const asociados = (f.cbtesAsoc || []).length
+    ? '<ar:CbtesAsoc>' + f.cbtesAsoc.map((c) => '<ar:CbteAsoc>' +
+        `<ar:Tipo>${Number(c.tipo)}</ar:Tipo><ar:PtoVta>${Number(c.ptoVta)}</ar:PtoVta><ar:Nro>${Number(c.nro)}</ar:Nro>` +
+        `<ar:Cuit>${String(cuitEmisor).replace(/\D/g, '')}</ar:Cuit>` +
+        (c.fecha ? `<ar:CbteFch>${yyyymmdd(c.fecha)}</ar:CbteFch>` : '') +
+        '</ar:CbteAsoc>').join('') + '</ar:CbtesAsoc>'
+    : '';
+  const periodo = f.periodoAsoc
+    ? `<ar:PeriodoAsoc><ar:FchDesde>${yyyymmdd(f.periodoAsoc.desde)}</ar:FchDesde><ar:FchHasta>${yyyymmdd(f.periodoAsoc.hasta)}</ar:FchHasta></ar:PeriodoAsoc>`
+    : '';
   return wsfeAuth(auth) +
     '<ar:FeCAEReq>' +
     `<ar:FeCabReq><ar:CantReg>1</ar:CantReg><ar:PtoVta>${Number(ptoVta)}</ar:PtoVta><ar:CbteTipo>${f.cbteTipo}</ar:CbteTipo></ar:FeCabReq>` +
     '<ar:FeDetReq><ar:FECAEDetRequest>' +
     `<ar:Concepto>${f.concepto}</ar:Concepto><ar:DocTipo>${f.docTipo}</ar:DocTipo><ar:DocNro>${f.docNro}</ar:DocNro>` +
     `<ar:CbteDesde>${numero}</ar:CbteDesde><ar:CbteHasta>${numero}</ar:CbteHasta><ar:CbteFch>${yyyymmdd(f.fecha)}</ar:CbteFch>` +
-    `<ar:ImpTotal>${imp(f.total)}</ar:ImpTotal><ar:ImpTotConc>0.00</ar:ImpTotConc><ar:ImpNeto>${imp(f.neto)}</ar:ImpNeto>` +
-    `<ar:ImpOpEx>0.00</ar:ImpOpEx><ar:ImpTrib>0.00</ar:ImpTrib><ar:ImpIVA>${imp(f.iva)}</ar:ImpIVA>` +
+    `<ar:ImpTotal>${imp(f.total)}</ar:ImpTotal><ar:ImpTotConc>${imp(f.noGravado || 0)}</ar:ImpTotConc><ar:ImpNeto>${imp(f.neto)}</ar:ImpNeto>` +
+    `<ar:ImpOpEx>${imp(f.exento || 0)}</ar:ImpOpEx><ar:ImpTrib>0.00</ar:ImpTrib><ar:ImpIVA>${imp(f.iva)}</ar:ImpIVA>` +
     servicios +
     '<ar:MonId>PES</ar:MonId><ar:MonCotiz>1</ar:MonCotiz>' +
     `<ar:CondicionIVAReceptorId>${f.condicionIvaReceptor}</ar:CondicionIVAReceptorId>` +
-    ivaBlock +
+    asociados + ivaBlock + periodo +
     '</ar:FECAEDetRequest></ar:FeDetReq></ar:FeCAEReq>';
 }
 

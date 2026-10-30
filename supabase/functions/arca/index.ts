@@ -233,7 +233,7 @@ const acciones: Record<string, (ctx: Ctx, p: Record<string, unknown>) => Promise
         core.wsfeSoapAction("FECompUltimoAutorizado"));
       try { numero = core.parseUltimoAutorizado(ultXml) + 1; } catch (e) { throw new ErrorUsuario((e as Error).message, 422); }
       const xml = await soap(core.ENDPOINTS[ambiente].wsfe,
-        core.wsfeEnvelope("FECAESolicitar", core.solicitarCaeBody(auth, ptoVta, numero, f)),
+        core.wsfeEnvelope("FECAESolicitar", core.solicitarCaeBody(auth, ptoVta, numero, f, emp.cuit)),
         core.wsfeSoapAction("FECAESolicitar"));
       try { resultado = core.parseSolicitarCae(xml); } catch (e) { throw new ErrorUsuario((e as Error).message, 422); }
       // 10016: el numero ya lo tomo otra emision concurrente -> reintento una vez
@@ -252,11 +252,15 @@ const acciones: Record<string, (ctx: Ctx, p: Record<string, unknown>) => Promise
         // DNI (96) se guarda sin guiones: el Libro IVA lo reconoce por la cantidad de digitos
         cuit: f.docTipo === 80 ? `${f.docNro.slice(0, 2)}-${f.docNro.slice(2, 10)}-${f.docNro.slice(10)}` : f.docTipo === 96 ? f.docNro.slice(0, 8) : "",
         neto: f.neto, iva: f.iva, total: f.total, cae: resultado!.cae, cae_vto: resultado!.caeVto,
+        alicuotas: f.alicuotas.map((x: { alicuota: number; base: number; importe: number }) => ({ alicuota: x.alicuota, neto: x.base, iva: x.importe })),
+        importe_exento: f.exento, importe_no_gravado: f.noGravado, exento: f.neto === 0 && f.exento > 0,
+        cbte_asoc: f.cbtesAsoc.map((c: { tipo: number; ptoVta: number; nro: number }) =>
+          `${core.TIPOS_CBTE[c.tipo as keyof typeof core.TIPOS_CBTE]} ${String(c.ptoVta).padStart(5, "0")}-${String(c.nro).padStart(8, "0")}`).join(", ") || null,
       });
       registrado = !error;
       if (error) console.error("No se pudo registrar la venta emitida:", error.message);
     }
-    return { ambiente, ...resultado!, numero: numeroTxt, tipo: tipoTxt, neto: f.neto, iva: f.iva, total: f.total, registrado };
+    return { ambiente, ...resultado!, numero: numeroTxt, tipo: tipoTxt, neto: f.neto, iva: f.iva, total: f.total, alicuotas: f.alicuotas, exento: f.exento, noGravado: f.noGravado, registrado };
   },
 };
 

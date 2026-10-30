@@ -23,11 +23,17 @@ export const MONOTRIBUTO_CATEGORIAS_2026 = {
 
 const round2 = (n) => Math.round(n * 100) / 100;
 
+/** Signo del comprobante: las notas de credito restan, el resto suma. */
+export const signo = (tx) => (/nota de cr[eé]dito/i.test(String(tx?.tipo_comprobante || '')) ? -1 : 1);
+
+/** Suma un importe respetando el signo de cada comprobante. */
+export const sumaFirmada = (lista, campo) => lista.reduce((s, t) => s + signo(t) * (Number(t[campo]) || 0), 0);
+
 /** Suma de ventas de los ultimos 365 dias (ventana movil de 12 meses). */
 export function ventasMoviles12Meses(ventas, hoy = new Date()) {
   const corte = new Date(hoy);
   corte.setDate(corte.getDate() - 365);
-  return ventas.reduce((s, v) => (new Date(v.fecha) >= corte ? s + v.total : s), 0);
+  return ventas.reduce((s, v) => (new Date(v.fecha) >= corte ? s + signo(v) * v.total : s), 0);
 }
 
 /** Letra de categoria desde "Monotributo - Cat H" (default H si no se puede leer). */
@@ -69,10 +75,10 @@ export function categoriaMonotributoRecomendada({ ingresos, energia, alquileres,
  *   demo del sandbox); sin ese parametro se computa todo el credito.
  */
 export function calcularIvaRI({ ventas, compras, retPercSaldo = 0, saldoFavor = 0, excluirCredito = null }) {
-  const debFiscal = ventas.reduce((s, v) => s + v.iva, 0);
-  const creditoHabilitado = compras.reduce((s, c) => (excluirCredito && excluirCredito(c) ? s : s + c.iva), 0);
-  const totalNeto = ventas.reduce((s, v) => s + v.neto, 0);
-  const totalExento = ventas.filter(v => v.exento).reduce((s, v) => s + v.neto, 0);
+  const debFiscal = sumaFirmada(ventas, 'iva');
+  const creditoHabilitado = sumaFirmada(compras.filter((c) => !(excluirCredito && excluirCredito(c))), 'iva');
+  const totalNeto = sumaFirmada(ventas, 'neto');
+  const totalExento = sumaFirmada(ventas.filter(v => v.exento), 'neto');
   const prorrateoGravado = totalNeto > 0 ? (1 - totalExento / totalNeto) : 1;
   const credFiscal = round2(creditoHabilitado * prorrateoGravado);
   return {

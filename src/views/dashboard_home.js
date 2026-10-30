@@ -5,7 +5,7 @@ import { getActiveCompany, getTransactions, getCompanies } from '../db/mockdb.js
 import { sanitizeInput as esc, getActivePeriod, periodLabel, validarCUIT, getVencimientos } from '../utils.js';
 import { renderSinEmpresas } from '../utils.js';
 import { isSupabaseConfigured } from '../db/supabase.js';
-import { MONOTRIBUTO_CATEGORIAS_2026, ventasMoviles12Meses, letraCategoria } from '../domain/fiscal.js';
+import { MONOTRIBUTO_CATEGORIAS_2026, ventasMoviles12Meses, letraCategoria, sumaFirmada } from '../domain/fiscal.js';
 
 const REAL = isSupabaseConfigured;
 
@@ -64,13 +64,13 @@ export function renderDashboardHome() {
   const filteredCompras = txs.compras.filter(c => c.fecha.startsWith(activePeriod));
 
   // Calcular KPIs
-  const totalNetSales = filteredVentas.reduce((sum, v) => sum + v.neto, 0);
-  const totalIvaSales = filteredVentas.reduce((sum, v) => sum + v.iva, 0);
-  const totalSales = filteredVentas.reduce((sum, v) => sum + v.total, 0);
+  const totalNetSales = sumaFirmada(filteredVentas, 'neto');
+  const totalIvaSales = sumaFirmada(filteredVentas, 'iva');
+  const totalSales = sumaFirmada(filteredVentas, 'total');
 
-  const totalNetPurchases = filteredCompras.reduce((sum, c) => sum + c.neto, 0);
-  const totalIvaPurchases = filteredCompras.reduce((sum, c) => sum + c.iva, 0);
-  const totalPurchases = filteredCompras.reduce((sum, c) => sum + c.total, 0);
+  const totalNetPurchases = sumaFirmada(filteredCompras, 'neto');
+  const totalIvaPurchases = sumaFirmada(filteredCompras, 'iva');
+  const totalPurchases = sumaFirmada(filteredCompras, 'total');
 
   const profit = totalSales - totalPurchases;
   

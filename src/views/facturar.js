@@ -48,12 +48,12 @@ export async function renderFacturar() {
   const inp = 'width:100%;border:1px solid var(--border-color);border-radius:6px;padding:8px 10px;font-size:13px;box-sizing:border-box;background:#fff;';
   const lab = 'display:block;font-size:11px;font-weight:700;color:var(--text-secondary);margin:10px 0 4px;text-transform:uppercase;';
   const hoy = hoyAR();
-  const tipos = esMono ? ['Factura C'] : ['Factura B', 'Factura A'];
+  const tipos = esMono ? ['Factura C', 'Nota de Crédito C', 'Nota de Débito C'] : ['Factura B', 'Factura A', 'Nota de Crédito B', 'Nota de Crédito A', 'Nota de Débito B', 'Nota de Débito A'];
 
   let emitidas = [];
   if (esEstudio) {
     const txs = await getTransactionsAsync(emp.id).catch(() => ({ ventas: [] }));
-    emitidas = (txs.ventas || []).filter((v) => v.cae).slice(0, 10);
+    emitidas = (txs.ventas || []).filter((v) => v.cae).slice(0, 50);
   }
 
   return `
@@ -101,11 +101,33 @@ export async function renderFacturar() {
           </div>
           <label style="${lab}">Detalle *</label>
           <input id="fac-detalle" style="${inp}" maxlength="200" required placeholder="Ej: Honorarios profesionales octubre">
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
-            <div><label style="${lab}">Fecha *</label><input type="date" id="fac-fecha" style="${inp}" value="${hoy}" required></div>
-            <div><label style="${lab}">${esMono ? 'Importe total' : 'Importe neto'} *</label><input type="number" id="fac-neto" step="0.01" min="0.01" style="${inp}" required></div>
-            <div><label style="${lab}">Alícuota IVA</label><select id="fac-ali" style="${inp}" ${esMono ? 'disabled' : ''}>${esMono ? '<option value="0">No corresponde</option>' : '<option value="21">21%</option><option value="10.5">10,5%</option><option value="27">27%</option><option value="5">5%</option><option value="2.5">2,5%</option><option value="0">0%</option>'}</select></div>
+          <div id="fac-asoc" style="display:none;margin-top:12px;padding:12px;border:1px dashed var(--border-color);border-radius:8px;">
+            <label style="${lab}margin-top:0;">Comprobante que se ajusta *</label>
+            ${emitidas.length ? `<select id="fac-asoc-lista" style="${inp}margin-bottom:8px;"><option value="">Elegir una factura emitida…</option>${emitidas.map((v) => `<option value="${esc(v.id)}">${esc(v.tipo_comprobante)} ${esc(v.numero)} · ${esc(v.cliente || 'Consumidor Final')} · ${esc(pesos(v.total))}</option>`).join('')}</select>` : ''}
+            <div style="display:grid;grid-template-columns:1.3fr 0.7fr 1fr 1fr;gap:10px;">
+              <div><label style="${lab}">Tipo</label><select id="fac-asoc-tipo" style="${inp}"></select></div>
+              <div><label style="${lab}">Pto. vta.</label><input type="number" id="fac-asoc-pv" min="1" style="${inp}"></div>
+              <div><label style="${lab}">Número</label><input type="number" id="fac-asoc-nro" min="1" style="${inp}"></div>
+              <div><label style="${lab}">Fecha</label><input type="date" id="fac-asoc-fecha" style="${inp}"></div>
+            </div>
+            <p style="font-size:11.5px;color:var(--text-secondary);margin:8px 0 0;">Si la nota ajusta un período completo (por ejemplo, un descuento por volumen), dejá el número vacío y completá el período:</p>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+              <div><label style="${lab}">Período desde</label><input type="date" id="fac-per-desde" style="${inp}"></div>
+              <div><label style="${lab}">Período hasta</label><input type="date" id="fac-per-hasta" style="${inp}"></div>
+            </div>
           </div>
+          <div style="display:grid;grid-template-columns:1fr 2fr;gap:12px;">
+            <div><label style="${lab}">Fecha *</label><input type="date" id="fac-fecha" style="${inp}" value="${hoy}" required></div>
+            <div></div>
+          </div>
+          <label style="${lab}">${esMono ? 'Importe *' : 'Importes netos por alícuota *'}</label>
+          <div id="fac-items" style="display:flex;flex-direction:column;gap:8px;"></div>
+          ${esMono ? '' : `<button type="button" class="btn btn-outline btn-xs" id="fac-add-item" style="margin-top:8px;"><i data-lucide="plus"></i> Agregar importe con otra alícuota</button>
+          <details style="margin-top:10px;font-size:12.5px;"><summary style="cursor:pointer;color:var(--text-secondary);">Importes exentos o no gravados</summary>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+              <div><label style="${lab}">Exento</label><input type="number" id="fac-exento" step="0.01" min="0" style="${inp}" placeholder="0,00"></div>
+              <div><label style="${lab}">No gravado</label><input type="number" id="fac-nograv" step="0.01" min="0" style="${inp}" placeholder="0,00"></div>
+            </div></details>`}
           <div id="fac-totales" style="margin-top:12px;font-size:13px;"></div>
           <button type="submit" class="btn btn-primary" id="fac-emitir" style="margin-top:14px;width:100%;" disabled><i data-lucide="zap"></i> Emitir y obtener CAE</button>
         </form>
@@ -171,31 +193,94 @@ export async function initFacturar(mainApp) {
     $('fac-resultado').innerHTML = `<span style="color:#b91c1c;">${esc(e.message)}</span>`;
   }
 
+  const r2 = (n) => Math.round(((Number(n) || 0) + Number.EPSILON) * 100) / 100;
+  const ALI_OPTS = '<option value="21">21%</option><option value="10.5">10,5%</option><option value="27">27%</option><option value="5">5%</option><option value="2.5">2,5%</option><option value="0">0%</option>';
+  const esMonoEmp = String(emp.condicion_iva).toLowerCase().includes('monotributo');
+  const agregarItem = (neto = '', ali = '21') => {
+    const fila = document.createElement('div');
+    fila.className = 'fac-item';
+    fila.style.cssText = 'display:grid;grid-template-columns:' + (esMonoEmp ? '1fr' : '1.4fr 1fr auto') + ';gap:8px;align-items:center;';
+    fila.innerHTML = `<input type="number" class="fac-item-neto" step="0.01" min="0" placeholder="${esMonoEmp ? 'Importe total' : 'Neto gravado'}" aria-label="Importe" style="width:100%;border:1px solid var(--border-color);border-radius:6px;padding:8px 10px;font-size:13px;box-sizing:border-box;background:#fff;" value="${esc(String(neto))}">` +
+      (esMonoEmp ? '' : `<select class="fac-item-ali" aria-label="Alícuota" style="width:100%;border:1px solid var(--border-color);border-radius:6px;padding:8px 10px;font-size:13px;background:#fff;">${ALI_OPTS}</select>
+      <button type="button" class="btn-icon-sm fac-item-quitar" aria-label="Quitar renglón" title="Quitar"><i data-lucide="x"></i></button>`);
+    $('fac-items').appendChild(fila);
+    const sel = fila.querySelector('.fac-item-ali');
+    if (sel) sel.value = String(ali);
+    fila.querySelectorAll('input,select').forEach((el) => el.addEventListener('input', refrescar));
+    fila.querySelector('.fac-item-quitar')?.addEventListener('click', () => {
+      if (document.querySelectorAll('.fac-item').length > 1) { fila.remove(); refrescar(); }
+    });
+    if (window.lucide) window.lucide.createIcons({ root: fila });
+  };
+  const items = () => [...document.querySelectorAll('.fac-item')].map((f) => ({
+    neto: r2(f.querySelector('.fac-item-neto').value),
+    alicuota: esMonoEmp ? 0 : parseFloat(f.querySelector('.fac-item-ali').value) || 0
+  })).filter((i) => i.neto > 0);
+  const esNota = () => [2, 3, 7, 8, 12, 13].includes(Number($('fac-tipo').value));
+  const claseDe = (t) => ({ 1: 'A', 2: 'A', 3: 'A', 6: 'B', 7: 'B', 8: 'B', 11: 'C', 12: 'C', 13: 'C' })[Number(t)];
+
   const calc = () => {
     const tipo = Number($('fac-tipo').value);
-    const esC = tipo === 11;
-    const neto = Math.round((parseFloat($('fac-neto').value) || 0) * 100) / 100;
-    const ali = esC ? 0 : parseFloat($('fac-ali').value) || 0;
-    const iva = Math.round(neto * ali) / 100;
-    return { esC, neto, ali, iva, total: Math.round((neto + iva) * 100) / 100 };
+    const esC = claseDe(tipo) === 'C';
+    const lista = items();
+    const porTasa = {};
+    lista.forEach((i) => { const t = esC ? 0 : i.alicuota; porTasa[t] = r2((porTasa[t] || 0) + i.neto); });
+    const alicuotas = esC ? [] : Object.entries(porTasa).map(([t, base]) => ({ alicuota: Number(t), base, importe: r2(base * Number(t) / 100) }));
+    const neto = r2(Object.values(porTasa).reduce((a, b) => a + b, 0));
+    const iva = r2(alicuotas.reduce((a, x) => a + x.importe, 0));
+    const exento = esC ? 0 : r2($('fac-exento')?.value);
+    const noGravado = esC ? 0 : r2($('fac-nograv')?.value);
+    return { esC, neto, iva, alicuotas, exento, noGravado, total: r2(neto + iva + exento + noGravado), items: lista };
   };
   const refrescar = () => {
     const c = calc();
-    $('fac-totales').innerHTML = c.esC ? `Total: <b>${pesos(c.total)}</b>` : `Neto ${pesos(c.neto)} · IVA ${pesos(c.iva)} · <b>Total ${pesos(c.total)}</b>`;
+    const extras = (c.exento ? ` · Exento ${pesos(c.exento)}` : '') + (c.noGravado ? ` · No gravado ${pesos(c.noGravado)}` : '');
+    $('fac-totales').innerHTML = c.esC ? `Total: <b>${pesos(c.total)}</b>`
+      : `Neto ${pesos(c.neto)} · ${c.alicuotas.map((a) => `IVA ${String(a.alicuota).replace('.', ',')}% ${pesos(a.importe)}`).join(' · ') || 'IVA $ 0,00'}${extras} · <b>Total ${pesos(c.total)}</b>`;
     const dt = $('fac-doctipo').value;
     $('fac-docnro').disabled = dt === '99';
     if (dt === '99') $('fac-docnro').value = '';
     $('fac-serv').style.display = $('fac-concepto').value === '1' ? 'none' : 'grid';
     // Cada clase solo admite ciertas condiciones del receptor: se ocultan las demas
     // y solo se corrige la elegida si deja de ser valida (no en cada tecla).
-    const permitidas = CONDICIONES_CLASE[$('fac-tipo').value];
+    const clase = claseDe($('fac-tipo').value);
+    const permitidas = CONDICIONES_CLASE[clase === 'A' ? 1 : clase === 'B' ? 6 : 11];
     const condrec = $('fac-condrec');
     [...condrec.options].forEach((o) => { o.hidden = o.disabled = !!permitidas && !permitidas.includes(Number(o.value)); });
     if (condrec.selectedOptions[0]?.disabled) condrec.value = String(permitidas[0]);
-    if ($('fac-tipo').value === '1') { $('fac-doctipo').value = '80'; $('fac-docnro').disabled = false; }
+    if (clase === 'A') { $('fac-doctipo').value = '80'; $('fac-docnro').disabled = false; }
+    // Notas: comprobante asociado de la misma clase
+    $('fac-asoc').style.display = esNota() ? 'block' : 'none';
+    const asocTipo = $('fac-asoc-tipo');
+    if (asocTipo.dataset.clase !== clase) {
+      asocTipo.dataset.clase = clase;
+      asocTipo.innerHTML = Object.entries(CODIGOS_TIPO).filter(([, cod]) => claseDe(cod) === clase)
+        .map(([nombre, cod]) => `<option value="${cod}">${nombre}</option>`).join('');
+    }
   };
-  ['fac-neto', 'fac-ali', 'fac-tipo', 'fac-doctipo', 'fac-concepto'].forEach((id) => $(id)?.addEventListener('input', refrescar));
-  ['fac-tipo', 'fac-doctipo', 'fac-concepto'].forEach((id) => $(id)?.addEventListener('change', refrescar));
+  ['fac-tipo', 'fac-doctipo', 'fac-concepto', 'fac-exento', 'fac-nograv'].forEach((id) => { $(id)?.addEventListener('input', refrescar); $(id)?.addEventListener('change', refrescar); });
+  $('fac-add-item')?.addEventListener('click', () => agregarItem('', '10.5'));
+  agregarItem();
+
+  // Elegir la factura original completa el asociado y el receptor
+  $('fac-asoc-lista')?.addEventListener('change', async (e) => {
+    if (!e.target.value) return;
+    const txs = await getTransactionsAsync(emp.id);
+    const v = txs.ventas.find((x) => x.id === e.target.value);
+    if (!v) return;
+    const [pv, nro] = String(v.numero).split('-');
+    $('fac-asoc-tipo').value = String(CODIGOS_TIPO[v.tipo_comprobante] || '');
+    $('fac-asoc-pv').value = Number(pv); $('fac-asoc-nro').value = Number(nro); $('fac-asoc-fecha').value = v.fecha;
+    const doc = String(v.cuit || '').replace(/\D/g, '');
+    $('fac-doctipo').value = doc.length === 11 ? '80' : doc.length >= 7 ? '96' : '99';
+    $('fac-docnro').value = doc;
+    $('fac-nombre').value = v.cliente || '';
+    // Sugiere el mismo importe (anulacion total); se puede editar para una parcial
+    $('fac-items').innerHTML = '';
+    const alics = Array.isArray(v.alicuotas) && v.alicuotas.length ? v.alicuotas : [{ neto: v.neto, alicuota: Number(v.neto) > 0 ? Math.round(Number(v.iva) / Number(v.neto) * 1000) / 10 : 0 }];
+    alics.forEach((a) => agregarItem(a.neto, a.alicuota));
+    refrescar();
+  });
   refrescar();
 
   form.addEventListener('submit', async (e) => {
@@ -205,13 +290,24 @@ export async function initFacturar(mainApp) {
     const docNro = $('fac-docnro').value.replace(/\D/g, '');
     if (docTipo === 80 && !validarCUIT(docNro)) { mainApp.showToast('El CUIT del receptor no es válido.', 'error'); return; }
     if (docTipo === 96 && !/^\d{7,8}$/.test(docNro)) { mainApp.showToast('El DNI debe tener 7 u 8 dígitos.', 'error'); return; }
+    if (!c.items.length && !(c.exento || c.noGravado)) { mainApp.showToast('Cargá al menos un importe.', 'error'); return; }
+    let cbtesAsoc = [];
+    let periodoAsoc = null;
+    if (esNota()) {
+      if ($('fac-asoc-nro').value) {
+        cbtesAsoc = [{ tipo: Number($('fac-asoc-tipo').value), ptoVta: Number($('fac-asoc-pv').value), nro: Number($('fac-asoc-nro').value), fecha: $('fac-asoc-fecha').value || undefined }];
+        if (!(cbtesAsoc[0].ptoVta >= 1)) { mainApp.showToast('Completá el punto de venta del comprobante asociado.', 'error'); return; }
+      } else if ($('fac-per-desde').value && $('fac-per-hasta').value) {
+        periodoAsoc = { desde: $('fac-per-desde').value, hasta: $('fac-per-hasta').value };
+      } else { mainApp.showToast('Indicá la factura que ajusta la nota (o el período).', 'error'); return; }
+    }
     const tipoTxt = $('fac-tipo').selectedOptions[0].textContent;
     const ok = window.confirm(`${ambiente === 'produccion' ? '⚠ PRODUCCIÓN: se emite un comprobante con validez fiscal.\n\n' : 'Homologación (prueba sin validez fiscal).\n\n'}${tipoTxt} por ${pesos(c.total)} a ${$('fac-nombre').value || 'Consumidor Final'}.\n¿Emitir?`);
     if (!ok) return;
     const datos = {
       empresa_id: emp.id, pto_vta: Number($('fac-pv').value), cbteTipo: Number($('fac-tipo').value), concepto: Number($('fac-concepto').value),
       docTipo, docNro: docNro || '0', condicionIvaReceptor: Number($('fac-condrec').value), fecha: $('fac-fecha').value,
-      neto: c.neto, alicuota: c.ali, receptor_nombre: $('fac-nombre').value.trim(),
+      items: c.items, exento: c.exento, noGravado: c.noGravado, cbtesAsoc, periodoAsoc, receptor_nombre: $('fac-nombre').value.trim(),
       servDesde: $('fac-sdesde').value, servHasta: $('fac-shasta').value, vtoPago: $('fac-vto').value
     };
     const btn = $('fac-emitir');
@@ -231,7 +327,9 @@ export async function initFacturar(mainApp) {
           emisor: emp,
           cbte: { tipo: r.tipo, numero: r.numero, fecha: datos.fecha, cae: r.cae, caeVto: r.caeVto, concepto: datos.concepto,
             servDesde: datos.servDesde, servHasta: datos.servHasta, vtoPago: datos.vtoPago, neto: r.neto, iva: r.iva,
-            alicuota: datos.alicuota, total: r.total, homologacion: r.ambiente === 'homologacion' },
+            alicuotas: r.alicuotas || c.alicuotas, exento: c.exento, noGravado: c.noGravado, total: r.total, homologacion: r.ambiente === 'homologacion',
+            asociado: cbtesAsoc.length ? `${$('fac-asoc-tipo').selectedOptions[0].textContent} ${String(cbtesAsoc[0].ptoVta).padStart(5, '0')}-${String(cbtesAsoc[0].nro).padStart(8, '0')}`
+              : periodoAsoc ? `Período ${periodoAsoc.desde.split('-').reverse().join('/')} al ${periodoAsoc.hasta.split('-').reverse().join('/')}` : '' },
           receptor: { nombre: datos.receptor_nombre, docTipo, docNro, condicionIva: $('fac-condrec').selectedOptions[0].textContent },
           detalle: $('fac-detalle').value
         }) || mainApp.showToast('Habilitá las ventanas emergentes para imprimir.', 'info');
@@ -239,6 +337,8 @@ export async function initFacturar(mainApp) {
         imprimir();
         form.reset();
         $('fac-fecha').value = hoyAR();
+        $('fac-items').innerHTML = '';
+        agregarItem();
         refrescar();
       } else {
         out.innerHTML = `<div style="color:#b91c1c;font-weight:700;">✗ Rechazada por ARCA</div><p>${esc([...r.errores, ...r.observaciones].join(' | ') || 'Sin detalle')}</p>`;
@@ -258,11 +358,15 @@ export async function initFacturar(mainApp) {
     if (!v) return;
     const cuit = String(v.cuit || '').replace(/\D/g, '');
     const neto = Number(v.neto), iva = Number(v.iva);
+    const alicuotas = Array.isArray(v.alicuotas) && v.alicuotas.length
+      ? v.alicuotas.map((a) => ({ alicuota: a.alicuota, base: a.neto, importe: a.iva }))
+      : [{ alicuota: neto > 0 ? Math.round((iva / neto) * 1000) / 10 : 0, base: neto, importe: iva }];
     abrirComprobante({
       emisor: emp,
       cbte: { tipo: v.tipo_comprobante, numero: v.numero, fecha: v.fecha, cae: v.cae, caeVto: v.cae_vto, concepto: 1,
-        neto, iva, alicuota: neto > 0 ? Math.round((iva / neto) * 1000) / 10 : 0, total: Number(v.total) },
-      receptor: { nombre: v.cliente, docTipo: cuit.length === 11 ? 80 : 99, docNro: cuit || '0', condicionIva: '' },
+        neto, iva, alicuotas, exento: Number(v.importe_exento) || 0, noGravado: Number(v.importe_no_gravado) || 0,
+        total: Number(v.total), asociado: v.cbte_asoc || '' },
+      receptor: { nombre: v.cliente, docTipo: cuit.length === 11 ? 80 : cuit.length >= 7 ? 96 : 99, docNro: cuit || '0', condicionIva: '' },
       detalle: ''
     });
   }));

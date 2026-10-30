@@ -5,7 +5,7 @@
 import { getActiveCompanyAsync, getTransactionsAsync, updateEmpresaFieldsAsync } from '../db/mockdb.js';
 import { isSupabaseConfigured, supabase } from '../db/supabase.js';
 import { getRetencionesAsync } from './retenciones.js';
-import { MONOTRIBUTO_CATEGORIAS_2026, ventasMoviles12Meses, letraCategoria, consumoMonotributo, categoriaMonotributoRecomendada, calcularIvaRI, consistenciaCLAE } from '../domain/fiscal.js';
+import { MONOTRIBUTO_CATEGORIAS_2026, ventasMoviles12Meses, letraCategoria, consumoMonotributo, categoriaMonotributoRecomendada, calcularIvaRI, consistenciaCLAE, sumaFirmada } from '../domain/fiscal.js';
 import { fmt, fmtDate, getVencimientos, downloadFile } from '../utils.js';
 import { sanitizeInput as esc } from '../utils.js';
 import { blockSimulated } from '../utils.js';
@@ -324,7 +324,7 @@ export async function renderIVASimple() {
 
   // CLAE mapping values
   const actividades = getActividadesPorEmpresa(company);
-  const totalNetVentas = txs.ventas.reduce((s, v) => s + v.neto, 0);
+  const totalNetVentas = sumaFirmada(txs.ventas, 'neto');
 
   const { rows: actividadRows, totalActividadDF, diff: consistDiff, ok: consistOkCalc } =
     consistenciaCLAE(totalNetVentas, actividades, debFiscal);

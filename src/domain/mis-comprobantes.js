@@ -77,6 +77,12 @@ export function detectarColumnas(encabezados) {
 
   const netoPorAlicuota = todos(/^neto grav(\.|ado)? (iva )?\d/);
   const ivaPorAlicuota = todos(/^iva \d/);
+  // Pares neto/IVA por tasa ("Neto Grav. IVA 21%" + "IVA 21%")
+  const tasa = (x) => { const m = /(\d+(?:[.,]\d+)?)\s*%?$/.exec(x); return m ? Number(m[1].replace(',', '.')) : NaN; };
+  const paresAlicuota = netoPorAlicuota.map((i) => {
+    const t = tasa(c[i]);
+    return { alicuota: t, neto: i, iva: ivaPorAlicuota.find((j) => tasa(c[j]) === t) ?? -1 };
+  }).filter((p) => Number.isFinite(p.alicuota));
   return {
     fecha: primero(/^fecha( de emision)?$/, /^fecha/),
     tipo: primero(/^tipo( de)? comprobante$/, /^tipo$/, /^tipo(?!.*(cambio|doc))/),
@@ -88,6 +94,7 @@ export function detectarColumnas(encabezados) {
     tipoCambio: primero(/^tipo( de)? cambio/),
     netoGravado: primero(/^(imp\.? )?neto gravado total$/, /^(imp\.? )?neto gravado$/, /^neto grav\.?$/),
     netoPorAlicuota,
+    paresAlicuota,
     iva: primero(/^total iva$/, /^(imp\.? )?iva$/),
     ivaPorAlicuota,
     total: primero(/^(imp\.? )?total$/, /^importe total$/),
@@ -157,16 +164,17 @@ export function parseMisComprobantes(texto, nombreArchivo = '') {
     const tipoComprobante = normalizarTipo(col.tipo !== -1 ? campos[col.tipo] : '');
     const monto = (i) => (i !== -1 ? Math.round(parseMonto(campos[i]) * cambio * 100) / 100 : 0);
     const exentas = monto(col.exentas);
-    const otros = monto(col.noGravado) + monto(col.otrosTributos);
-    const alicuotasUsadas = col.netoPorAlicuota.filter((i) => parseMonto(campos[i]) !== 0).length;
-    if (alicuotasUsadas > 1) avisos.push(`Fila ${n + 1}: ${tipoComprobante} ${numero} tiene ${alicuotasUsadas} alícuotas de IVA; se cargó como una sola. Revisalo antes de presentar el Libro IVA.`);
+    const noGravado = monto(col.noGravado);
+    const otrosTributos = monto(col.otrosTributos);
+    // Varias alicuotas: se guarda cada una (el Libro IVA informa un renglon por tasa)
+    const alicuotas = col.paresAlicuota
+      .map((p) => ({ alicuota: p.alicuota, neto: Math.abs(monto(p.neto)), iva: Math.abs(p.iva !== -1 ? monto(p.iva) : 0) }))
+      .filter((a) => a.neto !== 0 || a.iva !== 0);
     let exento = false;
     if (neto === 0 && iva === 0 && exentas !== 0) {
       // Operacion exenta: va al Libro IVA con codigo E, sin alicuota
       neto = total;
       exento = true;
-    } else if (neto !== 0 && (exentas !== 0 || otros !== 0)) {
-      avisos.push(`Fila ${n + 1}: ${tipoComprobante} ${numero} incluye importes exentos, no gravados u otros tributos que no se desglosan; revisalo antes de presentar el Libro IVA.`);
     }
     if (!exento && neto === 0 && iva === 0 && total !== 0) {
       // Sin desglose (por ejemplo Factura C o B recibida): no se inventa IVA
@@ -180,6 +188,10 @@ export function parseMisComprobantes(texto, nombreArchivo = '') {
       es_activo: false, categoria: tipo === 'ventas' ? 'Venta' : 'General'
     };
     if (exento) registro.exento = true;
+    if (alicuotas.length > 1) registro.alicuotas = alicuotas;
+    if (exentas && !exento) registro.importe_exento = Math.abs(exentas);
+    if (noGravado) registro.importe_no_gravado = Math.abs(noGravado);
+    if (otrosTributos) registro.otros_tributos = Math.abs(otrosTributos);
     const nombre = col.denominacion !== -1 ? campos[col.denominacion] : '';
     if (tipo === 'ventas') registro.cliente = nombre || (cuit ? '' : 'Consumidor Final');
     else registro.proveedor = nombre || 'Proveedor sin nombre';

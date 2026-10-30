@@ -61,7 +61,7 @@ describe('Lectura de archivos', () => {
     expect(r.avisos.join(' ')).toMatch(/sin tipo de cambio/);
   });
 
-  it('marca exentas y avisa varias alícuotas o importes no desglosados', () => {
+  it('marca exentas y guarda alícuotas e importes extra', () => {
     const txt = [
       CLASICO,
       '01/10/2026;1 - Factura A;2;20;20;76;80;30719283719;HOSPITAL SA;1;$;0;0;5000;0;5000',
@@ -70,12 +70,12 @@ describe('Lectura de archivos', () => {
     const r = parseMisComprobantes(txt, 'emitidos.csv');
     expect(r.registros[0]).toMatchObject({ neto: 5000, iva: 0, total: 5000, exento: true });
     expect(r.registros[1].exento).toBeUndefined();
-    expect(r.avisos.join(' ')).toMatch(/no se desglosan/);
+    expect(r.registros[1]).toMatchObject({ neto: 1000, iva: 210, importe_exento: 500, total: 1710 });
 
     const fila = ['10/10/2026', '1', '94', '7', '7', '76', '80', '30664422995', 'PAPELERA SRL', '1', 'PES',
       '0', '0', '0', '0', '0', '105', '1000', '210', '1000', '0', '0', '2000', '0', '0', '0', '315', '2315'];
     const r2 = parseMisComprobantes(NUEVO + '\n' + fila.join(';'), 'recibidos.csv');
-    expect(r2.avisos.join(' ')).toMatch(/2 alícuotas/);
+    expect(r2.registros[0].alicuotas).toEqual([{ alicuota: 10.5, neto: 1000, iva: 105 }, { alicuota: 21, neto: 1000, iva: 210 }]);
   });
 
   it('rechaza archivos que no son de Mis Comprobantes', () => {

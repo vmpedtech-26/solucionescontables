@@ -5,7 +5,7 @@
 import { getActiveCompanyAsync, getTransactionsAsync, addTransaction, updateEmpresaFieldsAsync } from '../db/mockdb.js';
 import { supabase, isSupabaseConfigured } from '../db/supabase.js';
 import { fmt, categorizarRT54, RT54_COEF, RT54_BASE_MEDIANA, RT54_BASE_RESTANTE, fetchAndCompileIPC } from '../utils.js';
-import { amortizacionAnualTotal, coeficienteReexpresion } from '../domain/fiscal.js';
+import { amortizacionAnualTotal, coeficienteReexpresion, sumaFirmada } from '../domain/fiscal.js';
 import { sanitizeInput as esc } from '../utils.js';
 
 const EI_FACTOR = 1.2; // EI = stockFinal * EI_FACTOR
@@ -186,7 +186,7 @@ export async function renderRT54() {
   const valuacionStock     = costoUltimaCompra * stockUnidades;
 
   // Total compras sum
-  const totalCompras = txs.compras.reduce((s,c) => s+c.total, 0);
+  const totalCompras = sumaFirmada(txs.compras, 'total');
 
   // Asset dynamic extraction: compras where es_activo = true
   const dbAssets = txs.compras.filter(c => c.es_activo === true);
@@ -983,7 +983,7 @@ export async function initRT54(mainApp) {
     const costoUnit = ultimaCompra ? ultimaCompra.neto / 10 : 0;
     const ei          = Math.round(unidades * EI_FACTOR) * costoUnit;
     const ef          = costoUnit * unidades;
-    const totalCompras = txs.compras.reduce((s,c) => s+c.total, 0);
+    const totalCompras = sumaFirmada(txs.compras, 'total');
     const cv           = ei + totalCompras - ef;
 
     const elEF = document.getElementById('val-ef');
