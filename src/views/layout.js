@@ -123,7 +123,7 @@ export function renderDashboardLayout(childHTML, activeRoute, role = null) {
         </a>
         <a href="#/studio/migrador" class="db-nav-item ${activeRoute === 'migrador' ? 'active' : ''}" data-route="migrador">
           <i data-lucide="upload-cloud"></i>
-          <span>Migrador de Sistemas${isSupabaseConfigured ? ' (pronto)' : ''}</span>
+          <span>Migrador de sistemas</span>
         </a>
 
         <div class="db-nav-label">Operaciones</div>

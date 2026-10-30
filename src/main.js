@@ -266,7 +266,7 @@ class Application {
           await this.safeRoute(renderWhatsApp, initWhatsApp, 'whatsapp', "Omnicanal · WhatsApp Inbox");
         }
         else if (subRoute === '/migrador') {
-          await this.safeRoute(renderMigrador, initMigrador, 'migrador', "Migrador de Sistemas Legados");
+          await this.safeRoute(renderMigrador, initMigrador, 'migrador', "Migrador de sistemas");
         }
         else if (subRoute === '/agenda') {
           await this.safeRoute(renderAgenda, initAgenda, 'agenda', "Agenda y vencimientos");

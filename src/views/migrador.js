@@ -1,307 +1,262 @@
 /* -------------------------------------------------------------
-   VMP Studio Contable - Legacy System Migrator View
-   Pilar 5: Migrador de Sistemas Legados (Tango, Bejerman, Excel)
+   Migrador de sistemas: importa clientes (empresas) y comprobantes
+   desde planillas de Tango, Bejerman, Holistor o Excel guardadas como
+   CSV. Detecta columnas, deja corregir el mapeo, valida cada fila y no
+   repite lo que ya esta cargado.
    ------------------------------------------------------------- */
-import { getCompaniesAsync, saveCompanyAsync, addTransactionAsync } from '../db/mockdb.js';
-import { isRealMode, renderComingSoon } from '../utils.js';
+import { getCompaniesAsync, saveCompanyAsync, addTransactionAsync, getTransactionsAsync } from '../db/mockdb.js';
+import { CAMPOS, leerTabla, autoMapear, convertirEmpresa, convertirComprobante, claveComprobante } from '../domain/migrador.js';
+import { sanitizeInput as esc, fmt } from '../utils.js';
 
-let migrationState = 'idle'; // 'idle' | 'uploaded' | 'migrating' | 'success'
-let selectedSystem = 'tango'; // 'tango' | 'bejerman' | 'excel'
-let uploadFileName = '';
-let migrationLogs = [];
+const CONDICIONES = ['Responsable Inscripto', 'Monotributo - Cat A', 'Exento'];
+const TIPOS = ['SRL', 'SA', 'SAS', 'Unipersonal', 'Sucesion Indivisa'];
+const COLORES = ['#0d9488', '#2563eb', '#7c3aed', '#db2777', '#ea580c', '#16a34a', '#0891b2', '#4f46e5'];
+
+const estado = { resultado: '', destino: 'empresas', empresaId: '', libro: 'ventas', tabla: null, mapa: {}, archivo: '', defaults: { condicion_iva: 'Responsable Inscripto', tipo: '' } };
 
 export function renderMigrador() {
-  if (isRealMode()) return renderComingSoon('Migrador de Sistemas', 'La importación desde Tango, Bejerman y Excel todavía no está disponible. Por ahora podés cargar empresas y comprobantes manualmente o importar el Libro IVA en TXT.');
-  const systems = [
-    { id: 'tango', name: 'Tango Gestión', desc: 'Sistemas ERP Tango (.xlsx / .csv)', icon: 'settings' },
-    { id: 'bejerman', name: 'Bejerman Contable', desc: 'Mapeo de archivos planos Bejerman (.txt / .xlsx)', icon: 'layout' },
-    { id: 'excel', name: 'Excel / CSV Genérico', desc: 'Planillas estructuradas de cualquier formato', icon: 'file-spreadsheet' }
-  ];
-
   return `
   <div class="view-header">
     <div>
-      <h1 class="view-title">Migrador Universal de Sistemas</h1>
-      <p class="view-subtitle">Pilar 5: Cero-Fricción. Migrá datos históricos completos de tus clientes en menos de 60 segundos.</p>
+      <h1 class="view-title">Migrador de sistemas</h1>
+      <p class="view-subtitle">Traé tus clientes y comprobantes desde Tango, Bejerman, Holistor o cualquier planilla de Excel.</p>
     </div>
   </div>
 
-  <div style="display: grid; grid-template-columns: 320px 1fr; gap: 24px; align-items: start;">
-    
-    <!-- Left Panel: Legacy selector -->
-    <div class="card" style="background: #fff; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 20px;">
-      <h3 style="font-size: 14.5px; font-weight: 800; color: var(--color-primary); margin: 0 0 16px 0; display: flex; align-items: center; gap: 8px;">
-        <i data-lucide="upload-cloud" style="color:var(--color-accent);"></i> 1. Origen de Datos
-      </h3>
-      
-      <div style="display: flex; flex-direction: column; gap: 12px;">
-        ${systems.map(sys => `
-          <div class="sys-option ${selectedSystem === sys.id ? 'active' : ''}" data-sys="${sys.id}" style="border: 1px solid ${selectedSystem === sys.id ? 'var(--color-accent)' : 'var(--border-color)'}; background: ${selectedSystem === sys.id ? 'rgba(22,163,74,0.02)' : '#fff'}; border-radius: 6px; padding: 12px 14px; cursor: pointer; transition: all 0.2s;">
-            <div style="display: flex; align-items: center; gap: 10px;">
-              <div style="background: ${selectedSystem === sys.id ? 'var(--color-accent)' : 'var(--bg-secondary)'}; color: ${selectedSystem === sys.id ? '#fff' : 'var(--text-secondary)'}; width: 32px; height: 32px; border-radius: 4px; display: flex; align-items: center; justify-content: center; flex-shrink:0;">
-                <i data-lucide="${sys.icon}" style="width: 16px; height: 16px;"></i>
-              </div>
-              <div style="overflow: hidden;">
-                <h4 style="font-size: 12.5px; font-weight: 750; color: var(--color-primary); margin: 0 0 2px 0;">${sys.name}</h4>
-                <p style="font-size: 10px; color: var(--text-secondary); margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${sys.desc}</p>
-              </div>
-            </div>
-          </div>
-        `).join('')}
+  <div class="card" style="margin-bottom:16px;">
+    <div class="card-header"><h3><i data-lucide="list-checks"></i> 1. Qué vas a importar</h3></div>
+    <div class="card-body" style="display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <label class="mig-op" style="display:flex;gap:8px;align-items:center;border:1px solid var(--border-color);border-radius:8px;padding:10px 14px;cursor:pointer;font-size:13px;">
+          <input type="radio" name="mig-destino" value="empresas"> <span><strong>Clientes del estudio</strong><br><small style="color:var(--text-secondary);">Razón social, CUIT, condición de IVA…</small></span></label>
+        <label class="mig-op" style="display:flex;gap:8px;align-items:center;border:1px solid var(--border-color);border-radius:8px;padding:10px 14px;cursor:pointer;font-size:13px;">
+          <input type="radio" name="mig-destino" value="comprobantes"> <span><strong>Comprobantes de un cliente</strong><br><small style="color:var(--text-secondary);">Libro de ventas o de compras</small></span></label>
       </div>
-      
-      <div style="background: rgba(22, 163, 74, 0.03); border: 1px solid rgba(22, 163, 74, 0.12); padding: 12px; border-radius: 6px; font-size: 11px; color: var(--text-secondary); margin-top: 20px; line-height: 1.4;">
-        💡 <strong>Mapeo Inteligente:</strong> El motor de IA analizará de forma heurística la primera fila del archivo cargado para asociar las cabeceras a la base de datos impositiva.
+      <div id="mig-dest-comp" style="display:none;gap:10px;flex-wrap:wrap;">
+        <div class="form-group" style="margin:0;"><label class="form-label" for="mig-empresa">Cliente</label><select class="form-select" id="mig-empresa"></select></div>
+        <div class="form-group" style="margin:0;"><label class="form-label" for="mig-libro">Libro</label>
+          <select class="form-select" id="mig-libro"><option value="ventas">Ventas (emitidos)</option><option value="compras">Compras (recibidos)</option></select></div>
       </div>
     </div>
-
-    <!-- Right Panel: Interactive Upload / Mapping / Progress -->
-    <div class="card" style="background: #fff; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 24px; min-height: 420px;">
-      ${renderMigrationFlowPanel()}
-    </div>
-
   </div>
-  `;
+
+  <div class="card" style="margin-bottom:16px;">
+    <div class="card-header"><h3><i data-lucide="upload-cloud"></i> 2. Archivo</h3></div>
+    <div class="card-body">
+      <label for="mig-archivo" style="display:flex;flex-direction:column;align-items:center;gap:8px;border:2px dashed var(--border-color);border-radius:12px;padding:28px;cursor:pointer;text-align:center;">
+        <i data-lucide="file-spreadsheet" style="width:28px;height:28px;color:var(--color-accent);"></i>
+        <strong id="mig-archivo-nombre" style="font-size:14px;">Elegí el archivo CSV o TXT</strong>
+        <span style="font-size:12px;color:var(--text-secondary);">Separado por punto y coma, coma o tabulación. Si lo tenés en Excel: Archivo → Guardar como → CSV.</span>
+        <input type="file" id="mig-archivo" accept=".csv,.txt,text/csv,text/plain" style="display:none;">
+      </label>
+      <details style="margin-top:12px;font-size:12.5px;color:var(--text-secondary);">
+        <summary style="cursor:pointer;font-weight:600;">Cómo exportar desde cada sistema</summary>
+        <ul style="margin:8px 0 0;padding-left:18px;line-height:1.6;">
+          <li><strong>Tango Gestión:</strong> Clientes → Consulta → exportar a Excel; Subdiario de IVA Ventas/Compras → exportar a Excel. Después guardalo como CSV.</li>
+          <li><strong>Bejerman:</strong> Listados → Clientes / Libro IVA → salida a archivo (Excel o texto delimitado).</li>
+          <li><strong>Holistor:</strong> Sujetos → exportar; IVA → Libro IVA → exportar a planilla.</li>
+          <li><strong>Planilla propia:</strong> una fila por cliente o comprobante, con títulos en la primera fila.</li>
+        </ul>
+      </details>
+    </div>
+  </div>
+
+  <div id="mig-paso3" style="display:none;">
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-header"><h3><i data-lucide="columns-3"></i> 3. Columnas</h3><span id="mig-sep" style="font-size:12px;color:var(--text-secondary);"></span></div>
+      <div class="card-body">
+        <p style="font-size:12.5px;color:var(--text-secondary);margin:0 0 12px;">Las detectamos solas. Corregí las que no correspondan.</p>
+        <div id="mig-mapa" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;"></div>
+        <div id="mig-defaults" style="display:none;margin-top:14px;padding-top:14px;border-top:1px solid var(--border-color);gap:12px;flex-wrap:wrap;">
+          <div class="form-group" style="margin:0;"><label class="form-label" for="mig-def-iva">Condición de IVA si no viene</label>
+            <select class="form-select" id="mig-def-iva">${CONDICIONES.map((c) => `<option>${c}</option>`).join('')}</select></div>
+          <div class="form-group" style="margin:0;"><label class="form-label" for="mig-def-tipo">Tipo societario si no se deduce</label>
+            <select class="form-select" id="mig-def-tipo"><option value="">SRL</option>${TIPOS.filter((t) => t !== 'SRL').map((t) => `<option>${t}</option>`).join('')}</select></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><h3><i data-lucide="scan-search"></i> 4. Revisión</h3>
+        <button class="btn btn-primary btn-sm" id="mig-importar"><i data-lucide="download"></i> Importar</button></div>
+      <div class="card-body">
+        <div id="mig-resumen" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;"></div>
+        <div id="mig-resultado"></div>
+        <div style="overflow-x:auto;"><table class="table" style="font-size:12px;min-width:640px;"><thead id="mig-thead"></thead><tbody id="mig-tbody"></tbody></table></div>
+        <p id="mig-mas" style="font-size:12px;color:var(--text-secondary);"></p>
+      </div>
+    </div>
+  </div>`;
 }
 
-function renderMigrationFlowPanel() {
-  if (migrationState === 'idle') {
-    return `
-      <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; border: 2px dashed rgba(22, 163, 74, 0.25); border-radius: 8px; padding: 48px 24px; text-align: center; background: rgba(22,163,74,0.01); min-height: 350px;">
-        <i data-lucide="file-up" style="width: 48px; height: 48px; color: var(--color-accent); margin-bottom: 16px;"></i>
-        <h4 style="font-size: 15px; font-weight: 800; color: var(--color-primary); margin-bottom: 6px;">Cargar Planilla del Sistema Anterior</h4>
-        <p style="font-size: 12px; color: var(--text-secondary); max-width: 420px; line-height: 1.5; margin-bottom: 20px;">
-          Arrastra tu archivo Excel, CSV o de Texto exportado desde Tango o Bejerman, o haz clic para simular la importación.
-        </p>
-        <button class="btn btn-primary" id="btn-simulate-upload" style="background: var(--color-accent); border-color: var(--color-accent); font-weight: 700; padding: 10px 24px; display: flex; align-items: center; gap: 8px;">
-          <i data-lucide="plus-circle"></i> Seleccionar Archivo
-        </button>
-      </div>
-    `;
-  }
+export async function initMigrador(mainApp) {
+  const root = document.getElementById('view-root');
+  const $ = (s) => root.querySelector(s);
+  let empresas = await getCompaniesAsync();
+  let existentes = new Set();
+  let filasConvertidas = [];
 
-  if (migrationState === 'uploaded') {
-    return `
-      <div>
-        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; margin-bottom: 20px;">
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <div style="background: rgba(34, 197, 94, 0.08); color: var(--color-accent-light); width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-              <i data-lucide="file-check"></i>
-            </div>
-            <div>
-              <h4 style="font-size: 13.5px; font-weight: 750; color: var(--color-primary); margin: 0 0 2px 0;">${uploadFileName}</h4>
-              <p style="font-size: 11px; color: var(--text-secondary); margin: 0;">14.2 MB · 1,420 filas detectadas · Planilla Excel</p>
-            </div>
-          </div>
-          <button class="btn btn-outline btn-sm" id="btn-reset-upload" style="font-size: 11px; padding: 6px 12px;">Cambiar Archivo</button>
-        </div>
+  $('#mig-empresa').innerHTML = empresas.length
+    ? empresas.map((e) => `<option value="${esc(e.id)}">${esc(e.razon_social)}</option>`).join('')
+    : '<option value="">Primero importá o cargá clientes</option>';
+  if (!estado.empresaId && empresas[0]) estado.empresaId = empresas[0].id;
+  $('#mig-empresa').value = estado.empresaId;
+  $('#mig-libro').value = estado.libro;
+  root.querySelector(`input[name=mig-destino][value=${estado.destino}]`).checked = true;
 
-        <h4 style="font-size: 13px; font-weight: 850; color: var(--color-primary); margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
-          <i data-lucide="cpu" style="color: var(--color-accent);"></i> 2. Mapeador Inteligente de Columnas (AI-Mapping)
-        </h4>
+  const pintarDestino = () => {
+    $('#mig-dest-comp').style.display = estado.destino === 'comprobantes' ? 'flex' : 'none';
+    $('#mig-defaults').style.display = estado.destino === 'empresas' ? 'flex' : 'none';
+    root.querySelectorAll('.mig-op').forEach((l) => { l.style.borderColor = l.querySelector('input').checked ? 'var(--color-accent)' : 'var(--border-color)'; });
+  };
 
-        <!-- AI Match Columns Table -->
-        <div style="border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden; margin-bottom: 20px;">
-          <table class="table" style="margin:0; font-size: 12px;">
-            <thead style="background: var(--bg-secondary);">
-              <tr>
-                <th style="padding: 10px 12px;">Columna en Archivo</th>
-                <th style="padding: 10px 12px;">Mapeo Sugerido (AI)</th>
-                <th style="padding: 10px 12px;" class="text-right">Confianza</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td style="font-family: monospace; font-weight: 700; padding: 10px 12px;">FECHA_CBTE</td>
-                <td style="padding: 10px 12px; color: var(--color-primary); font-weight: 600;">➔ Fecha Comprobante</td>
-                <td style="padding: 10px 12px;" class="text-right"><span style="background: rgba(34, 197, 94, 0.08); color: var(--color-accent-light); font-size: 9.5px; padding: 2px 6px; border-radius: 10px; font-weight: 700;">100% Match</span></td>
-              </tr>
-              <tr>
-                <td style="font-family: monospace; font-weight: 700; padding: 10px 12px;">RAZON_SOCIAL</td>
-                <td style="padding: 10px 12px; color: var(--color-primary); font-weight: 600;">➔ Cliente / Proveedor</td>
-                <td style="padding: 10px 12px;" class="text-right"><span style="background: rgba(34, 197, 94, 0.08); color: var(--color-accent-light); font-size: 9.5px; padding: 2px 6px; border-radius: 10px; font-weight: 700;">100% Match</span></td>
-              </tr>
-              <tr>
-                <td style="font-family: monospace; font-weight: 700; padding: 10px 12px;">NRO_CUIT</td>
-                <td style="padding: 10px 12px; color: var(--color-primary); font-weight: 600;">➔ CUIT Entidad</td>
-                <td style="padding: 10px 12px;" class="text-right"><span style="background: rgba(34, 197, 94, 0.08); color: var(--color-accent-light); font-size: 9.5px; padding: 2px 6px; border-radius: 10px; font-weight: 700;">100% Match</span></td>
-              </tr>
-              <tr>
-                <td style="font-family: monospace; font-weight: 700; padding: 10px 12px;">SUBTOTAL_NETO</td>
-                <td style="padding: 10px 12px; color: var(--color-primary); font-weight: 600;">➔ Neto Imponible</td>
-                <td style="padding: 10px 12px;" class="text-right"><span style="background: rgba(34, 197, 94, 0.08); color: var(--color-accent-light); font-size: 9.5px; padding: 2px 6px; border-radius: 10px; font-weight: 700;">99.2% Match</span></td>
-              </tr>
-              <tr>
-                <td style="font-family: monospace; font-weight: 700; padding: 10px 12px;">IVA_ALIC_21</td>
-                <td style="padding: 10px 12px; color: var(--color-primary); font-weight: 600;">➔ Alícuota IVA (21%)</td>
-                <td style="padding: 10px 12px;" class="text-right"><span style="background: rgba(34, 197, 94, 0.08); color: var(--color-accent-light); font-size: 9.5px; padding: 2px 6px; border-radius: 10px; font-weight: 700;">98.8% Match</span></td>
-              </tr>
-              <tr>
-                <td style="font-family: monospace; font-weight: 700; padding: 10px 12px;">TOTAL_CBTE</td>
-                <td style="padding: 10px 12px; color: var(--color-primary); font-weight: 600;">➔ Importe Total</td>
-                <td style="padding: 10px 12px;" class="text-right"><span style="background: rgba(34, 197, 94, 0.08); color: var(--color-accent-light); font-size: 9.5px; padding: 2px 6px; border-radius: 10px; font-weight: 700;">100% Match</span></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+  const cargarExistentes = async () => {
+    if (estado.destino === 'empresas') {
+      empresas = await getCompaniesAsync();
+      existentes = new Set(empresas.map((e) => String(e.cuit).replace(/\D/g, '')));
+    } else if (estado.empresaId) {
+      const txs = await getTransactionsAsync(estado.empresaId);
+      existentes = new Set((txs?.[estado.libro] || []).map(claveComprobante));
+    } else existentes = new Set();
+  };
 
-        <button class="btn btn-primary" id="btn-run-migration" style="background: var(--color-accent); border-color: var(--color-accent); font-weight: 700; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px;">
-          <i data-lucide="play-circle"></i> 3. Ejecutar Migración Completa a Base de Datos
-        </button>
-      </div>
-    `;
-  }
+  const clave = (v) => (estado.destino === 'empresas' ? String(v.cuit).replace(/\D/g, '') : claveComprobante(v));
 
-  if (migrationState === 'migrating') {
-    return `
-      <div style="min-height: 350px; display: flex; flex-direction: column; justify-content: space-between;">
-        <div>
-          <h4 style="font-size: 13.5px; font-weight: 800; color: var(--color-primary); margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
-            <i data-lucide="loader" class="spin" style="animation: spin 1s linear infinite; color: var(--color-accent);"></i> Migrando Registros Históricos...
-          </h4>
-          <p style="font-size: 11px; color: var(--text-secondary); margin-bottom: 16px;">Por favor, no cierres esta pestaña. Parseando asientos de balance y partidas.</p>
-          
-          <!-- Progress Bar -->
-          <div style="background: var(--border-color); height: 6px; border-radius: 3px; overflow: hidden; margin-bottom: 20px;">
-            <div class="migration-progress-bar" style="width: 10%; height: 100%; background: var(--color-accent); border-radius: 3px; transition: width 0.3s ease;"></div>
-          </div>
-        </div>
-
-        <!-- Terminal Logs -->
-        <div style="background: var(--text-primary); border-radius: 6px; padding: 14px; font-family: 'JetBrains Mono', monospace; font-size: 11px; line-height: 1.5; color: #38bdf8; height: 200px; overflow-y: auto; text-align: left;">
-          ${migrationLogs.map(l => `<div>${l}</div>`).join('')}
-        </div>
-      </div>
-    `;
-  }
-
-  if (migrationState === 'success') {
-    return `
-      <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px 16px; text-align: center; min-height: 350px;">
-        <div style="background: rgba(34, 197, 94, 0.08); border: 1px solid rgba(34, 197, 94, 0.2); width: 56px; height: 56px; border-radius: 50%; color: var(--color-accent-light); display: flex; align-items: center; justify-content: center; font-size: 28px; margin-bottom: 20px;">
-          ✓
-        </div>
-        <h4 style="font-size: 16px; font-weight: 800; color: var(--color-primary); margin-bottom: 8px;">¡Migración Completada con Éxito!</h4>
-        <p style="font-size: 12.5px; color: var(--text-secondary); max-width: 440px; line-height: 1.5; margin-bottom: 24px;">
-          Se crearon 154 proveedores/clientes en el padrón y se importaron 1,420 comprobantes. La empresa <strong>Catedral Constructora S.A.</strong> ya figura en tu selector de empresas.
-        </p>
-        
-        <div style="display: flex; gap: 12px; width: 100%; max-width: 380px;">
-          <button class="btn btn-outline" id="btn-migrator-restart" style="flex: 1; padding: 10px;">Migrar Otro Cliente</button>
-          <button class="btn btn-primary" id="btn-select-new-co" style="flex: 1; background: var(--color-accent); border-color: var(--color-accent); font-weight: 700; padding: 10px;">Seleccionar Empresa</button>
-        </div>
-      </div>
-    `;
-  }
-}
-
-export function initMigrador(mainApp) {
-  if (isRealMode()) return;
-  // Handle switching source system
-  document.querySelectorAll('.sys-option').forEach(item => {
-    item.addEventListener('click', () => {
-      selectedSystem = item.dataset.sys;
-      mainApp.router();
+  const convertir = () => {
+    const vistos = new Set();
+    filasConvertidas = estado.tabla.filas.map((fila, i) => {
+      const r = estado.destino === 'empresas'
+        ? convertirEmpresa(fila, estado.mapa, { condicion_iva: estado.defaults.condicion_iva, tipo: estado.defaults.tipo || 'SRL' })
+        : convertirComprobante(fila, estado.mapa);
+      const k = clave(r.valor);
+      r.fila = i + 1;
+      r.duplicado = !r.errores.length && (existentes.has(k) ? 'ya cargado' : vistos.has(k) ? 'repetido en el archivo' : '');
+      if (!r.errores.length) vistos.add(k);
+      return r;
     });
-  });
+  };
 
-  // Simulate file selection
-  document.getElementById('btn-simulate-upload')?.addEventListener('click', () => {
-    migrationState = 'uploaded';
-    if (selectedSystem === 'tango') uploadFileName = 'TANGO_LIBRO_DIARIO_COMPLETO_2025.xlsx';
-    else if (selectedSystem === 'bejerman') uploadFileName = 'BEJERMAN_JOURNAL_EXPORT_COMP.txt';
-    else uploadFileName = 'EXCEL_COMPROBANTES_VENTAS_COMPRAS.csv';
-    mainApp.router();
-  });
+  const pintarMapa = () => {
+    const opciones = `<option value="-1">— No está —</option>${estado.tabla.encabezados.map((e, i) => `<option value="${i}">${esc(e || `Columna ${i + 1}`)}</option>`).join('')}`;
+    $('#mig-mapa').innerHTML = CAMPOS[estado.destino].map((c) => `
+      <div class="form-group" style="margin:0;"><label class="form-label" for="mig-c-${c.id}">${esc(c.nombre)}${c.requerido ? ' *' : ''}</label>
+        <select class="form-select mig-col" id="mig-c-${c.id}" data-campo="${c.id}" style="${c.requerido && estado.mapa[c.id] < 0 ? 'border-color:#ef4444;' : ''}">${opciones}</select></div>`).join('');
+    root.querySelectorAll('.mig-col').forEach((s) => {
+      s.value = String(estado.mapa[s.dataset.campo] ?? -1);
+      s.addEventListener('change', () => { estado.mapa[s.dataset.campo] = Number(s.value); pintarMapa(); revisar(); });
+    });
+  };
 
-  // Reset upload
-  document.getElementById('btn-reset-upload')?.addEventListener('click', () => {
-    migrationState = 'idle';
-    uploadFileName = '';
-    mainApp.router();
-  });
+  const revisar = () => {
+    convertir();
+    const faltan = CAMPOS[estado.destino].filter((c) => c.requerido && estado.mapa[c.id] < 0).map((c) => c.nombre);
+    const ok = filasConvertidas.filter((r) => !r.errores.length && !r.duplicado);
+    const conError = filasConvertidas.filter((r) => r.errores.length);
+    const dup = filasConvertidas.filter((r) => r.duplicado);
+    const conAviso = ok.filter((r) => r.avisos.length);
+    const chip = (n, txt, color) => `<span style="padding:6px 12px;border-radius:999px;font-size:12.5px;font-weight:600;background:${color}14;color:${color};border:1px solid ${color}40;">${n} ${txt}</span>`;
+    $('#mig-resumen').innerHTML = faltan.length
+      ? `<span style="color:#dc2626;font-size:13px;font-weight:600;">Falta elegir: ${esc(faltan.join(', '))}</span>`
+      : chip(ok.length, 'listos para importar', '#16a34a') + chip(conAviso.length, 'con avisos', '#d97706') + chip(conError.length, 'con errores (no se importan)', '#dc2626') + chip(dup.length, 'ya cargados o repetidos', '#64748b');
+    const btn = $('#mig-importar');
+    btn.disabled = !!faltan.length || !ok.length || (estado.destino === 'comprobantes' && !estado.empresaId);
 
-  // Trigger migration
-  document.getElementById('btn-run-migration')?.addEventListener('click', () => {
-    migrationState = 'migrating';
-    migrationLogs = ['[INFO] Conectando con el motor AI-Mapper de SolucionesContables...', '[INFO] Analizando estructura del archivo...'];
-    mainApp.router();
+    const cols = estado.destino === 'empresas'
+      ? [['razon_social', 'Razón social'], ['cuit', 'CUIT'], ['condicion_iva', 'IVA'], ['tipo', 'Tipo'], ['inicio_actividades', 'Inicio']]
+      : [['fecha', 'Fecha'], ['tipo_comprobante', 'Tipo'], ['numero', 'Número'], ['nombre', 'Cliente / proveedor'], ['cuit', 'CUIT'], ['neto', 'Neto'], ['iva', 'IVA'], ['total', 'Total']];
+    const num = new Set(['neto', 'iva', 'total']);
+    $('#mig-thead').innerHTML = `<tr><th>Fila</th>${cols.map(([, t]) => `<th class="${num.has(t.toLowerCase()) ? 'text-right' : ''}">${t}</th>`).join('')}<th>Estado</th></tr>`;
+    const mostrar = filasConvertidas.slice(0, 100);
+    $('#mig-tbody').innerHTML = mostrar.map((r) => `<tr style="${r.errores.length ? 'background:#fef2f2;' : r.duplicado ? 'opacity:.55;' : ''}">
+      <td>${r.fila}</td>
+      ${cols.map(([k]) => `<td class="${num.has(k) ? 'text-right' : ''}">${num.has(k) ? fmt(r.valor[k]) : esc(r.valor[k] ?? '')}</td>`).join('')}
+      <td style="font-size:11.5px;">${r.errores.length ? `<span style="color:#dc2626;">${esc(r.errores.join('; '))}</span>`
+        : r.duplicado ? esc(r.duplicado) : r.avisos.length ? `<span style="color:#b45309;">${esc(r.avisos.join('; '))}</span>` : '<span style="color:#16a34a;">OK</span>'}</td></tr>`).join('');
+    $('#mig-mas').textContent = filasConvertidas.length > 100 ? `Se muestran las primeras 100 de ${filasConvertidas.length} filas.` : '';
+  };
 
-    const steps = [
-      { prg: 25, log: '[INFO] Estructura validada. Iniciando mapeo con Gemini AI...' },
-      { prg: 40, log: '[INFO] Mapeado de columnas completado. Leyendo 1,420 filas...' },
-      { prg: 65, log: '[INFO] CUITs validados. Creando 154 perfiles en base de datos local...' },
-      { prg: 85, log: '[INFO] Importando transacciones impositivas de compras y ventas de 2025/2026...' },
-      { prg: 95, log: '[INFO] Balance de saldos y consistencia de Libro IVA completado sin errores...' },
-      { prg: 100, log: '[SUCCESS] ¡Inyección de empresa Catedral Constructora S.A. exitosa!' }
-    ];
+  const decodificar = (buf) => {
+    try { return new TextDecoder('utf-8', { fatal: true }).decode(buf); }
+    catch (e) { return new TextDecoder('windows-1252').decode(buf); } // Tango y Bejerman exportan en ANSI
+  };
 
-    let stepIdx = 0;
-    const interval = setInterval(async () => {
-      if (stepIdx < steps.length) {
-        const step = steps[stepIdx];
-        migrationLogs.push(step.log);
+  const procesarArchivo = async (archivo) => {
+    if (!archivo) return;
+    if (archivo.size > 15 * 1024 * 1024) { mainApp.showToast('El archivo supera 15 MB. Dividilo por año.', 'error'); return; }
+    if (/\.xlsx?$/i.test(archivo.name)) { mainApp.showToast('Guardá la planilla como CSV (Archivo → Guardar como → CSV) y subí ese archivo.', 'error'); return; }
+    try {
+      estado.tabla = leerTabla(decodificar(await archivo.arrayBuffer()));
+    } catch (e) { mainApp.showToast(e.message, 'error'); return; }
+    if (!estado.tabla.filas.length) { mainApp.showToast('El archivo no tiene filas de datos.', 'error'); return; }
+    estado.archivo = archivo.name;
+    estado.mapa = autoMapear(estado.tabla.encabezados, estado.destino);
+    $('#mig-archivo-nombre').textContent = `${archivo.name} · ${estado.tabla.filas.length} filas`;
+    $('#mig-sep').textContent = `Separador: ${{ ';': 'punto y coma', ',': 'coma', '\t': 'tabulación' }[estado.tabla.separador]}`;
+    $('#mig-paso3').style.display = 'block';
+    estado.resultado = '';
+    $('#mig-resultado').innerHTML = '';
+    await cargarExistentes();
+    pintarMapa();
+    revisar();
+    if (window.lucide) window.lucide.createIcons({ root });
+  };
 
-        // Update progress bar width dynamically in the DOM
-        const prgBar = document.querySelector('.migration-progress-bar');
-        if (prgBar) prgBar.style.width = `${step.prg}%`;
+  const rehacer = async () => {
+    pintarDestino();
+    if (!estado.tabla) return;
+    estado.mapa = autoMapear(estado.tabla.encabezados, estado.destino);
+    await cargarExistentes();
+    pintarMapa();
+    revisar();
+  };
 
-        mainApp.router();
+  root.querySelectorAll('input[name=mig-destino]').forEach((r) => r.addEventListener('change', () => { estado.destino = r.value; rehacer(); }));
+  $('#mig-empresa').addEventListener('change', (e) => { estado.empresaId = e.target.value; rehacer(); });
+  $('#mig-libro').addEventListener('change', (e) => { estado.libro = e.target.value; rehacer(); });
+  $('#mig-def-iva').addEventListener('change', (e) => { estado.defaults.condicion_iva = e.target.value; if (estado.tabla) revisar(); });
+  $('#mig-def-tipo').addEventListener('change', (e) => { estado.defaults.tipo = e.target.value; if (estado.tabla) revisar(); });
+  $('#mig-archivo').addEventListener('change', (e) => procesarArchivo(e.target.files[0]));
 
-        stepIdx++;
-      } else {
-        clearInterval(interval);
-
-        try {
-          // Inyectar Catedral Constructora S.A. en base de datos
-          const newCo = {
-            id: 'co-catedral',
-            razon_social: 'Catedral Constructora S.A.',
-            cuit: '30-99887766-7',
-            condicion_iva: 'Responsable Inscripto',
-            tipo: 'SA',
-            actividad: 'Construcción y Obras de Ingeniería',
-            inicio_actividades: '2019-04-01',
-            color: '#fb923c'
-          };
-
-          // Evitar duplicados de Catedral Constructora
-          const cos = await getCompaniesAsync();
-          if (!cos.some(c => c.id === newCo.id)) {
-            await saveCompanyAsync(newCo);
-
-            // Cargar comprobantes históricos
-            await addTransactionAsync('co-catedral', 'ventas', { id: 'v-cat-1', fecha: '2026-05-18', cliente: 'Gobierno de la Pampa', cuit: '30-67890123-3', tipo_comprobante: 'Factura A', numero: '0001-00000392', neto: 12000000, iva: 2520000, total: 14520000 });
-            await addTransactionAsync('co-catedral', 'ventas', { id: 'v-cat-2', fecha: '2026-05-05', cliente: 'Inversiones Sur SRL', cuit: '30-44556677-9', tipo_comprobante: 'Factura A', numero: '0001-00000393', neto: 4500000, iva: 945000, total: 5445000 });
-            await addTransactionAsync('co-catedral', 'compras', { id: 'c-cat-1', fecha: '2026-05-12', proveedor: 'Hierros Patagónicos S.A.', cuit: '30-11223344-6', tipo_comprobante: 'Factura A', numero: '0012-00038294', neto: 6500000, iva: 1365000, total: 7865000, es_activo: false, categoria: 'Hierros' });
-            await addTransactionAsync('co-catedral', 'compras', { id: 'c-cat-2', fecha: '2026-05-20', proveedor: 'Excavaciones Neuquén', cuit: '30-55998877-0', tipo_comprobante: 'Factura A', numero: '0002-00000482', neto: 2300000, iva: 483000, total: 2783000, es_activo: false, categoria: 'Servicios de Terceros' });
-          }
-
-          migrationState = 'success';
-          mainApp.showToast("¡Empresa 'Catedral Constructora S.A.' migrada con éxito!", 'success');
-        } catch (err) {
-          migrationState = 'uploaded';
-          mainApp.showToast(err.message || 'Error al migrar la empresa.', 'error');
+  $('#mig-importar').addEventListener('click', async (ev) => {
+    const boton = ev.currentTarget;
+    const lote = filasConvertidas.filter((r) => !r.errores.length && !r.duplicado);
+    const destino = estado.destino === 'empresas' ? `${lote.length} clientes` : `${lote.length} comprobantes de ${estado.libro} en ${empresas.find((e) => e.id === estado.empresaId)?.razon_social || ''}`;
+    if (!window.confirm(`Se van a importar ${destino}. ¿Continuar?`)) return;
+    boton.disabled = true;
+    const errores = [];
+    let ok = 0;
+    for (const [n, r] of lote.entries()) {
+      boton.textContent = `Importando ${n + 1} de ${lote.length}…`;
+      try {
+        if (estado.destino === 'empresas') {
+          await saveCompanyAsync({ ...r.valor, color: COLORES[n % COLORES.length] });
+        } else {
+          const { nombre, ...tx } = r.valor;
+          await addTransactionAsync(estado.empresaId, estado.libro, { ...tx, [estado.libro === 'ventas' ? 'cliente' : 'proveedor']: nombre || null }, { silencioso: true });
         }
-        mainApp.router();
+        ok++;
+      } catch (e) {
+        errores.push(`Fila ${r.fila}: ${/ya existe/i.test(e.message) ? 'ya estaba cargado' : e.message}`);
       }
-    }, 900);
+    }
+    boton.innerHTML = '<i data-lucide="download"></i> Importar';
+    if (window.lucide) window.lucide.createIcons({ root: boton });
+    estado.resultado = `<div style="margin-bottom:12px;padding:12px 14px;border-radius:8px;font-size:12.5px;line-height:1.5;background:${errores.length ? '#fff7ed' : '#f0fdf4'};">
+      <strong>Se importaron ${ok} de ${lote.length}.</strong>${errores.length ? `<br>${errores.slice(0, 20).map(esc).join('<br>')}${errores.length > 20 ? `<br>…y ${errores.length - 20} más.` : ''}` : ''}</div>`;
+    // Guardar empresas re-dibuja la pantalla: el resultado queda en el estado
+    if ($('#mig-resultado')) $('#mig-resultado').innerHTML = estado.resultado;
+    window.dispatchEvent(new CustomEvent('vmp_db_updated', { detail: { companyId: estado.empresaId, type: estado.destino } }));
+    mainApp.showToast(`Importación terminada: ${ok} de ${lote.length}.`, errores.length ? 'warning' : 'success');
+    await cargarExistentes();
+    revisar();
+    if (estado.destino === 'empresas') {
+      empresas = await getCompaniesAsync();
+      $('#mig-empresa').innerHTML = empresas.map((e) => `<option value="${esc(e.id)}">${esc(e.razon_social)}</option>`).join('');
+      if (!estado.empresaId && empresas[0]) estado.empresaId = empresas[0].id;
+      $('#mig-empresa').value = estado.empresaId;
+    }
   });
 
-  // Success button restarts
-  document.getElementById('btn-migrator-restart')?.addEventListener('click', () => {
-    migrationState = 'idle';
-    uploadFileName = '';
-    migrationLogs = [];
-    mainApp.router();
-  });
-
-  // Select Catedral Constructora S.A.
-  document.getElementById('btn-select-new-co')?.addEventListener('click', () => {
-    mainApp.setActiveCompany('co-catedral');
-    migrationState = 'idle';
-    uploadFileName = '';
-    migrationLogs = [];
-    window.location.hash = '#/studio';
-  });
+  pintarDestino();
+  if (estado.tabla) { await cargarExistentes(); pintarMapa(); revisar(); $('#mig-paso3').style.display = 'block'; $('#mig-resultado').innerHTML = estado.resultado || ''; $('#mig-archivo-nombre').textContent = `${estado.archivo} · ${estado.tabla.filas.length} filas`; }
 }
