@@ -29,7 +29,7 @@ export function renderLanding() {
             <a href="#problemas" class="lp-menu-link">Cómo funciona</a>
             <a href="#pricing" class="lp-menu-link">Planes</a>
             <a href="#preguntas" class="lp-menu-link">Preguntas</a>
-            <a href="#" class="lp-menu-link" id="nav-login-btn" style="font-weight: 700; color: var(--color-accent); display: flex; align-items: center; gap: 4px;"><i data-lucide="log-in" style="width: 14px; height: 14px;"></i> Ingresar</a>
+            <a href="#" class="lp-menu-link" id="nav-login-btn" style="font-weight: 700; color: var(--color-accent-strong); display: flex; align-items: center; gap: 4px;"><i data-lucide="log-in" style="width: 14px; height: 14px;"></i> Ingresar</a>
             <a href="#contact" class="btn btn-primary btn-sm">Solicitar demo</a>
           </nav>
       </div>
@@ -594,7 +594,7 @@ export function renderLanding() {
     </footer>
 
     <!-- Boton flotante de WhatsApp -->
-      <a href="https://wa.me/5492996731487?text=Hola!%20Quiero%20ver%20una%20demo%20de%20Soluciones%20Contables" target="_blank" rel="noopener" class="lp-wa-float" aria-label="Escribinos por WhatsApp">
+      <a href="https://wa.me/5492996731487?text=Hola!%20Quiero%20ver%20una%20demo%20de%20Soluciones%20Contables" target="_blank" rel="noopener" class="lp-wa-float" aria-label="¿Hablamos? Escribinos por WhatsApp">
         <i data-lucide="message-circle"></i><span>¿Hablamos?</span>
       </a>
 

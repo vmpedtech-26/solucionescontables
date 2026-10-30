@@ -1327,7 +1327,7 @@ h1, h2, h3, h4, h5, h6 {
   position: fixed; right: 20px; bottom: 20px; z-index: 400;
   display: inline-flex; align-items: center; gap: 8px;
   padding: 12px 18px 12px 14px; border-radius: 999px;
-  background: #25d366; color: #fff; text-decoration: none; font-weight: 700; font-size: 14px;
+  background: #0E7C4A; color: #fff; text-decoration: none; font-weight: 700; font-size: 14px;
   box-shadow: 0 12px 28px -10px rgba(37, 211, 102, 0.7);
   transition: transform 0.25s ease, box-shadow 0.25s ease;
   animation: lpWaIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) 1.5s both;
