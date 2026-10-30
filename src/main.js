@@ -31,6 +31,7 @@ import { renderSueldos, initSueldos } from './views/sueldos.js';
 import { renderEquipo, initEquipo } from './views/equipo.js';
 import { renderAgenda, initAgenda } from './views/agenda.js';
 import { renderHonorarios, initHonorarios } from './views/honorarios.js';
+import { renderConciliacion, initConciliacion } from './views/conciliacion.js';
 
 class Application {
   constructor() {
@@ -270,6 +271,9 @@ class Application {
         }
         else if (subRoute === '/agenda') {
           await this.safeRoute(renderAgenda, initAgenda, 'agenda', "Agenda y vencimientos");
+        }
+        else if (subRoute === '/conciliacion') {
+          await this.safeRoute(renderConciliacion, initConciliacion, 'conciliacion', "Conciliación bancaria");
         }
         else if (subRoute === '/honorarios') {
           await this.safeRoute(renderHonorarios, initHonorarios, 'honorarios', "Honorarios y cobranzas");

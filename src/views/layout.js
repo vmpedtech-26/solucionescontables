@@ -139,6 +139,10 @@ export function renderDashboardLayout(childHTML, activeRoute, role = null) {
           <i data-lucide="receipt"></i>
           <span>Factura electrónica</span>
         </a>` : ''}
+        <a href="#/studio/conciliacion" class="db-nav-item ${activeRoute === 'conciliacion' ? 'active' : ''}" data-route="conciliacion">
+          <i data-lucide="landmark"></i>
+          <span>Conciliación bancaria</span>
+        </a>
         <a href="#/studio/bandeja" class="db-nav-item ${activeRoute === 'bandeja' ? 'active' : ''}" data-route="bandeja">
           <i data-lucide="inbox"></i>
           <span>Bandeja de clientes</span>
