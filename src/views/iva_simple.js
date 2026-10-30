@@ -6,7 +6,8 @@ import { getActiveCompanyAsync, getTransactionsAsync, updateEmpresaFieldsAsync }
 import { isSupabaseConfigured, supabase } from '../db/supabase.js';
 import { getRetencionesAsync } from './retenciones.js';
 import { MONOTRIBUTO_CATEGORIAS_2026, ventasMoviles12Meses, letraCategoria, consumoMonotributo, categoriaMonotributoRecomendada, calcularIvaRI, consistenciaCLAE, sumaFirmada } from '../domain/fiscal.js';
-import { fmt, fmtDate, getVencimientos, downloadFile } from '../utils.js';
+import { fmt, fmtDate, downloadFile, getActivePeriod } from '../utils.js';
+import { fechaVencimiento } from '../domain/vencimientos.js';
 import { sanitizeInput as esc } from '../utils.js';
 import { blockSimulated } from '../utils.js';
 
@@ -320,7 +321,10 @@ export async function renderIVASimple() {
     ventas: txs.ventas, compras: txs.compras, retPercSaldo, saldoFavor, excluirCredito
   });
 
-  const venc      = getVencimientos(company.cuit);
+  // DDJJ del periodo activo: vence el mes siguiente segun el calendario ARCA
+  const [pY, pM] = getActivePeriod().split('-').map(Number);
+  const vencIva = new Date(`${fechaVencimiento('iva', company.cuit, pM === 12 ? pY + 1 : pY, pM === 12 ? 1 : pM + 1)}T12:00:00`)
+    .toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' });
 
   // CLAE mapping values
   const actividades = getActividadesPorEmpresa(company);
@@ -579,10 +583,10 @@ export async function renderIVASimple() {
         <div class="card-body">
           <div style="background:rgba(22,163,74,0.03);border:1px solid rgba(22,163,74,0.15);border-radius:var(--radius-sm);padding:12px 14px;text-align:center;font-size:13px;">
             La fecha límite para la presentación de DDJJ y pago del saldo neto es el 
-            <strong style="color:var(--color-accent-light);display:block;font-size:15px;margin-top:6px;">${venc.iva.dia} de Junio de 2026</strong>
+            <strong style="color:var(--color-accent-light);display:block;font-size:15px;margin-top:6px;">${vencIva}</strong>
           </div>
           <p style="font-size:11px;color:var(--text-muted);text-align:center;margin-top:8px;margin-bottom:0;">
-            (Calculado de forma exacta por terminación de CUIT: terminación en <strong>${company.cuit.slice(-1)}</strong>)
+            (Según el calendario de ARCA para la terminación de CUIT <strong>${company.cuit.slice(-1)}</strong>, con feriados)
           </p>
         </div>
       </div>

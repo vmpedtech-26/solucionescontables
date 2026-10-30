@@ -2,20 +2,15 @@
    VMP Studio Contable - Dashboard Home View (Charts & KPI)
    ------------------------------------------------------------- */
 import { getActiveCompany, getTransactions, getCompanies } from '../db/mockdb.js';
-import { sanitizeInput as esc, getActivePeriod, periodLabel, validarCUIT, getVencimientos } from '../utils.js';
+import { sanitizeInput as esc, getActivePeriod, periodLabel, validarCUIT } from '../utils.js';
+import { fechaVencimiento } from '../domain/vencimientos.js';
 import { renderSinEmpresas } from '../utils.js';
 import { isSupabaseConfigured } from '../db/supabase.js';
 import { MONOTRIBUTO_CATEGORIAS_2026, ventasMoviles12Meses, letraCategoria, sumaFirmada } from '../domain/fiscal.js';
 
 const REAL = isSupabaseConfigured;
 
-// Vencen el mes siguiente al periodo; si cae fin de semana pasa al lunes. No contempla feriados ni prorrogas.
-function fechaVencimiento(periodo, dia) {
-  const [y, m] = periodo.split('-').map(Number);
-  const d = new Date(y, m, dia); // mes siguiente (m es 1-based => indice m)
-  while (d.getDay() === 0 || d.getDay() === 6) d.setDate(d.getDate() + 1);
-  return d.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
-}
+const fmtVenc = (iso) => (iso ? iso.split('-').reverse().join('/') : '—');
 
 export function renderDashboardHome() {
   const activeCompany = getActiveCompany();
@@ -35,14 +30,16 @@ export function renderDashboardHome() {
   const wsaaRemainingH = Math.floor(wsaaRemainingMs / 3600000);
   const wsaaRemainingM = Math.floor((wsaaRemainingMs % 3600000) / 60000);
 
-  // Fechas por terminación de CUIT para las DDJJ del período activo (orientativas).
+  // Calendario ARCA (dias habiles por terminacion de CUIT, con feriados) para el periodo activo:
+  // IVA, F.931 y autonomos vencen el mes siguiente; la cuota de monotributo, en el mismo mes.
   const getVencimientoDates = (cuit, cond) => {
-    const v = getVencimientos(cuit);
+    const [y, m] = activePeriod.split('-').map(Number);
+    const [ys, ms] = m === 12 ? [y + 1, 1] : [y, m + 1];
     const esMono = cond.toLowerCase().includes('monotributo');
     return {
-      ivaDate: esMono ? '—' : fechaVencimiento(activePeriod, v.iva.dia),
-      sussDate: esMono ? '—' : fechaVencimiento(activePeriod, v.suss.dia),
-      monoDate: fechaVencimiento(activePeriod, esMono ? v.monotributo.dia : v.autonomos.dia)
+      ivaDate: esMono ? '—' : fmtVenc(fechaVencimiento('iva', cuit, ys, ms)),
+      sussDate: esMono ? '—' : fmtVenc(fechaVencimiento('empleadores', cuit, ys, ms)),
+      monoDate: fmtVenc(esMono ? fechaVencimiento('monotributo', cuit, y, m) : fechaVencimiento('autonomos', cuit, ys, ms))
     };
   };
 
